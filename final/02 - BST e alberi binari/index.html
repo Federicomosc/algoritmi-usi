@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BST e alberi binari — Final USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=JetBrains+Mono&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#98c379;
+}
+html[data-theme="light"]{
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:40px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-link{display:block;padding:5px 20px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+#main{margin-left:var(--sidebar-w);max-width:880px;padding:48px 48px 80px}
+.hero{background:linear-gradient(135deg,#1a1814,#12121c);border:1px solid var(--border);border-radius:12px;padding:36px 40px;margin-bottom:40px}
+.hero h1{font-family:'Lora',serif;font-size:26px;color:var(--text-bright)}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px}
+.hero-sub{font-size:13px;color:var(--teal);margin-top:8px;font-style:italic}
+.ex-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:28px;border-left:3px solid var(--accent)}
+.ex-header{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ex-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:rgba(255,255,255,.06);padding:3px 10px;border-radius:4px;color:var(--accent)}
+.ex-years{font-size:12px;color:var(--text-dim)}
+.ex-card h3{font-size:15px;color:var(--text-bright);margin-bottom:12px;line-height:1.4}
+.note-dup{font-size:12px;color:var(--orange);margin-bottom:10px}
+.box{border-radius:8px;padding:16px 18px;margin:14px 0;border-left:3px solid}
+.box-strat{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.strat-list{padding-left:18px}.strat-list li{margin-bottom:8px;font-size:14px}
+details{background:var(--bg4);border:1px solid var(--border);border-radius:8px;margin:10px 0}
+details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text-bright);font-size:13px}
+.detail-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.code-block{background:var(--bg2);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.code-block.sol{border-left:3px solid var(--accent)}
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer}
+.back-link{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+@media(max-width:768px){#main{margin-left:0;padding:24px}}
+</style>
+<link rel="stylesheet" href="../../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle">☀</button>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Final · BST e alberi binari</div>
+    <div class="sub">2021 – 2025</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice Final</a>
+  <a class="nav-link" href="../../index.html">← Indice corso</a>
+  <a class="nav-link" href="#ex-270">Ex. 270</a><a class="nav-link" href="#ex-274">Ex. 274</a><a class="nav-link" href="#ex-305">Ex. 305</a>
+</nav>
+<main id="main">
+<a class="back-link" href="../index.html">← Torna all'indice Final</a>
+<div class="hero">
+  <h1><span>BST e alberi binari</span></h1>
+  <p>Conteggio in range, rotazioni, campo size</p>
+  <p class="hero-sub">Esercizi tratti dagli esami finali 2021–2025 (exercises-2.pdf, Carzaniga USI)</p>
+</div>
+
+<article class="ex-card" id="ex-270">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 270</span>
+    <span class="ex-years">Final 2022</span>
+  </div>
+  <h3>Write an algorithm BST-Count-In-Range(T , a, b) that, given the root t of a (20’</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**BST-Count-In-Range:** poda ramo sinistro se key>b, destro se key<a; conta entrambi se in range.</li><li>Worst Θ(n), best O(1) se range fuori dal sottoalbero.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Write an algorithm BST-Count-In-Range(T , a, b) that, given the root t of a (20’)
+binary search tree and two values a and b, returns the number of keys in the tree that are between
+a and b. Also, analyze the best and worst-case complexity of your so lution.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">BST-Count-In-Range(T , a, b)
+1 if T = = NIL
+2 return 0
+3 if a ≤ T .key and b ≥ T .key
+4 return 1 + BST-Count-In-Range(T .left, a, b) + BST-Count-In-Range(T .right, a, b)
+5 if b &lt; T . key
+6 return BST-Count-In-Range(T .left, a, b)
+7 else return BST-Count-In-Range(T .right, a, b)
+In the worst case, we have to count all the nodes in T . So the complexity is Θ(n). In the best case,
+the root key T .key is the minimum (and therefore T .left is nil) and the given range [a, b] is to
+the left of that key, so the algorithm terminates immediatel y after one recursion into T .left, and
+therefore the complexity is O(1). Same thing in the other direction.</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-274">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 274</span>
+    <span class="ex-years">Final 2022 B, Final 2022 C</span>
+  </div>
+  <h3>Write an algorithm BST-Count-Outside-Range(T , a, b) that, given the root (30’)</h3>
+  <p class="note-dup"><em>Stessa domanda in più sessioni d'esame.</em></p>
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Outside [a,b]:** count(−∞,a)+count(b,+∞). Best O(1) se tutto in range.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Write an algorithm BST-Count-Outside-Range(T , a, b) that, given the root (30’)
+T of a binary search tree and two values a and b, returns the number of keys in the tree that
+are outside of the interval [a, b]. Your solution must have a best-case complexity of O(1). Also,
+analyze the worst-case complexity of your solution.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">BST-Count-Outside-Range(T , a, b)
+1 return BST-Count-In-Range(T , −∞, a) + BST-Count-In-Range(T , b, ∞)
+BST-Count-In-Range(T , a, b)
+1 if T = = NIL
+2 return 0
+3 if a &lt; T . key and b &gt; T . key
+4 return 1 + BST-Count-In-Range(T .left, a, b) + BST-Count-In-Range(T .right, a, b)
+5 if b ≤ T .key
+6 return BST-Count-In-Range(T .left, a, b)
+7 else return BST-Count-In-Range(T .right, a, b)
+In the worst case, we have to count all the nodes in T . So the complexity is Θ(n). In the best
+case, the root key T .key is the minimum (and therefore T .left is nil), T .right. key is the maximum
+(and therefore T .right. right is nil), and the minimum and the maximum keys are both in the
+interval [a, b]. In this case, the ﬁrst call to BST-Count-In-Range(T , −∞, a) recurses to T .left
+so the algorithm terminates immediately after one recursio n into T .left and returns immediately
+(since T .left is nil), and the second call BST-Count-In-Range(T , b, ∞) recurses only to T .right and
+then to T .right. right.</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-305">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 305</span>
+    <span class="ex-years">Final 2024</span>
+  </div>
+  <h3>Consider a binary search trees that contains numeric keys, a nd in which each</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Rotate-Right:** rotazione + aggiorna size.</li><li>**Count-In-Range O(h):** t.size − lessThan(a) − greaterThan(b) con walk O(h).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider a binary search trees that contains numeric keys, a nd in which each
+node t holds a positive integer t. size that counts the number of nodes found in the subtree rooted
+at t (including t itself).
+Question 1: Write an algorithm Rotate-Right(t) that performs a right-rotation on node t while (10’)
+ensuring that the size attributes are correct after the rotation.
+Question 2: Write an algorithm Count-In-Range(t, a, b) that, given a node t and two numbers a (20’)
+and b with a ≤ b, returns the number of keys in the tree rooted at t that are between a and b.
+Count-In-Range(t, a, b) must have a complexity O(h) where h is the height of the tree rooted at
+t. For example, if h = O(log n) then the complexity of Count-In-Range(t, a, b) must be O(log n).</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+One way to count the number of keys in the range [a, b] is to subtract from t. size the number of
+keys that are less than a and those that are greater than b.
+Count-In-Range(t, a, b)
+1 if t = = nil
+2 return 0
+3 return t. size − Count-Less-Than(t, a) − Count-Greater-Than(t, b)
+Count-Less-Than(t, a)
+1 n = 0
+2 while t ̸=nil
+3 if t. key &lt; a
+4 n = n + 1
+5 if t. left ̸=NIL
+6 n = n + t. left. size
+7 t = t. right
+8 else t = t. left
+9 return n
+Count-Greater-Than(t, b)
+1 n = 0
+2 while t ̸=nil
+3 if t. key &gt; b
+4 n = n + 1
+5 if t. right ̸=NIL
+6 n = n + t. right. size
+7 t = t. left
+8 else t = t. right
+9 return n
+The way we count the number of keys less than a given number a is essentially to go down the
+tree adding up all the subtrees (and individual keys) that we know to contain keys less than a. In
+particular, for each node t, if the key in t is less than a then we count +1 for that key, and then we
+also add the size of the whole subtree on the left of t.
+The idea works just as well to count the keys greater than a giv en number b.</pre></div>
+  </details>
+</article>
+</main>
+<script>
+const tb=document.getElementById('themeToggle');
+const s=localStorage.getItem('algo-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+tb.textContent=s==='light'?'🌙':'☀';
+tb.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('algo-theme',n);tb.textContent=n==='light'?'🌙':'☀';};
+</script>
+<script src="../../mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stringhe, sequenze e DNA — Final USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=JetBrains+Mono&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#61afef;
+}
+html[data-theme="light"]{
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:40px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-link{display:block;padding:5px 20px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+#main{margin-left:var(--sidebar-w);max-width:880px;padding:48px 48px 80px}
+.hero{background:linear-gradient(135deg,#1a1814,#12121c);border:1px solid var(--border);border-radius:12px;padding:36px 40px;margin-bottom:40px}
+.hero h1{font-family:'Lora',serif;font-size:26px;color:var(--text-bright)}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px}
+.hero-sub{font-size:13px;color:var(--teal);margin-top:8px;font-style:italic}
+.ex-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:28px;border-left:3px solid var(--accent)}
+.ex-header{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ex-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:rgba(255,255,255,.06);padding:3px 10px;border-radius:4px;color:var(--accent)}
+.ex-years{font-size:12px;color:var(--text-dim)}
+.ex-card h3{font-size:15px;color:var(--text-bright);margin-bottom:12px;line-height:1.4}
+.note-dup{font-size:12px;color:var(--orange);margin-bottom:10px}
+.box{border-radius:8px;padding:16px 18px;margin:14px 0;border-left:3px solid}
+.box-strat{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.strat-list{padding-left:18px}.strat-list li{margin-bottom:8px;font-size:14px}
+details{background:var(--bg4);border:1px solid var(--border);border-radius:8px;margin:10px 0}
+details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text-bright);font-size:13px}
+.detail-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.code-block{background:var(--bg2);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.code-block.sol{border-left:3px solid var(--accent)}
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer}
+.back-link{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+@media(max-width:768px){#main{margin-left:0;padding:24px}}
+</style>
+<link rel="stylesheet" href="../../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle">☀</button>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Final · Stringhe, sequenze e D</div>
+    <div class="sub">2021 – 2025</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice Final</a>
+  <a class="nav-link" href="../../index.html">← Indice corso</a>
+  <a class="nav-link" href="#ex-318">Ex. 318</a>
+</nav>
+<main id="main">
+<a class="back-link" href="../index.html">← Torna all'indice Final</a>
+<div class="hero">
+  <h1><span>Stringhe, sequenze e DNA</span></h1>
+  <p>Bilanciamento nucleotidi</p>
+  <p class="hero-sub">Esercizi tratti dagli esami finali 2021–2025 (exercises-2.pdf, Carzaniga USI)</p>
+</div>
+
+<article class="ex-card" id="ex-318">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 318</span>
+    <span class="ex-years">Final 2025</span>
+  </div>
+  <h3>A DNA sequence S is given as a string of the four characters A, C, G, T, each</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Bilanciato:** stesso numero di due nucleotidi diversi (es. 2 A e 2 G). Vuoto = bilanciato.</li><li>**Idea chiave:** per coppia (N1,N2), x(i) = bilancio A−C fino a posizione i (+1 per N1, −1 per N2). Sottosequenza [i,j] bilanciata su N1/N2 ⟺ x(i)=x(j).</li><li>**Linear:** per ogni coppia tra 6 possibili, array First/Last per ogni valore x∈[−n,n]; max(Last[x]−First[x]). Totale O(n).</li><li>**Pattern esame:** «sottosequenza contigua bilanciata» → prefix balance + hash/array su valori ripetuti.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">A DNA sequence S is given as a string of the four characters A, C, G, T, each
+representing one of the nucleotides components. We say that a sequence (or subsequence) is bal-
+anced if it contains an equal number of two diﬀerent nucleotides. F or example, the sequence
+GCAATGTT is balanced because it contains two G’s and two A’s. However, the sequence GCAAT-
+GTTGGTG is not balanced. Notice that an empty sequence is balanced.
+Question 1: Write an algorithm Maximal-Balanced-Subsequence(S) that returns the maximal (10’)
+length of any balanced contiguous subsequence of a given seq uence S.
+Question 2: Write an algorithm Linear-Maximal-Balanced-Subsequence(S) that returns the max- (20’)
+imal length of any balanced contiguous subsequence of S in linear time.
+Hint: This is, comparatively, a challenging exercise. One useful idea is to compute a running bal-
+ance between two nucleotides (types), say A’s and C’s, in the sequence starting from the beginning
+up to any given position. The key idea is that this total balan ce (of A’s and C’s) from the beginning
+can also be used to determine whether any other contiguous su bsequence—one that starts from
+somewhere other than the beginning—is balanced (in terms of A’s and C’s).</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+The general idea is to track the balance between the counts of any two nucleotides. For example,
+let’s focus only on the balance between A’s and C’s. For the other pairs of nucleotides (ﬁve, so
+six pairs in total), the story is identical. So, let xAB(i) represent the net balance between A’s and
+C’s for the subsequence starting at the beginning and extendi ng to position i. We compute xAB(i)
+simply by scanning the sequence left-to-right, at the begin ning, the balance starts at xAB(0) = 0.
+Then, every time we see an A, we increase by one, and every time we see a C, we decrease by one.
+Now, the idea is to use xAB(i) to ﬁnd subsequences that are balanced by virtue of the balance
+between A’s and C’s? For sure, when xAB(i) goes back to zero, we know that the subsequence
+from the beginning to position i is balanced. But that is not the only case. More generally, an y
+subsequence going from positions i to j is balanced if and only if xAB(i) = xAB(j). For example, if
+xAB(10) = 3 that means that in the ﬁrst 10 positions there are 3 more A’s than C’s, but if we ﬁnd
+that xAB(15) = 3, that means that also in the ﬁrst 15 positions that are 3 more A’s than C’s, which
+also means that between positions 10 and 15 we must have the sa me number of A’s and C’s.
+So, now the problem is to ﬁnd the longest interval [i, j] such that xAB(i) = xAB(j). We can’t check
+every interval, because there are Θ(n2) intervals. However, since we are interested in the largest
+interval with the same value, we can focus on the values rathe r than the intervals, and for each
+value record the ﬁrst position i and the last position j in which we see that value of xAB. And since
+the values can only go from −n to n, we can do that using a simple array.
+So, here’s the code:
+Linear-Maximal-Balanced-Subsequence-NN(S, N1, N2)
+1 n = S. length
+2 First = array of 2 n nil values indexed from −n to n
+3 Last = array of 2 n nil values indexed from −n to n
+4 x = 0
+5 First[0] = 0
+6 m = 0
+7 for i = 1 to n
+8 if S[j] = = N1
+9 x = x + 1
+10 elseif S[j] = = N2
+11 x = x − 1
+12 if First[x] = = nil
+13 First[x] = i
+14 else Last[x] = i
+15 if Last[x] − First[x] &gt; m
+16 m = Last[x] − First[x]
+17 return m
+Linear-Maximal-Balanced-Subsequence(S)
+1 return max{Linear-Maximal-Balanced-Subsequence-NN(S, A, C),
+Linear-Maximal-Balanced-Subsequence-NN(S, A, G),
+Linear-Maximal-Balanced-Subsequence-NN(S, A, T),
+Linear-Maximal-Balanced-Subsequence-NN(S, C, G),
+Linear-Maximal-Balanced-Subsequence-NN(S, C, T),
+Linear-Maximal-Balanced-Subsequence-NN(S, G, T)}</pre></div>
+  </details>
+</article>
+</main>
+<script>
+const tb=document.getElementById('themeToggle');
+const s=localStorage.getItem('algo-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+tb.textContent=s==='light'?'🌙':'☀';
+tb.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('algo-theme',n);tb.textContent=n==='light'?'🌙':'☀';};
+</script>
+<script src="../../mobile.js"></script>
+</body>
+</html>

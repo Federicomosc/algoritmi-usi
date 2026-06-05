@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greedy Algorithms — Appunti USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --accent: #e5953a; --chart-grid: #2e2e3e; --chart-text: #7a7890; --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32; --accent: #a85a18;
+  --chart-grid: #d4cfc4; --chart-text: #6a6878; --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--accent); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--accent); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(229,149,58,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #1a1814 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(229,149,58,.18) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--accent); color: var(--accent); background: rgba(229,149,58,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--accent); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(229,149,58,.07); border-color: var(--accent); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(229,149,58,.1); border-color: var(--accent); border-left-width: 4px; }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-breve .box-label, .box-thm .box-label { color: var(--accent); }
+.box-def .box-label { color: var(--blue); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--accent); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-1 { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-n { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-log { background: rgba(229,149,58,.15); color: var(--accent); }
+hr.part { border: none; border-top: 1px solid var(--accent); opacity: .3; margin: 64px 0 48px; }
+.ex-diff { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.ex-diff.facile { background: rgba(152,195,121,.15); color: var(--green); }
+.ex-diff.medio { background: rgba(229,149,58,.15); color: var(--accent); }
+.ex-diff.avanzato { background: rgba(224,108,117,.15); color: var(--red); }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--accent); font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.btn-row button { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; font-weight: 600; }
+.btn-row button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-row button:hover { filter: brightness(1.1); }
+#actSvg, #huffSvg { width: 100%; display: block; }
+.act-bar { transition: opacity .3s; }
+.act-bar.sel .bar { fill: rgba(229,149,58,.55); stroke: var(--accent); stroke-width: 2; }
+.act-bar.dim .bar { opacity: .25; }
+.act-bar .bar { fill: var(--bg4); stroke: var(--border); stroke-width: 1.5; }
+.act-bar .lbl { fill: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+.axis-tick { stroke: var(--border); stroke-width: 1; }
+.axis-lbl { fill: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-anchor: middle; }
+.huff-node { fill: var(--bg4); stroke: var(--border); stroke-width: 1.5; }
+.huff-node.merge { fill: rgba(229,149,58,.2); stroke: var(--accent); stroke-width: 2; }
+.huff-node.leaf { fill: rgba(78,201,168,.15); stroke: var(--teal); }
+.huff-lbl { fill: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+.huff-edge { stroke: var(--border); stroke-width: 2; }
+.huff-edge.lbl { fill: var(--text-dim); font-size: 10px; font-family: 'JetBrains Mono', monospace; }
+.queue-box { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.queue-item { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.queue-item.merge { border-color: var(--accent); background: rgba(229,149,58,.15); color: var(--accent); font-weight: 700; }
+.log-area { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg4); padding: 12px; border-radius: 6px; max-height: 120px; overflow-y: auto; margin-top: 12px; }
+.quiz-q { background: var(--bg4); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); }
+.quiz-q.answered-correct { border-color: var(--green); background: rgba(152,195,121,.08); }
+.quiz-q.answered-wrong { border-color: var(--red); background: rgba(224,108,117,.08); }
+.quiz-q p { margin-bottom: 10px; font-size: 14px; }
+.quiz-btns { display: flex; gap: 8px; margin-top: 8px; }
+.quiz-btns button { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; }
+.quiz-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btns button:disabled { opacity: .5; cursor: default; }
+.quiz-feedback { font-size: 12px; margin-top: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-score { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--teal); margin-top: 16px; padding: 12px; background: var(--bg4); border-radius: 8px; text-align: center; }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset:hover { background: rgba(78,201,168,.1); }
+.knap-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin: 4px 0; background: var(--bg4); border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
+.knap-row.taken { border-color: var(--accent); background: rgba(229,149,58,.1); }
+.knap-row.partial { border-color: var(--teal); background: rgba(78,201,168,.08); }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 06 — Tecniche</div>
+    <div class="sub">PDF 01 · Greedy Algorithms</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Teoria</div>
+    <a class="nav-link" href="#s1">1. Recap MST → greedy</a>
+    <a class="nav-link" href="#s2">2. Progettare greedy</a>
+    <a class="nav-link" href="#s3">3. Proprietà chiave</a>
+    <a class="nav-link" href="#s4">4. Esempio regalo</a>
+    <a class="nav-link" href="#s5">5. Resto monete</a>
+    <a class="nav-link" href="#s6">6. 0-1 Knapsack</a>
+    <a class="nav-link" href="#s7">7. Fractional knapsack</a>
+    <a class="nav-link" href="#s8">8. Activity selection</a>
+    <a class="nav-link" href="#s9">9. Huffman coding</a>
+    <a class="nav-link" href="#s10">10. Greedy vs DP</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#sim-act">Timeline attività</a>
+    <a class="nav-link" href="#sim-huff">Stepper Huffman</a>
+    <a class="nav-link" href="#sim-knap">Knapsack frazionario</a>
+    <a class="nav-link" href="#quiz">Quiz (8 domande)</a>
+    <div class="nav-label">Esercizi</div>
+    <a class="nav-link" href="#ex">6 esercizi guidati</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Greedy Algorithms</span><br>— Algoritmi voraci</h1>
+  <p>Appunti didattici completi — Antonio Carzaniga (USI, 6 maggio 2026). Dalla strategia greedy vista con l'MST fino ad activity selection e Huffman, con esempi dove il greedy funziona e dove fallisce.</p>
+  <div class="hero-tags">
+    <span class="tag g">Greedy-choice</span>
+    <span class="tag g">Optimal substructure</span>
+    <span class="tag t">Activity selection</span>
+    <span class="tag b">Huffman O(n log n)</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — cosa impari qui</div>
+  Un algoritmo <strong>greedy</strong> (vorace) risolve un problema facendo, a ogni passo, la scelta che <em>sembra</em> migliore <strong>adesso</strong>, senza tornare indietro. Funziona solo se il problema ha la <strong>greedy-choice property</strong> (una scelta locale porta sempre a una soluzione globale) e la <strong>optimal-substructure property</strong> (il sottoproblema residuo ha la stessa struttura). L'MST con <code>GENERIC-MST</code> è il modello: si aggiunge l'arco più leggero «sicuro». Ma attenzione: il greedy <span class="bad">fallisce</span> su resto monete (senza nickels) e sullo zaino 0-1, mentre funziona su knapsack frazionario, activity selection e Huffman.
+</div>
+
+<!-- ═══ 1. RECAP MST ═══ -->
+<section id="s1">
+<h2><span class="num">1</span>Recap MST → cos'è il greedy</h2>
+
+<p>Nelle slide precedenti (MST) abbiamo già visto un algoritmo greedy senza chiamarlo così. Il problema: dato un grafo pesato connesso <code>G = (V, E)</code> con peso <code>w : E → ℝ</code>, trovare un insieme <code>T ⊆ E</code> che forma un <strong>minimum spanning tree</strong> (albero di copertura di peso minimo).</p>
+
+<p>L'idea naturale è <strong>scomporre</strong> il problema in una serie di scelte successive:</p>
+<ul>
+  <li>Ad ogni punto abbiamo una <strong>soluzione parziale</strong> <code>A ⊆ T</code> (archi già scelti).</li>
+  <li>Abbiamo diverse possibilità per <em>estendere</em> <code>A</code>.</li>
+  <li>Facciamo una scelta <strong>greedy</strong>: selezioniamo l'<strong>arco più leggero</strong> che non viola i vincoli del problema MST (un <em>safe edge</em>).</li>
+</ul>
+
+<div class="box box-def">
+  <div class="box-label">Schema GENERIC-MST</div>
+<pre><span class="fn">GENERIC-MST</span>(G, w)
+<span class="nm">1</span>  A = ∅
+<span class="nm">2</span>  <span class="kw">while</span> A <span class="kw">non è</span> uno spanning tree
+<span class="nm">3</span>      trova un <span class="st">safe edge</span> e = (u, v)   <span class="cm">// il più leggero che attraversa un cut...</span>
+<span class="nm">4</span>      A = A ∪ {e}
+<span class="nm">5</span>  <span class="kw">return</span> A</pre>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Analogia</div>
+  Immagina di costruire una rete elettrica collegando le città: ad ogni passo aggiungi il cavo <em>più economico</em> che collega una città già raggiunta a una nuova, senza creare anelli. Non «pensi al futuro» oltre al vincolo MST — è proprio questo il greedy.
+</div>
+</section>
+
+<!-- ═══ 2. PROGETTARE GREEDY ═══ -->
+<section id="s2">
+<h2><span class="num">2</span>Come progettare un algoritmo greedy</h2>
+
+<p>Inventare una scelta greedy è <strong>facile</strong>; dimostrare che produce l'ottimo è <strong>difficile</strong> e richiede una comprensione profonda della struttura del problema. Le slide propongono tre passi:</p>
+
+<ol class="steps">
+  <li><strong>Modellare il problema</strong> come sequenza di scelte greedy + sottoproblema residuo. Ogni passo: fai una scelta, poi risolvi ciò che resta.</li>
+  <li><strong>Dimostrare la greedy-choice property</strong>: esiste sempre una soluzione ottima del problema originale che <em>include</em> la scelta greedy fatta. Non serve che sia <em>l'unica</em> ottima — basta che <em>qualche</em> ottima la contenga.</li>
+  <li><strong>Dimostrare l'optimal substructure</strong>: combinare la scelta greedy con la soluzione ottima del sottoproblema residuo dà una soluzione ottima del problema originale.</li>
+</ol>
+
+<div class="box box-warn">
+  <div class="box-label">Errore comune</div>
+  Non basta <em>provare</em> l'algoritmo su molti esempi. Serve una <strong>dimostrazione</strong> (per contraddizione, scambio, induzione…) che la proprietà greedy vale per <em>tutti</em> gli input ammessi.
+</div>
+</section>
+
+<!-- ═══ 3. PROPRIETÀ ═══ -->
+<section id="s3">
+<h2><span class="num">3</span>Greedy-choice e optimal substructure</h2>
+
+<div class="box box-def">
+  <div class="box-label">Greedy-choice property</div>
+  Si può sempre arrivare a una soluzione <strong>globalmente ottima</strong> facendo una scelta <strong>localmente ottima</strong>. Ad ogni passo consideri solo cosa è meglio <em>nel problema corrente</em>, senza guardare le conseguenze future dei sottoproblemi.
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Optimal-substructure property</div>
+  Una soluzione ottima del problema <strong>contiene</strong> al suo interno soluzioni ottime dei sottoproblemi. Si dimostra tipicamente per <strong>induzione</strong>: se il sottoproblema è risolto in modo ottimo, unirlo alla scelta greedy dà l'ottimo globale.
+</div>
+
+<h3>Spiegazione semplice con analogie</h3>
+
+<div class="grid2">
+  <div class="box box-tip" style="margin:0">
+    <div class="box-label">Greedy-choice — buffet</div>
+    Al buffet prendi il piatto che <em>ora</em> ti sembra più buono, senza riservare spazio per il dessert. Se il buffet è «ben strutturato» (proprietà greedy), questa strategia massimizza la soddisfazione totale. Se no (es. dessert obbligatorio a fine pasto), il greedy fallisce.
+  </div>
+  <div class="box box-tip" style="margin:0">
+    <div class="box-label">Optimal substructure — puzzle</div>
+    Se il puzzle completo ha una soluzione ottima, togliendo un pezzo già posizionato correttamente, la parte rimanente deve essere risolta in modo ottimo da sola. Altrimenti potresti migliorare il tutto sostituendo solo il sottopuzzle — contraddizione.
+  </div>
+</div>
+
+<p>Le due proprietà lavorano insieme: la prima garantisce che la <em>prima</em> scelta non esclude l'ottimo; la seconda che, dopo quella scelta, possiamo ricorrere (induzione) sul resto.</p>
+</section>
+
+<!-- ═══ 4. REGALO ═══ -->
+<section id="s4">
+<h2><span class="num">4</span>Esempio banale: selezione regalo</h2>
+
+<p>Problema «assolutamente banale» delle slide: dato un insieme <code>X = {x₁, …, xₙ}</code> di oggetti con valore <code>v(xᵢ)</code>, puoi scegliere <strong>k oggetti</strong> come regalo. Massimizza il valore totale.</p>
+
+<h3>Decomposizione</h3>
+<ul>
+  <li><strong>Scelta greedy:</strong> prendi <code>xᵢ</code> con <code>v(xᵢ) = max_{x∈X} v(x)</code> (il più prezioso).</li>
+  <li><strong>Sottoproblema:</strong> <code>X' = X − {xᵢ}</code>, <code>k' = k − 1</code>, stessa funzione <code>v</code>.</li>
+</ul>
+
+<div class="box box-thm">
+  <div class="box-label">Perché funziona</div>
+  <p><strong>Greedy-choice:</strong> se <code>xᵢ</code> ha valore massimo, esiste una soluzione ottima <code>A</code> che contiene <code>xᵢ</code> (se un'ottima non lo avesse, scambialo con un oggetto di valore ≤ e migliori).</p>
+  <p><strong>Optimal substructure:</strong> se <code>A'</code> è ottima per <code>X'</code>, allora <code>A' ⊂ A</code> per qualche ottima <code>A</code> di <code>X</code>.</p>
+</div>
+
+<p>Questo esempio serve a capire lo <em>schema</em>: scelta locale evidente + sottoproblema identico ma più piccolo. I problemi veri (knapsack, attività…) richiedono scelte meno ovvie e dimostrazioni più elaborate.</p>
+</section>
+
+<!-- ═══ 5. RESTO MONETE ═══ -->
+<section id="s5">
+<h2><span class="num">5</span>Resto monete: quando il greedy funziona e quando no</h2>
+
+<p>Il pranzo costa Fr. 15.20; paghi con Fr. 20 → resto <strong>Fr. 4.80</strong>. Denominazioni CHF: 5, 2, 1, 0.5, 0.2, 0.1.</p>
+
+<h3>Algoritmo greedy per il resto</h3>
+<p>Finché resta da dare, prendi sempre la <strong>moneta più grande</strong> ≤ al resto:</p>
+<pre><span class="cm">// Resto 4.80 CHF — greedy</span>
+<span class="nm">4.80</span> − <span class="nm">2</span> = <span class="nm">2.80</span>   <span class="cm">// moneta 2</span>
+<span class="nm">2.80</span> − <span class="nm">2</span> = <span class="nm">0.80</span>   <span class="cm">// moneta 2</span>
+<span class="nm">0.80</span> − <span class="nm">0.5</span> = <span class="nm">0.30</span>  <span class="cm">// moneta 0.5</span>
+<span class="nm">0.30</span> − <span class="nm">0.2</span> = <span class="nm">0.10</span>  <span class="cm">// moneta 0.2</span>
+<span class="nm">0.10</span> − <span class="nm">0.1</span> = <span class="nm">0</span>    <span class="cm">// moneta 0.1</span>
+<span class="cm">→ 5 monete/banconote. Ottimo per CHF.</span></pre>
+
+<div class="box box-ex">
+  <div class="box-label">CHF — funziona</div>
+  <code>2×2 + 0.5 + 0.2 + 0.1 = 4.8</code> con <strong>5</strong> pezzi. Per il sistema monetario svizzero (e molti altri «canonici»), il greedy dà il minimo numero di monete.
+</div>
+
+<h3>Controesempio USA (senza nickels)</h3>
+<p>Stesso resto <strong>$4.80</strong>, ma disponibili solo: $5, $1, $0.25, $0.10, $0.01 (niente nickels da $0.05).</p>
+
+<div class="grid2">
+  <div class="box box-warn" style="margin:0">
+    <div class="box-label">Greedy — 12 monete</div>
+    <code>4×$1 + 3×$0.25 + 5×$0.01 = $4.80</code><br>
+    Dopo 4 dollari restano $0.80 → greedy prende 3 quarti ($0.75) + 5 centesimi ($0.05) = <strong>12</strong> monete.
+  </div>
+  <div class="box box-ex" style="margin:0">
+    <div class="box-label">Ottimo — 9 monete</div>
+    <code>4×$1 + 2×$0.25 + 3×$0.10 = $4.80</code><br>
+    Usando i dime ($0.10) invece di centesimi: <strong>9</strong> monete — meno del greedy!
+  </div>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Lezione</div>
+  Il resto monete <em>sembra</em> naturale per il greedy, ma non ha in generale greedy-choice property. Con denominazioni «fortunate» (CHF, EUR con cent) funziona; con set patologici fallisce. Serve <strong>programmazione dinamica</strong> per il caso generale.
+</div>
+</section>
+
+<!-- ═══ 6. 0-1 KNAPSACK ═══ -->
+<section id="s6">
+<h2><span class="num">6</span>Zaino 0-1 — perché il greedy fallisce</h2>
+
+<p>Un ladro trova <code>n</code> oggetti: valore <code>vᵢ</code>, peso <code>wᵢ</code>, capacità massima <code>W</code>. Deve scegliere quali oggetti prendere <strong>interamente</strong> (0-1: o tutto o niente) per massimizzare il valore totale senza superare <code>W</code>.</p>
+
+<h3>Scelte greedy «ragionevoli» che falliscono</h3>
+<ul>
+  <li>Massimo <strong>valore assoluto</strong> <code>vᵢ</code></li>
+  <li>Massimo <strong>rapporto valore/peso</strong> <code>vᵢ/wᵢ</code></li>
+  <li>Minimo <strong>peso</strong> <code>wᵢ</code></li>
+</ul>
+
+<div class="box box-ex">
+  <div class="box-label">Controesempio numerico (greedy per vᵢ/wᵢ)</div>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th>Oggetto</th><th>v</th><th>w</th><th>v/w</th></tr>
+  <tr><td>1</td><td>10</td><td>5</td><td>2.0</td></tr>
+  <tr><td>2</td><td>40</td><td>40</td><td>1.0</td></tr>
+  <tr><td>3</td><td>30</td><td>10</td><td>3.0</td></tr>
+  <tr><td>4</td><td>50</td><td>60</td><td>0.83</td></tr>
+  </table>
+  </div>
+  <p><code>W = 50</code>. Ordine greedy per rapporto: <strong>3 → 1 → 2 → 4</strong>.</p>
+  <p>Prende oggetto 3 (w=10, v=30), poi oggetto 1 (w=15 totale, v=40). Restano 35 kg: oggetto 2 pesa 40 → non entra. Oggetto 4 pesa 60 → non entra.</p>
+  <p><strong>Greedy: valore 40</strong> (oggetti 3 e 1).</p>
+  <p><strong>Ottimo 0-1: oggetti 2 + 3</strong> → peso 10+40=50, <strong>valore 70</strong>. Il greedy per rapporto fallisce!</p>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Perché fallisce?</div>
+  Prendere una frazione «quasi intera» di un oggetto ad alto rapporto può <em>escludere</em> un oggetto grande ad alto valore assoluto. La scelta locale (miglior rapporto) non rispetta la greedy-choice property nel 0-1.
+</div>
+</section>
+
+<!-- ═══ 7. FRACTIONAL KNAPSACK ═══ -->
+<section id="s7">
+<h2><span class="num">7</span>Zaino frazionario — il greedy funziona</h2>
+
+<p>Stesso setup, ma il ladro può prendere <strong>qualsiasi frazione</strong> di un oggetto (con valore proporzionale). Qui la scelta greedy per <code>vᵢ/wᵢ</code> è ottima.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Algoritmo</div>
+<pre><span class="fn">FRACTIONAL-KNAPSACK</span>(items, W)
+<span class="nm">1</span>  ordina gli oggetti per <span class="st">vᵢ/wᵢ</span> decrescente
+<span class="nm">2</span>  valore = 0, peso = 0
+<span class="nm">3</span>  <span class="kw">for each</span> oggetto i nell'ordine
+<span class="nm">4</span>      <span class="kw">if</span> peso + wᵢ ≤ W
+<span class="nm">5</span>          prendi tutto i; aggiorna peso e valore
+<span class="nm">6</span>      <span class="kw">else</span>
+<span class="nm">7</span>          prendi frazione (W − peso)/wᵢ di i; <span class="kw">break</span>
+<span class="nm">8</span>  <span class="kw">return</span> valore</pre>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio numerico completo</div>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th>i</th><th>vᵢ</th><th>wᵢ</th><th>vᵢ/wᵢ</th></tr>
+  <tr><td>1</td><td>60</td><td>10</td><td class="mark">6.0</td></tr>
+  <tr><td>2</td><td>100</td><td>20</td><td>5.0</td></tr>
+  <tr><td>3</td><td>120</td><td>30</td><td>4.0</td></tr>
+  </table>
+  </div>
+  <p><code>W = 50</code>.</p>
+  <ol>
+    <li>Prendi tutto oggetto 1: peso 10, valore 60. Resto W=40.</li>
+    <li>Prendi tutto oggetto 2: peso 30, valore 160. Resto W=20.</li>
+    <li>Prendi <code>20/30 = ⅔</code> dell'oggetto 3: peso +20, valore +80.</li>
+  </ol>
+  <p><strong>Totale: peso 50, valore 60 + 100 + 80 = 240.</strong> Completamente ottimo (dimostrabile con scambio: se una soluzione ottima non prende per intero l'oggetto con rapporto massimo, si può scambiare).</p>
+</div>
+</section>
+
+<!-- ═══ 8. ACTIVITY SELECTION ═══ -->
+<section id="s8">
+<h2><span class="num">8</span>Activity selection — massimo insieme compatibile</h2>
+
+<p>Una sala conferenze è condivisa tra attività. Ogni attività <code>aᵢ</code> ha inizio <code>sᵢ</code> e fine <code>fᵢ</code>. Due attività sono <strong>compatibili</strong> se non si sovrappongono: <code>fᵢ ≤ sⱼ</code> oppure <code>fⱼ ≤ sᵢ</code>. Obiettivo: il <strong>massimo numero</strong> di attività compatibili.</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Attività</th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th><th>h</th><th>i</th><th>j</th><th>k</th></tr>
+<tr><td>Inizio s</td><td>8</td><td>0</td><td>2</td><td>3</td><td>5</td><td>1</td><td>5</td><td>3</td><td>12</td><td>6</td><td>8</td></tr>
+<tr><td>Fine f</td><td>12</td><td>6</td><td>13</td><td>5</td><td>7</td><td>4</td><td>9</td><td>8</td><td>14</td><td>10</td><td>11</td></tr>
+</table>
+</div>
+
+<h3>Scelta greedy: earliest finish time</h3>
+<p>Ordina per <code>fᵢ</code> crescente; scegli l'attività che finisce prima, poi ricorsivamente tra quelle con <code>sⱼ ≥ f</code> scelta.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Traccia completa (ordinamento per fᵢ)</div>
+  <p>f:4, d:5, b:6, e:7, h:8, g:9, j:10, k:11, a:12, c:13, i:14</p>
+  <ol>
+    <li><strong>f</strong> (1–4): finisce alle 4.</li>
+    <li>Compatibili con s ≥ 4: e, g, a, j, k, i. Scegli <strong>e</strong> (fine 7).</li>
+    <li>Compatibili con s ≥ 7: a, k, i. Scegli <strong>k</strong> (fine 11).</li>
+    <li>Compatibili con s ≥ 11: <strong>i</strong> (12–14).</li>
+  </ol>
+  <p><strong>Soluzione greedy: {f, e, k, i} — 4 attività.</strong></p>
+</div>
+
+<h3>Proof sketch (exchange argument)</h3>
+<div class="box box-thm">
+  <div class="box-label">Greedy-choice property</div>
+  <p>Sia <code>aₓ</code> l'attività con fine minima. Se un'ottima <code>OPT</code> non contiene <code>aₓ</code>, sia <code>aₘ ∈ OPT</code> la prima a finire in OPT. Poiché <code>fₓ ≤ fₘ</code>, ogni altra attività in OPT inizia dopo <code>fₘ ≥ fₓ</code>, quindi è compatibile con <code>aₓ</code>. Sostituendo <code>aₘ</code> con <code>aₓ</code> si ottiene <code>OPT*</code> di uguale cardinalità → esiste un'ottima che include la scelta greedy.</p>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Optimal substructure</div>
+  <p>Dopo aver scelto <code>aₓ</code>, il sottoproblema è <code>S' = {aᵢ : sᵢ ≥ fₓ}</code>. Se <code>OPT'</code> è ottima per <code>S'</code>, allora <code>{aₓ} ∪ OPT'</code> è ottima per <code>S</code> (per contraddizione: altrimenti esisterebbe una soluzione più grande per <code>S'</code>).</p>
+</div>
+
+<pre><span class="fn">GREEDY-ACTIVITY-SELECTOR</span>(S)
+<span class="nm">1</span>  ordina S per tempo di fine fᵢ crescente
+<span class="nm">2</span>  A = {a₁}   <span class="cm">// prima nell'ordine (finisce prima)</span>
+<span class="nm">3</span>  <span class="kw">for</span> i = 2 to n
+<span class="nm">4</span>      <span class="kw">if</span> sᵢ ≥ f<sub>ultima in A</sub>
+<span class="nm">5</span>          A = A ∪ {aᵢ}
+<span class="nm">6</span>  <span class="kw">return</span> A</pre>
+<p>Complessità: <span class="cx cx-log">O(n log n)</span> per l'ordinamento.</p>
+</section>
+
+<!-- ═══ 9. HUFFMAN ═══ -->
+<section id="s9">
+<h2><span class="num">9</span>Huffman coding — codifica a lunghezza variabile</h2>
+
+<p>Sequenza enorme (<code>n = 10⁹</code>) su 6 simboli {a,b,c,d,e,f}. Come comprimere?</p>
+
+<h3>Codifica a larghezza fissa</h3>
+<p>6 simboli → <code>⌈log₂ 6⌉ = 3</code> bit per simbolo → <code>3 × 10⁹ / 8 ≈ 375 MB</code>.</p>
+
+<h3>Codifica a lunghezza variabile</h3>
+<p>Assegnare codici più corti ai simboli più frequenti. Esempio iniziale:</p>
+<div class="tbl-wrap">
+<table>
+<tr><th>simbolo</th><th>codice fisso</th><th>codice variabile</th></tr>
+<tr><td>a</td><td>000</td><td>000</td></tr>
+<tr><td>b</td><td>001</td><td>001</td></tr>
+<tr><td>c</td><td>010</td><td>010</td></tr>
+<tr><td>d</td><td>011</td><td>011</td></tr>
+<tr><td>e</td><td>100</td><td>10</td></tr>
+<tr><td>f</td><td>101</td><td>11</td></tr>
+</table>
+</div>
+<p>Per e e f il secondo bit di «10x» non distingue nulla se il primo è 1 → si accorcia a <code>10</code> e <code>11</code>. Serve che la codifica sia <strong>non ambigua</strong>.</p>
+
+<div class="box box-def">
+  <div class="box-label">Prefix code (codice prefisso)</div>
+  Nessuna parola codice <code>E(c₁)</code> è prefisso di un'altra <code>E(c₂)</code>. Così la decodifica è univoca: si legge bit per bit fino a riconoscere un simbolo, poi si riparte.
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Problema formale</div>
+  Dati simboli <code>C</code> e frequenze <code>f : C → [0,1]</code>, trovare codice prefisso <code>E</code> che minimizza la lunghezza media:
+  <div class="formula">B(S) = Σ<sub>c∈C</sub> f(c) · |E(c)|</div>
+</div>
+
+<h3>Albero binario di codifica</h3>
+<p>Ogni codice è un cammino radice-foglia: <code>0</code> = sinistra, <code>1</code> = destra. I nodi interni sono prefissi; le foglie sono simboli.</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>sym</th><th>freq</th><th>codice Huffman</th></tr>
+<tr><td>a</td><td>45%</td><td>0</td></tr>
+<tr><td>b</td><td>13%</td><td>100</td></tr>
+<tr><td>c</td><td>12%</td><td>101</td></tr>
+<tr><td>d</td><td>16%</td><td>110</td></tr>
+<tr><td>e</td><td>9%</td><td>1110</td></tr>
+<tr><td>f</td><td>5%</td><td>1111</td></tr>
+</table>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Algoritmo HUFFMAN</div>
+<pre><span class="fn">HUFFMAN</span>(C)
+<span class="nm">1</span>  n = |C|
+<span class="nm">2</span>  Q = C   <span class="cm">// coda di priorità min-heap per frequenza</span>
+<span class="nm">3</span>  <span class="kw">for</span> i = 1 to n − 1
+<span class="nm">4</span>      crea nuovo nodo z
+<span class="nm">5</span>      z.left = <span class="fn">EXTRACT-MIN</span>(Q)
+<span class="nm">6</span>      z.right = <span class="fn">EXTRACT-MIN</span>(Q)
+<span class="nm">7</span>      f(z) = f(z.left) + f(z.right)
+<span class="nm">8</span>      <span class="fn">INSERT</span>(Q, z)
+<span class="nm">9</span>  <span class="kw">return</span> <span class="fn">EXTRACT-MIN</span>(Q)   <span class="cm">// radice dell'albero</span></pre>
+  <p>Scelta greedy: unire sempre i <strong>due nodi meno frequenti</strong>. Costruzione <em>bottom-up</em>. Complessità: <span class="cx cx-log">O(n log n)</span>.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Traccia merge completa (frequenze %)</div>
+  <ol>
+    <li>Q iniziale: a:45, b:13, c:12, d:16, e:9, f:5</li>
+    <li>Merge <strong>f+e</strong> → nodo <strong>14</strong>. Q: a:45, d:16, c:12, b:13, 14</li>
+    <li>Merge <strong>c+b</strong> → nodo <strong>25</strong>. Q: a:45, d:16, 14, 25</li>
+    <li>Merge <strong>14+d</strong> → nodo <strong>30</strong>. Q: a:45, 25, 30</li>
+    <li>Merge <strong>25+30</strong> → nodo <strong>55</strong>. Q: a:45, 55</li>
+    <li>Merge <strong>a+55</strong> → radice <strong>100</strong>. Albero completo.</li>
+  </ol>
+  <p>Lunghezza media: <code>0.45×1 + 0.13×3 + 0.12×3 + 0.16×3 + 0.09×4 + 0.05×4 = 2.24</code> bit/simbolo (vs 3 fissi).</p>
+</div>
+</section>
+
+<!-- ═══ 10. GREEDY VS DP ═══ -->
+<section id="s10">
+<h2><span class="num">10</span>Quando il greedy funziona — e quando no</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Problema</th><th>Greedy?</th><th>Scelta tipica</th><th>Alternativa</th></tr>
+<tr><td>MST (Kruskal/Prim)</td><td class="good">✓ Sì</td><td>Arco/vertice minimo safe</td><td>—</td></tr>
+<tr><td>Activity selection (non pesata)</td><td class="good">✓ Sì</td><td>Earliest finish</td><td>—</td></tr>
+<tr><td>Activity selection (pesata)</td><td class="bad">✗ No</td><td>Earliest finish</td><td>DP O(n log n)</td></tr>
+<tr><td>Fractional knapsack</td><td class="good">✓ Sì</td><td>Max vᵢ/wᵢ</td><td>—</td></tr>
+<tr><td>Huffman</td><td class="good">✓ Sì</td><td>Merge 2 minimi</td><td>—</td></tr>
+<tr><td>Resto monete (generale)</td><td class="bad">✗ No*</td><td>Moneta max</td><td>DP</td></tr>
+<tr><td>0-1 Knapsack</td><td class="bad">✗ No</td><td>vᵢ o vᵢ/wᵢ</td><td>DP O(nW)</td></tr>
+<tr><td>TSP</td><td class="bad">✗ No</td><td>Vicino più vicino</td><td>DP / euristiche</td></tr>
+</table>
+</div>
+<p><em>*</em> Funziona per sistemi monetari «canonici» (CHF, EUR), non in generale.</p>
+
+<div class="box box-tip">
+  <div class="box-label">Anteprima programmazione dinamica</div>
+  Quando il greedy fallisce, spesso il problema ha <strong>sottostrutture sovrapposte</strong> e scelte interdipendenti: serve esplorare più sottoproblemi e combinarli (memoization / tabella). Il prossimo capitolo (DP) affronta resto monete generale, 0-1 knapsack, LCS, ecc.
+</div>
+
+<div class="box box-breve" style="margin-top:24px">
+  <div class="box-label">Riepilogo — cosa portare all'esame</div>
+  <div class="grid2" style="margin:0">
+    <ul>
+      <li>3 passi progettazione greedy + 2 proprietà (greedy-choice, optimal substructure)</li>
+      <li><code>GENERIC-MST</code> come modello di schema greedy</li>
+      <li>Resto CHF 4.80 → 5 monete; USA senza nickels: greedy 12 vs ottimo 9</li>
+      <li>0-1 knapsack: controesempio con rapporto v/w</li>
+      <li>Fractional knapsack: ordina per vᵢ/wᵢ, prendi frazioni</li>
+    </ul>
+    <ul>
+      <li>Activity selection non pesata: earliest finish → {f,e,k,i} = 4 attività</li>
+      <li>Activity selection <em>pesata</em>: greedy fallisce (11) → serve DP (15)</li>
+      <li>Proof sketch: scambio con attività che finisce prima in OPT</li>
+      <li>Huffman: prefix code, merge 2 minimi, traccia f+e→14, c+b→25, …</li>
+      <li>Codici finali: a=0, b=100, c=101, d=110, e=1110, f=1111</li>
+      <li>Greedy facile da inventare, <strong>difficile da dimostrare</strong></li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<hr class="part">
+<p class="part-label">Parte interattiva</p>
+
+<!-- ═══ SIM ACTIVITY ═══ -->
+<section id="sim-act">
+<h2>Simulatore — Activity selection timeline</h2>
+<div class="interactive-panel">
+  <h4>Asse temporale 0–14 — greedy earliest finish</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Arancione = attività selezionate · Grigio attenuato = eliminate (incompatibili o non scelte). Usa Avanti per seguire la traccia {f → e → k → i}.</p>
+  <svg id="actSvg" viewBox="0 0 720 340"></svg>
+  <p id="actCaption" style="text-align:center;font-size:14px;margin:16px 0 8px;color:var(--text-bright)"></p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="actPlay">▶ Play</button>
+    <button id="actNext">Avanti ▶</button>
+    <button id="actReset">↺ Reset</button>
+  </div>
+  <div class="log-area" id="actLog"></div>
+</div>
+</section>
+
+<!-- ═══ SIM HUFFMAN ═══ -->
+<section id="sim-huff">
+<h2>Stepper — merge Huffman</h2>
+<div class="interactive-panel">
+  <h4>f:5 e:9 c:12 b:13 d:16 a:45 — costruzione bottom-up</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Ogni passo unisce i due nodi con frequenza minima. Evidenziati in arancione i nodi appena fusi.</p>
+  <div class="queue-box" id="huffQueue"></div>
+  <svg id="huffSvg" viewBox="0 0 600 280"></svg>
+  <p id="huffCaption" style="text-align:center;font-size:14px;margin:12px 0;color:var(--text-bright)"></p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="huffNext">Avanti ▶</button>
+    <button id="huffReset">↺ Reset</button>
+  </div>
+</div>
+</section>
+
+<!-- ═══ SIM KNAPSACK ═══ -->
+<section id="sim-knap">
+<h2>Stepper — zaino frazionario</h2>
+<div class="interactive-panel">
+  <h4>W = 50 — oggetti ordinati per vᵢ/wᵢ</h4>
+  <div id="knapList"></div>
+  <p id="knapCaption" style="font-size:14px;margin:12px 0;color:var(--text-bright)"></p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="knapNext">Avanti ▶</button>
+    <button id="knapReset">↺ Reset</button>
+  </div>
+  <p style="font-size:13px;margin-top:12px">Valore accumulato: <strong id="knapVal">0</strong> · Peso: <strong id="knapW">0</strong> / 50</p>
+</div>
+</section>
+
+<!-- ═══ QUIZ ═══ -->
+<section id="quiz">
+<h2>Quiz — 8 domande Vero/Falso</h2>
+<div id="quizPanel"></div>
+<div class="quiz-score" id="quizScore">Rispondi alle 8 domande.</div>
+<button class="btn-reset" id="quizReset">↺ Ricomincia quiz</button>
+</section>
+
+<hr class="part">
+<p class="part-label">Esercizi guidati</p>
+
+<!-- ═══ ESERCIZI ═══ -->
+<section id="ex">
+<h2>6 esercizi con soluzioni</h2>
+
+<details>
+<summary><strong>Esercizio 1</strong> — Proprietà greedy <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Quali sono i due ingredienti chiave di una strategia greedy secondo le slide?</p>
+  <p><strong>Soluzione:</strong> (1) <strong>Greedy-choice property</strong>: una scelta localmente ottima porta sempre a una soluzione globalmente ottima (esiste un'ottima che include la scelta). (2) <strong>Optimal-substructure property</strong>: un'ottima del problema contiene ottime dei sottoproblemi; si combina la scelta greedy con l'ottimo del residuo.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 2</strong> — Resto monete USA <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Resto $4.80 con {$5, $1, $0.25, $0.10, $0.01}, senza nickels. Quante monete usa il greedy e qual è l'ottimo?</p>
+  <p><strong>Soluzione:</strong> Greedy: 4×$1 + 3×$0.25 + 5×$0.01 = <strong>12</strong> monete. Ottimo: 4×$1 + 2×$0.25 + 3×$0.10 = <strong>9</strong> monete. Il greedy non è ottimo per questo set di denominazioni.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 3</strong> — 0-1 Knapsack controesempio <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Oggetti (v,w): (10,5), (40,40), (30,10), (50,60), W=50. Cosa produce il greedy per v/w e qual è l'ottimo 0-1?</p>
+  <p><strong>Soluzione:</strong> Ordine v/w: 3(3.0), 1(2.0), 2(1.0), 4(0.83). Greedy prende 3+1 → valore <strong>40</strong>, peso 15 (non può aggiungere 2). Ottimo 0-1: oggetti 2+3 → peso 50, valore <strong>70</strong>. Dimostra che il greedy per rapporto fallisce nel 0-1.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 4</strong> — Fractional knapsack <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Stessi oggetti (60,10), (100,20), (120,30), W=50. Calcola valore ottimo frazionario passo per passo.</p>
+  <p><strong>Soluzione:</strong> Rapporti 6, 5, 4. Prendi tutto (60,10): valore 60, peso 10. Prendi tutto (100,20): valore 160, peso 30. Restano 20 kg → prendi 20/30 di (120,30): +80 valore. <strong>Totale 240</strong>, peso 50. Ogni passo è greedy sul massimo v/w residuo.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 5</strong> — Activity selection <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Con la tabella delle slide (a–k), applica earliest-finish greedy e dimostra che {f,e,k,i} ha cardinalità 4.</p>
+  <p><strong>Soluzione:</strong> Ordine per f: f(4), d(5), b(6), e(7), h(8), g(9), j(10), k(11), a(12), c(13), i(14). Greedy: f → tra {e,g,a,j,k,i} scegli e(7) → tra {a,k,i} scegli k(11) → i(14). Nessun altro insieme ha 5 attività: ogni attività che inizia prima di 4 confligge con f, e dopo ogni scelta il vincolo s ≥ f ultima restringe lo spazio. <strong>4 è ottimo</strong> (si può verificare per enumerazione o con la correttezza del teorema).</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 6</strong> — Huffman merge e codici <span class="ex-diff avanzato">Avanzato</span></summary>
+<div class="sol-body">
+  <p>Frequenze a:45, b:13, c:12, d:16, e:9, f:5. Esegui tutti i merge e scrivi i codici finali.</p>
+  <p><strong>Soluzione:</strong></p>
+  <ol>
+    <li>f(5)+e(9)=<strong>14</strong></li>
+    <li>c(12)+b(13)=<strong>25</strong></li>
+    <li>14+d(16)=<strong>30</strong></li>
+    <li>25+30=<strong>55</strong></li>
+    <li>a(45)+55=<strong>100</strong> (radice)</li>
+  </ol>
+  <p>Dall'albero (0=sin, 1=des): <strong>a=0</strong>, <strong>b=100</strong>, <strong>c=101</strong>, <strong>d=110</strong>, <strong>e=1110</strong>, <strong>f=1111</strong>. Lunghezza media 2.24 bit/symbol. La scelta greedy «due minimi» minimizza B(S) per il teorema di Huffman.</p>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+/* ── NAV + THEME ────────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => navObs.observe(s));
+
+const themeBtn = document.getElementById('themeToggle');
+const saved = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', saved);
+themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  drawAct();
+});
+
+/* ── ACTIVITY SELECTION ─────────────────────────── */
+const ACTS = [
+  {id:'a',s:8,f:12},{id:'b',s:0,f:6},{id:'c',s:2,f:13},{id:'d',s:3,f:5},
+  {id:'e',s:5,f:7},{id:'f',s:1,f:4},{id:'g',s:5,f:9},{id:'h',s:3,f:8},
+  {id:'i',s:12,f:14},{id:'j',s:6,f:10},{id:'k',s:8,f:11}
+];
+const ACT_STEPS = [
+  {sel:[], note:'Inizio: 11 attività. Ordinamento per fᵢ: f(4), d(5), b(6), e(7), h(8), g(9), j(10), k(11), a(12), c(13), i(14).'},
+  {sel:['f'], note:'Passo 1: scegliamo f (fine=4) — earliest finish.'},
+  {sel:['f','e'], note:'Passo 2: tra attività con sᵢ ≥ 4, scegliamo e (fine=7).'},
+  {sel:['f','e','k'], note:'Passo 3: tra sᵢ ≥ 7, scegliamo k (fine=11).'},
+  {sel:['f','e','k','i'], note:'Passo 4: tra sᵢ ≥ 11, scegliamo i (fine=14).'},
+  {sel:['f','e','k','i'], done:true, note:'✓ Soluzione ottima: {f, e, k, i} — 4 attività compatibili.'}
+];
+let actStep = 0, actTimer = null;
+const TMAX = 14, PAD = 50, ROW = 26, SVG_W = 720;
+
+function drawAct() {
+  const svg = document.getElementById('actSvg');
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const dim = getComputedStyle(document.documentElement).getPropertyValue('--text-dim').trim();
+  const step = ACT_STEPS[actStep];
+  const selSet = new Set(step.sel);
+  const lastFin = step.sel.length ? ACTS.find(a => a.id === step.sel[step.sel.length-1]).f : 0;
+  const scale = (SVG_W - 2*PAD) / TMAX;
+  let html = '';
+  for (let t = 0; t <= TMAX; t++) {
+    const x = PAD + t*scale;
+    html += `<line class="axis-tick" x1="${x}" y1="30" x2="${x}" y2="${30+ACTS.length*ROW+10}"/>`;
+    if (t % 2 === 0) html += `<text class="axis-lbl" x="${x}" y="22">${t}</text>`;
+  }
+  ACTS.forEach((a, i) => {
+    const y = 40 + i*ROW;
+    const x1 = PAD + a.s*scale, x2 = PAD + a.f*scale;
+    const w = Math.max(x2-x1, 4);
+    let cls = 'act-bar';
+    if (selSet.has(a.id)) cls += ' sel';
+    else if (actStep > 0 && a.s < lastFin && !selSet.has(a.id)) cls += ' dim';
+    else if (actStep >= ACT_STEPS.length-1 && !selSet.has(a.id)) cls += ' dim';
+    html += `<g class="${cls}"><text class="lbl" x="12" y="${y+10}">${a.id}</text>`;
+    html += `<rect class="bar" x="${x1}" y="${y}" width="${w}" height="18" rx="3"/>`;
+    html += `<text class="lbl" x="${x2+4}" y="${y+10}" fill="${dim}">${a.s}-${a.f}</text></g>`;
+  });
+  svg.setAttribute('viewBox', `0 0 ${SVG_W} ${40+ACTS.length*ROW+20}`);
+  svg.innerHTML = html;
+  document.getElementById('actCaption').textContent = step.note;
+  document.getElementById('actLog').textContent = step.sel.length
+    ? `Selezionate: {${step.sel.join(', ')}} (${step.sel.length} attività)`
+    : 'Nessuna selezione ancora.';
+}
+
+function goAct(n) {
+  actStep = Math.max(0, Math.min(ACT_STEPS.length-1, n));
+  drawAct();
+  document.getElementById('actPlay').textContent = actTimer ? '⏸ Pausa' : '▶ Play';
+}
+function stopAct() { if (actTimer) { clearInterval(actTimer); actTimer = null; } document.getElementById('actPlay').textContent = '▶ Play'; }
+document.getElementById('actNext').onclick = () => { stopAct(); goAct(actStep+1); };
+document.getElementById('actReset').onclick = () => { stopAct(); goAct(0); };
+document.getElementById('actPlay').onclick = () => {
+  if (actTimer) { stopAct(); return; }
+  if (actStep >= ACT_STEPS.length-1) goAct(0);
+  document.getElementById('actPlay').textContent = '⏸ Pausa';
+  actTimer = setInterval(() => {
+    if (actStep >= ACT_STEPS.length-1) { stopAct(); return; }
+    goAct(actStep+1);
+  }, 1400);
+};
+goAct(0);
+
+/* ── HUFFMAN STEPPER ────────────────────────────── */
+const HUFF_STEPS = [
+  {q:[{l:'a',f:45},{l:'b',f:13},{l:'c',f:12},{l:'d',f:16},{l:'e',f:9},{l:'f',f:5}], merge:null, note:'Coda iniziale — 6 foglie.'},
+  {q:[{l:'a',f:45},{l:'d',f:16},{l:'c',f:12},{l:'b',f:13},{l:'14',f:14,isM:true,children:['f','e']}], merge:'f+e→14', note:'Merge 1: f(5) + e(9) = nodo 14.'},
+  {q:[{l:'a',f:45},{l:'d',f:16},{l:'14',f:14,isM:true},{l:'25',f:25,isM:true,children:['c','b']}], merge:'c+b→25', note:'Merge 2: c(12) + b(13) = nodo 25.'},
+  {q:[{l:'a',f:45},{l:'25',f:25,isM:true},{l:'30',f:30,isM:true,children:['14','d']}], merge:'14+d→30', note:'Merge 3: 14 + d(16) = nodo 30.'},
+  {q:[{l:'a',f:45},{l:'55',f:55,isM:true,children:['25','30']}], merge:'25+30→55', note:'Merge 4: 25 + 30 = nodo 55.'},
+  {q:[{l:'100',f:100,isM:true,children:['a','55']}], merge:'a+55→100', note:'Merge 5: a(45) + 55 = radice 100. Codici: a=0, b=100, c=101, d=110, e=1110, f=1111.'}
+];
+let huffStep = 0;
+
+function renderHuffQueue() {
+  const step = HUFF_STEPS[huffStep];
+  document.getElementById('huffQueue').innerHTML = step.q.map(n =>
+    `<div class="queue-item${n.isM?' merge':''}">${n.l}:${n.f}</div>`
+  ).join('');
+  document.getElementById('huffCaption').textContent = step.note;
+  drawHuffTree(huffStep);
+}
+
+function drawHuffTree(stepIdx) {
+  const svg = document.getElementById('huffSvg');
+  if (stepIdx < HUFF_STEPS.length - 1) {
+    svg.innerHTML = `<text x="300" y="140" class="huff-lbl" fill="var(--text-dim)">Albero completo al passo ${HUFF_STEPS.length-1}</text>`;
+    return;
+  }
+  const nodes = [
+    {id:'100',x:300,y:30,f:100},
+    {id:'a',x:150,y:100,f:45,leaf:true},
+    {id:'55',x:450,y:100,f:55},
+    {id:'25',x:370,y:170,f:25},
+    {id:'30',x:530,y:170,f:30},
+    {id:'c',x:310,y:240,f:12,leaf:true},
+    {id:'b',x:430,y:240,f:13,leaf:true},
+    {id:'14',x:490,y:240,f:14},
+    {id:'d',x:570,y:240,f:16,leaf:true},
+    {id:'e',x:460,y:300,f:9,leaf:true},
+    {id:'f',x:520,y:300,f:5,leaf:true}
+  ];
+  const edges = [
+    ['100','a','0'],['100','55','1'],['55','25','0'],['55','30','1'],
+    ['25','c','0'],['25','b','1'],['30','14','0'],['30','d','1'],
+    ['14','e','0'],['14','f','1']
+  ];
+  let html = '';
+  edges.forEach(([u,v,lbl]) => {
+    const a = nodes.find(n=>n.id===u), b = nodes.find(n=>n.id===v);
+    html += `<line class="huff-edge" x1="${a.x}" y1="${a.y+14}" x2="${b.x}" y2="${b.y-14}"/>`;
+    html += `<text class="huff-edge lbl" x="${(a.x+b.x)/2}" y="${(a.y+b.y)/2}">${lbl}</text>`;
+  });
+  nodes.forEach(n => {
+    html += `<circle class="huff-node${n.leaf?' leaf':''}" cx="${n.x}" cy="${n.y}" r="22"/>`;
+    html += `<text class="huff-lbl" x="${n.x}" y="${n.y}">${n.id}:${n.f}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+document.getElementById('huffNext').onclick = () => { if (huffStep < HUFF_STEPS.length-1) { huffStep++; renderHuffQueue(); } };
+document.getElementById('huffReset').onclick = () => { huffStep = 0; renderHuffQueue(); };
+renderHuffQueue();
+
+/* ── FRACTIONAL KNAPSACK ────────────────────────── */
+const KNAP_ITEMS = [
+  {id:1,v:60,w:10,r:6},{id:2,v:100,w:20,r:5},{id:3,v:120,w:30,r:4}
+];
+const KNAP_STEPS = [
+  {taken:[], frac:null, val:0, wt:0, note:'Ordine per v/w: oggetto 1 (6.0), 2 (5.0), 3 (4.0). Capacità W=50.'},
+  {taken:[1], frac:null, val:60, wt:10, note:'Prendi tutto oggetto 1: +60 valore, peso 10. Restano 40 kg.'},
+  {taken:[1,2], frac:null, val:160, wt:30, note:'Prendi tutto oggetto 2: +100 valore, peso 30. Restano 20 kg.'},
+  {taken:[1,2], frac:3, fracAmt:2/3, val:240, wt:50, note:'Prendi ⅔ dell\'oggetto 3 (20/30 kg): +80 valore. Zaino pieno — ottimo 240.'}
+];
+let knapStep = 0;
+
+function renderKnap() {
+  const s = KNAP_STEPS[knapStep];
+  document.getElementById('knapList').innerHTML = KNAP_ITEMS.map(it => {
+    let cls = 'knap-row';
+    if (s.taken.includes(it.id)) cls += s.frac===it.id ? ' partial' : ' taken';
+    const extra = s.frac===it.id ? ` — preso ${Math.round(s.fracAmt*100)}%` : '';
+    return `<div class="${cls}">#${it.id}: v=${it.v}, w=${it.w}, v/w=${it.r}${extra}</div>`;
+  }).join('');
+  document.getElementById('knapCaption').textContent = s.note;
+  document.getElementById('knapVal').textContent = s.val;
+  document.getElementById('knapW').textContent = s.wt;
+}
+document.getElementById('knapNext').onclick = () => { if (knapStep < KNAP_STEPS.length-1) { knapStep++; renderKnap(); } };
+document.getElementById('knapReset').onclick = () => { knapStep = 0; renderKnap(); };
+renderKnap();
+
+/* ── QUIZ ───────────────────────────────────────── */
+const quizData = [
+  {q:'La greedy-choice property afferma che una scelta localmente ottima porta sempre a una soluzione globalmente ottima (per qualche ottima).', a:true, why:'È la definizione: esiste una soluzione globale ottima che include la scelta greedy locale.'},
+  {q:'Inventare una scelta greedy è difficile; dimostrarne l\'ottimalità è facile.', a:false, why:'È il contrario: le slide dicono che inventare greedy è facile, dimostrare l\'ottimo è difficile.'},
+  {q:'Per il resto $4.80 senza nickels, il greedy con moneta massima dà 12 monete ma l\'ottimo è 9.', a:true, why:'Greedy: 4×$1+3×$0.25+5×$0.01=12. Ottimo: 4×$1+2×$0.25+3×$0.10=9.'},
+  {q:'Il knapsack 0-1 si risolve ottimamente ordinando per vᵢ/wᵢ e prendendo oggetti interi in quell\'ordine.', a:false, why:'Il controesempio (v,w)=(10,5),(40,40),(30,10),(50,60), W=50 dà greedy 40 vs ottimo 70.'},
+  {q:'Nel knapsack frazionario, ordinare per vᵢ/wᵢ decrescente e prendere frazioni è ottimo.', a:true, why:'È l\'algoritmo greedy classico con dimostrazione per scambio.'},
+  {q:'Per activity selection, la scelta greedy «earliest finish time» produce un insieme massimo di attività compatibili.', a:true, why:'Dimostrato con exchange argument + optimal substructure.'},
+  {q:'Huffman unisce ad ogni passo i due nodi con frequenza massima.', a:false, why:'Unisce i due nodi con frequenza MINIMA (greedy bottom-up).'},
+  {q:'Un codice Huffman è sempre un prefix code.', a:true, why:'Le foglie sono solo alle estremità; nessun codice è prefisso di un altro.'}
+];
+let qAns = 0, qOk = 0;
+function renderQuiz() {
+  document.getElementById('quizPanel').innerHTML = quizData.map((item,i) => `
+    <div class="quiz-q" id="qq${i}">
+      <p><strong>${i+1}.</strong> ${item.q}</p>
+      <div class="quiz-btns">
+        <button onclick="answerQuiz(${i},true)">Vero</button>
+        <button onclick="answerQuiz(${i},false)">Falso</button>
+      </div>
+      <div class="quiz-feedback" id="qf${i}"></div>
+    </div>`).join('');
+  qAns = 0; qOk = 0;
+  document.getElementById('quizScore').textContent = 'Rispondi alle 8 domande.';
+}
+function answerQuiz(i, ans) {
+  const el = document.getElementById('qq'+i);
+  if (el.classList.contains('answered-correct') || el.classList.contains('answered-wrong')) return;
+  const ok = ans === quizData[i].a;
+  el.classList.add(ok ? 'answered-correct' : 'answered-wrong');
+  const fb = document.getElementById('qf'+i);
+  fb.classList.add('show');
+  fb.innerHTML = (ok ? '<span class="good">✓</span> ' : '<span class="bad">✗</span> ') + quizData[i].why;
+  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  qAns++; if (ok) qOk++;
+  document.getElementById('quizScore').textContent = `Punteggio: ${qOk}/${qAns}` + (qAns < quizData.length ? ` — ancora ${quizData.length-qAns}` : ' — Completato!');
+}
+document.getElementById('quizReset').onclick = renderQuiz;
+renderQuiz();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

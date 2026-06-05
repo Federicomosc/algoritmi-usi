@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rappresentazione e algoritmi base — Grafi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --accent: #61afef; --chart-grid: #2e2e3e; --chart-text: #7a7890; --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32; --accent: #2a6cb8;
+  --chart-grid: #d4cfc4; --chart-text: #6a6878; --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--accent); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--accent); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(97,175,239,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #0e1018 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(97,175,239,.18) 0%, transparent 70%); pointer-events: none; }
+.hero::after { content: ''; position: absolute; bottom: -40px; left: 20%; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(97,175,239,.08) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--accent); color: var(--accent); background: rgba(97,175,239,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--accent); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(97,175,239,.12); border-radius: 3px; padding: 0 2px; }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(97,175,239,.07); border-color: var(--accent); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(97,175,239,.1); border-color: var(--accent); border-left-width: 4px; }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-breve .box-label, .box-thm .box-label { color: var(--accent); }
+.box-def .box-label { color: var(--blue); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--accent); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-1 { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-n { background: rgba(224,108,117,.15); color: var(--red); }
+.cx-log { background: rgba(97,175,239,.15); color: var(--accent); }
+hr.part { border: none; border-top: 1px solid var(--accent); opacity: .3; margin: 64px 0 48px; }
+.ex-diff { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.ex-diff.facile { background: rgba(152,195,121,.15); color: var(--green); }
+.ex-diff.medio { background: rgba(97,175,239,.15); color: var(--blue); }
+.ex-diff.avanzato { background: rgba(224,108,117,.15); color: var(--red); }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--accent); font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.btn-row button { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; font-weight: 600; }
+.btn-row button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-row button:hover { filter: brightness(1.1); }
+#graphSvg { width: 100%; height: 380px; display: block; }
+.g-edge { stroke: var(--border); stroke-width: 2; fill: none; transition: stroke .2s; }
+.g-edge.bfs-tree { stroke: var(--accent); stroke-width: 3; }
+.g-node circle { fill: var(--bg4); stroke: var(--border); stroke-width: 2; transition: all .25s; }
+.g-node text { fill: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.g-node.white circle { fill: var(--bg4); stroke: var(--border); }
+.g-node.gray circle { fill: rgba(97,175,239,.25); stroke: var(--accent); stroke-width: 3; }
+.g-node.black circle { fill: rgba(152,195,121,.2); stroke: var(--green); }
+.g-node.current circle { fill: rgba(229,149,58,.3); stroke: var(--orange); stroke-width: 3; }
+.layer-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--text-dim); }
+.state-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.state-box { background: var(--bg4); border-radius: 6px; padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.state-box strong { color: var(--text-bright); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 4px; font-family: 'Inter', sans-serif; }
+.log-area { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg4); padding: 12px; border-radius: 6px; max-height: 100px; overflow-y: auto; margin-top: 12px; }
+.quiz-q { background: var(--bg4); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); }
+.quiz-q.answered-correct { border-color: var(--green); background: rgba(152,195,121,.08); }
+.quiz-q.answered-wrong { border-color: var(--red); background: rgba(224,108,117,.08); }
+.quiz-q p { margin-bottom: 10px; font-size: 14px; }
+.quiz-btns { display: flex; gap: 8px; margin-top: 8px; }
+.quiz-btns button { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.quiz-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btns button:disabled { opacity: .5; cursor: default; }
+.quiz-feedback { font-size: 12px; margin-top: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-score { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--teal); margin-top: 16px; padding: 12px; background: var(--bg4); border-radius: 8px; text-align: center; }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset:hover { background: rgba(78,201,168,.1); }
+.color-legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--text-dim); margin: 8px 0; }
+.color-legend span::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.cl-white::before { background: var(--bg4); border: 2px solid var(--border); }
+.cl-gray::before { background: rgba(97,175,239,.4); border: 2px solid var(--accent); }
+.cl-black::before { background: rgba(152,195,121,.3); border: 2px solid var(--green); }
+.cl-cur::before { background: rgba(229,149,58,.4); border: 2px solid var(--orange); }
+html[data-theme="light"] .hero { background: linear-gradient(135deg, #e8f0fa 0%, #f4f1ea 100%); }
+html[data-theme="light"] .g-node.gray circle { fill: rgba(42,108,184,.15); }
+html[data-theme="light"] .nav-link.active { background: rgba(42,108,184,.07); }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 05 — Grafi</div>
+    <div class="sub">PDF 01 · Rappresentazione e algoritmi base</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Teoria</div>
+    <a class="nav-link" href="#s1">1. Definizioni G = (V, E)</a>
+    <a class="nav-link" href="#s2">2. Lista di adiacenza</a>
+    <a class="nav-link sub" href="#s2-ops">Complessità operazioni</a>
+    <a class="nav-link" href="#s3">3. Matrice di adiacenza</a>
+    <a class="nav-link" href="#s4">4. Spazio e scelta</a>
+    <a class="nav-link" href="#s5">5. BFS</a>
+    <a class="nav-link sub" href="#s5-bfs">Pseudocodice e albero</a>
+    <a class="nav-link" href="#s6">6. DFS</a>
+    <a class="nav-link sub" href="#s6-dfs">Timestamp d/f</a>
+    <a class="nav-link" href="#s7">7. Ordinamento topologico</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#sim-bfs">Simulatore BFS passo-passo</a>
+    <div class="nav-label">Verifica</div>
+    <a class="nav-link" href="#quiz">Quiz (8 domande)</a>
+    <a class="nav-link" href="#ex">6 esercizi guidati</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Grafi</span><br>— Rappresentazione e algoritmi base</h1>
+  <p>Appunti didattici completi — Antonio Carzaniga (USI, 20 aprile 2026). Dalle definizioni alle due rappresentazioni classiche, fino a BFS, DFS e ordinamento topologico su DAG.</p>
+  <div class="hero-tags">
+    <span class="tag g">Θ(|V|+|E|) BFS/DFS</span>
+    <span class="tag g">Lista vs matrice</span>
+    <span class="tag t">Albero BFS · foresta DFS</span>
+    <span class="tag b">Topological-Sort</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — cosa impari qui</div>
+  Un <strong>grafo</strong> <code>G = (V, E)</code> modella relazioni tra entità: cantoni confinanti, social network, dipendenze software. In memoria si sceglie tra <strong>lista di adiacenza</strong> (<span class="cx cx-log">Θ(|V|+|E|)</span> spazio, ottima per grafi <em>sparsi</em>) e <strong>matrice di adiacenza</strong> (<span class="cx cx-n">Θ(|V|²)</span>, ottima per accesso casuale agli archi). <strong>BFS</strong> esplora a strati con una coda, calcola distanze e costruisce un albero BFS in <span class="cx cx-log">O(|V|+|E|)</span>. <strong>DFS</strong> segue il ramo più profondo e fa backtrack, producendo una foresta DFS con timestamp <code>d[]</code> e <code>f[]</code>. Su un <strong>DAG</strong>, l'<strong>ordinamento topologico</strong> si ottiene con DFS + output in ordine decrescente di <code>f[]</code>.
+</div>
+
+<!-- ═══ 1. DEFINIZIONI ═══ -->
+<section id="s1">
+<h2><span class="num">01</span>Definizioni — G = (V, E)</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — grafo</div>
+  Un <strong>grafo</strong> è una coppia <code>G = (V, E)</code> dove:
+  <ul>
+    <li><code>V</code> — insieme dei <strong>vertici</strong> (nodi)</li>
+    <li><code>E</code> — insieme degli <strong>archi</strong>; <code>E ⊆ V × V</code>, cioè <code>E</code> è una relazione su <code>V</code></li>
+    <li>Un arco <code>e = (u, v)</code> è una coppia ordinata di vertici <code>u, v ∈ V</code></li>
+  </ul>
+</div>
+
+<h3>Orientato vs non orientato</h3>
+<div class="grid2">
+  <div>
+    <h4>Grafo orientato (diretto)</h4>
+    <p>Gli archi sono <strong>coppie ordinate</strong> <code>(u, v)</code>: l'arco va da <code>u</code> a <code>v</code>. Es.: dipendenze tra pacchetti software (<code>xserver-xorg → libc6</code>).</p>
+  </div>
+  <div>
+    <h4>Grafo non orientato</h4>
+    <p>La relazione è <strong>simmetrica</strong>: un arco è un insieme <code>{u, v}</code>. Se <code>u</code> è adiacente a <code>v</code>, anche <code>v</code> è adiacente a <code>u</code>. Es.: confini tra cantoni svizzeri.</p>
+  </div>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Applicazioni (slide Carzaniga / Spielman)</div>
+  <ul>
+    <li><strong>Social network</strong> — chi conosce chi</li>
+    <li><strong>Web graph</strong> — quale pagina linka quale</li>
+    <li><strong>Internet graph</strong> — router e collegamenti</li>
+    <li><strong>Citation graph</strong> — chi cita chi</li>
+    <li><strong>Grafi planari</strong> — cantoni CH confinanti (GE, VS, TI, VD, …)</li>
+    <li><strong>Mesh geometriche</strong>, <strong>grafi geometrici</strong>, <strong>grafi casuali</strong></li>
+  </ul>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Esempio cantoni svizzeri</div>
+  Le prime slide mostrano i 26 cantoni come vertici e i confini come archi — un grafo <strong>planare</strong> non orientato. Lo stesso formalismo modella reti sociali, il Web e le dipendenze APT.
+</div>
+
+<h3>Notazione e misure</h3>
+<div class="tbl-wrap">
+<table>
+<tr><th>Concetto</th><th>Definizione</th><th>Esempio (12 nodi)</th></tr>
+<tr><td><strong>Grado</strong> <code>deg(u)</code></td><td>Numero di vicini di <code>u</code> (archi incidenti)</td><td><code>deg(7) = 3</code>, <code>deg(10) = 0</code></td></tr>
+<tr><td><strong>Cammino</strong></td><td>Sequenza di vertici consecutivi collegati da archi</td><td>1 → 5 → 9 → 10</td></tr>
+<tr><td><strong>Distanza</strong></td><td>Lunghezza del cammino minimo (numero di archi)</td><td><code>dist(1, 10) = 3</code> in BFS</td></tr>
+<tr><td><strong>Grafo connesso</strong></td><td>Cammino tra ogni coppia di vertici</td><td>Il grafo esempio è connesso</td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Altri esempi delle slide</div>
+  <strong>Tennis scoring</strong> — ogni stato del game (0/0, 15/0, deuce, advantage A/B, …) è un vertice; una transizione «vince il punto» è un arco orientato. Il grafo modella tutte le sequenze possibili di punteggio, non i confini geografici.<br>
+  <strong>Dipendenze Debian/APT</strong> — pacchetti come vertici, dipendenze come archi orientati verso le librerie richieste (<code>libx11-6 → libc6</code>). Stesso formalismo <code>G = (V, E)</code>, applicazioni diverse.
+</div>
+</section>
+
+<!-- ═══ 2. LISTA ADIACENZA ═══ -->
+<section id="s2">
+<h2><span class="num">02</span>Lista di adiacenza — Adj[u]</h2>
+
+<p>Per <code>V = {1, 2, …, |V|}</code>, il grafo è un array <code>Adj</code> dove ogni vertice <code>u</code> ha una <strong>lista di adiacenza</strong> <code>Adj[u]</code>: l'elenco di tutti i <code>v</code> tali che <code>(u, v) ∈ E</code>.</p>
+
+<div class="box box-def">
+  <div class="box-label">Grafo esempio — 12 nodi (slide)</div>
+  <pre style="border-left-color:var(--blue);margin:8px 0">Adj[1]  = 5, 6
+Adj[2]  = 3, 7
+Adj[3]  = 4, 7
+Adj[4]  = 7
+Adj[5]  = 9
+Adj[6]  = 2, 7, 9
+Adj[7]  = 8, 10, 11
+Adj[8]  = 11, 12
+Adj[9]  = 10
+Adj[10] = ∅
+Adj[11] = 12
+Adj[12] = ∅</pre>
+  Layout griglia: riga 1 → <code>1 2 3 4</code>, riga 2 → <code>5 6 7 8</code>, riga 3 → <code>9 10 11 12</code>. Grafo non orientato con <code>|V| = 12</code>, <code>|E| = 9</code> archi (18 entry nelle liste).
+</div>
+
+<h3 id="s2-ops">Complessità delle operazioni</h3>
+<div class="tbl-wrap">
+<table>
+<tr><th>Operazione</th><th>Complessità</th><th>Valutazione</th></tr>
+<tr><td>Accesso al vertice <code>u</code> (puntatore <code>Adj[u]</code>)</td><td class="mark"><span class="cx cx-1">O(1)</span></td><td class="good">ottimale</td></tr>
+<tr><td>Scansione di tutti i vertici <code>V</code></td><td class="mark"><span class="cx cx-log">Θ(|V|)</span></td><td class="good">ottimale</td></tr>
+<tr><td>Scansione di tutti gli archi <code>E</code></td><td class="mark"><span class="cx cx-log">Θ(|V|+|E|)</span></td><td>okay (non ottimale in senso stretto, ma standard)</td></tr>
+<tr><td>Verifica <code>(u,v) ∈ E</code></td><td class="mark"><span class="cx cx-n">O(deg(u))</span></td><td class="bad">cattivo — scan lineare della lista; worst case <span class="cx cx-n">O(|V|)</span></td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Perché il check arco è «bad»</div>
+  Per sapere se esiste l'arco <code>(u, v)</code> bisogna scorrere <code>Adj[u]</code> fino a trovare <code>v</code> — tempo proporzionale al <strong>grado</strong> di <code>u</code>. Su grafi densi o con query frequenti «esiste arco?» conviene la matrice.
+</div>
+
+<h3>Iterazione sugli archi con Adj</h3>
+<p>Per scorrere tutti gli archi si visita ogni vertice <code>u</code> e si itera su <code>Adj[u]</code>:</p>
+<pre><span class="kw">for each</span> u ∈ V
+    <span class="kw">for each</span> v ∈ Adj[u]
+        process edge (u, v)    <span class="cm">← in grafo non orientato ogni arco appare 2 volte</span></pre>
+<p>Costo totale: somma dei gradi = <span class="cx cx-log">Θ(|E|)</span> per grafo orientato, <span class="cx cx-log">Θ(2|E|) = Θ(|E|)</span> per non orientato. Più <span class="cx cx-log">Θ(|V|)</span> per il ciclo esterno → <span class="cx cx-log">Θ(|V|+|E|)</span>.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — espansione da u = 6</div>
+  <code>Adj[6] = {2, 7, 9}</code>. Per BFS/DFS da 6 si esaminano questi tre vicini in ordine di lista. L'ordine influenza l'albero BFS/DFS ma non la complessità.
+</div>
+</section>
+
+<!-- ═══ 3. MATRICE ═══ -->
+<section id="s3">
+<h2><span class="num">03</span>Matrice di adiacenza</h2>
+
+<p>Il grafo è una matrice <code>A</code> di dimensione <code>|V| × |V|</code> con <code>a<sub>ij</sub> = 1</code> se <code>(i, j) ∈ E</code>, altrimenti <code>0</code>.</p>
+
+<div class="box box-def">
+  <div class="box-label">Esempio — righe 1, 6, 7 della matrice A</div>
+  <pre style="border-left-color:var(--blue);margin:8px 0;font-size:11px">     1 2 3 4 5 6 7 8 9 10 11 12
+ 1 [ 0 0 0 0 1 1 0 0 0  0  0  0 ]
+ 6 [ 0 1 0 0 0 0 1 0 1  0  0  0 ]
+ 7 [ 0 0 0 0 0 0 0 1 0  1  1  0 ]</pre>
+  <code>A[i][j] = 1</code> ⟺ arco <code>{i,j}</code> presente. Matrice <strong>simmetrica</strong> per grafi non orientati. Totale: 18 celle con <code>1</code> (9 archi × 2) su <code>12² = 144</code> celle.
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Operazione</th><th>Lista</th><th>Matrice</th></tr>
+<tr><td>Accesso vertice <code>u</code></td><td><span class="cx cx-1">O(1)</span></td><td><span class="cx cx-1">O(1)</span></td></tr>
+<tr><td>Scansione <code>V</code></td><td><span class="cx cx-log">Θ(|V|)</span></td><td><span class="cx cx-log">Θ(|V|)</span></td></tr>
+<tr><td>Scansione <code>E</code></td><td><span class="cx cx-log">Θ(|V|+|E|)</span></td><td class="bad"><span class="cx cx-n">Θ(|V|²)</span> — possibilmente molto cattivo</td></tr>
+<tr><td>Check <code>(u,v) ∈ E</code></td><td class="bad"><span class="cx cx-n">O(deg(u))</span></td><td class="good"><span class="cx cx-1">O(1)</span> — ottimale</td></tr>
+</table>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Trade-off chiave</div>
+  La matrice eccelle quando servono <strong>accessi casuali agli archi</strong> in tempo costante; paga <span class="cx cx-n">Θ(|V|²)</span> spazio e per iterare tutti gli archi deve scorrere tutta la matrice.
+</div>
+</section>
+
+<!-- ═══ 4. SPAZIO ═══ -->
+<section id="s4">
+<h2><span class="num">04</span>Complessità spaziale — quale rappresentazione?</h2>
+
+<div class="grid2">
+  <div class="box box-thm" style="margin:0">
+    <div class="box-label">Lista di adiacenza</div>
+    Spazio: <span class="cx cx-log">Θ(|V|+|E|)</span> — <strong class="good">ottimale</strong>.<br>
+    Preferibile per grafi <strong>sparsi</strong> (grado basso, <code>|E| ≪ |V|²</code>).
+  </div>
+  <div class="box box-warn" style="margin:0">
+    <div class="box-label">Matrice di adiacenza</div>
+    Spazio: <span class="cx cx-n">Θ(|V|²)</span> — <strong class="bad">possibilmente molto cattivo</strong>.<br>
+    Preferibile per grafi <strong>densi</strong> e algoritmi con molte query «arco?».
+  </div>
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Rappresentazione</th><th>Pro</th><th>Contro</th><th>Quando usarla</th></tr>
+<tr><td><strong>Lista</strong></td><td>Spazio ottimale; BFS/DFS naturali</td><td>Check arco lento</td><td>Grafi sparsi, reti reali, Web</td></tr>
+<tr><td><strong>Matrice</strong></td><td>Check arco <span class="cx cx-1">O(1)</span></td><td>Spazio e scan archi costosi</td><td>Grafi densi, Floyd-Warshall, closure</td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Quando la matrice è «very bad»?</div>
+  Quando <code>|E| = O(|V|)</code> (grafo sparso): si allocano <code>|V|²</code> celle per memorizzare pochi archi. Esempio: grafo dei cantoni CH (<code>|V| = 26</code>, <code>|E| ≈ 60</code>) — lista <span class="cx cx-log">Θ(86)</span> vs matrice <span class="cx cx-n">Θ(676)</span>.
+</div>
+
+<div class="grid2">
+  <div class="box box-tip" style="margin:0">
+    <div class="box-label">Lista — quando preferirla (slide)</div>
+    <ul>
+      <li>In generale <strong>buona</strong>, soprattutto per spazio <span class="cx cx-log">Θ(|V|+|E|)</span> ottimale</li>
+      <li><strong>Cattiva</strong> per grafi densi e algoritmi che richiedono accesso casuale agli archi</li>
+      <li>Preferibile per grafi <strong>sparsi</strong> o a grado basso</li>
+    </ul>
+  </div>
+  <div class="box box-warn" style="margin:0">
+    <div class="box-label">Matrice — quando preferirla (slide)</div>
+    <ul>
+      <li>Spazio <span class="cx cx-n">Θ(|V|²)</span> — possibilmente molto cattivo</li>
+      <li><strong>Buona</strong> per algoritmi con accesso casuale agli archi (<span class="cx cx-1">O(1)</span>)</li>
+      <li>Preferibile per grafi <strong>densi</strong></li>
+    </ul>
+  </div>
+</div>
+
+<h3>Regola pratica (slide)</h3>
+<ol class="steps">
+  <li><strong>Grafo sparso</strong> (<code>|E| ≈ O(|V|)</code>) → lista di adiacenza. BFS, DFS, Dijkstra con heap usano le liste.</li>
+  <li><strong>Grafo denso</strong> (<code>|E| ≈ O(|V|²)</code>) → matrice può essere competitiva: spazio simile, check arco veloce.</li>
+  <li><strong>Molte query «(u,v) ∈ E?»</strong> → matrice o struttura hash degli archi.</li>
+  <li><strong>Algoritmi che iterano tutti gli archi</strong> → lista vince su grafi sparsi (<span class="cx cx-log">Θ(|V|+|E|)</span> vs <span class="cx cx-n">Θ(|V|²)</span>).</li>
+</ol>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>|V|</th><th>|E| (sparso)</th><th>Lista</th><th>Matrice</th><th>Vincitore spazio</th></tr>
+<tr><td>12</td><td>9</td><td>21</td><td>144</td><td class="good">Lista</td></tr>
+<tr><td>1 000</td><td>3 000</td><td>4 000</td><td>1 000 000</td><td class="good">Lista</td></tr>
+<tr><td>1 000</td><td>500 000</td><td>501 000</td><td>1 000 000</td><td>Lista (ancora)</td></tr>
+<tr><td>1 000</td><td>900 000</td><td>901 000</td><td>1 000 000</td><td>Matrice (quasi denso)</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ═══ 5. BFS ═══ -->
+<section id="s5">
+<h2><span class="num">05</span>Breadth-First Search (BFS)</h2>
+
+<p>Algoritmo fondamentale: esplora il grafo a <strong>strati</strong> di distanza crescente dalla sorgente <code>s</code>.</p>
+
+<div class="box box-def">
+  <div class="box-label">Input e output</div>
+  <strong>Input:</strong> grafo <code>G = (V, E)</code> e vertice sorgente <code>s ∈ V</code>.<br>
+  <strong>Effetti:</strong>
+  <ul>
+    <li>Visita tutti i vertici raggiungibili da <code>s</code></li>
+    <li>Calcola la <strong>distanza</strong> (in numero di archi) <code>d[v]</code> da <code>s</code></li>
+    <li>Costruisce un <strong>albero BFS</strong> tramite i predecessori <code>π[v]</code></li>
+    <li>Funziona su grafi orientati e non orientati</li>
+  </ul>
+</div>
+
+<h3>Colori e strutture dati</h3>
+<div class="grid2">
+  <div>
+    <ul>
+      <li><strong>WHITE</strong> — non ancora scoperto</li>
+      <li><strong>GRAY</strong> — scoperto, in coda, adiacenze non ancora esaminate</li>
+      <li><strong>BLACK</strong> — completamente processato</li>
+    </ul>
+  </div>
+  <div>
+    <ul>
+      <li><strong>Coda Q</strong> — FIFO; i vertici grigi attendono di essere espansi</li>
+      <li><code>d[u]</code> — distanza da <code>s</code> (numero di archi)</li>
+      <li><code>π[u]</code> — predecessore di <code>u</code> nell'albero BFS</li>
+    </ul>
+  </div>
+</div>
+
+<p>Le slide enfatizzano il ruolo della <strong>coda</strong>: il primo vertice entrato è il primo espanso (FIFO). Questo garantisce che tutti i vertici a distanza <code>k</code> vengano processati prima di quelli a distanza <code>k+1</code>.</p>
+
+<h3 id="s5-bfs">Pseudocodice completo</h3>
+<pre><span class="fn">BFS</span>(G, s)
+<span class="kw">for each</span> vertex u ∈ V(G) \ {s}
+    color[u] = WHITE
+    d[u] = ∞
+    π[u] = NIL
+color[s] = GRAY
+d[s] = 0
+π[s] = NIL
+Q = ∅
+<span class="fn">ENQUEUE</span>(Q, s)
+<span class="kw">while</span> Q ≠ ∅
+    u = <span class="fn">DEQUEUE</span>(Q)
+    <span class="kw">for each</span> v ∈ Adj[u]
+        <span class="kw">if</span> color[v] = WHITE
+            color[v] = GRAY
+            d[v] = d[u] + 1
+            π[v] = u
+            <span class="fn">ENQUEUE</span>(Q, v)
+    color[u] = BLACK</pre>
+
+<div class="box box-ex">
+  <div class="box-label">BFS(G, 1) sul grafo a 12 nodi</div>
+  Ordine di dequeue: <code>1, 5, 6, 9, 2, 7, 10, 3, 8, 11, 4, 12</code>.<br>
+  Strati: <code>d=0:</code> {1} · <code>d=1:</code> {5,6} · <code>d=2:</code> {9,2,7} · <code>d=3:</code> {10,3,8,11} · <code>d=4:</code> {4,12}.<br>
+  Archi albero BFS: 1→5, 1→6, 5→9, 6→2, 6→7, 9→10, 2→3, 7→8, 7→11, 8→12, 3→4.
+</div>
+
+<h3>Evoluzione della coda Q — traccia slide (pag. 81–103)</h3>
+<p>Ogni riga mostra il vertice <code>u</code> estratto con <code>DEQUEUE</code> e lo stato di <code>Q</code> <em>dopo</em> aver processato i vicini bianchi di <code>u</code> (prima di colorare <code>u</code> in BLACK).</p>
+<div class="tbl-wrap">
+<table>
+<tr><th>Passo</th><th>u = DEQUEUE</th><th>Nuovi GRAY (enqueue)</th><th>Q dopo il passo</th></tr>
+<tr><td>init</td><td>—</td><td>1 (sorgente)</td><td>{1}</td></tr>
+<tr><td>1</td><td>1</td><td>5, 6</td><td>{5, 6}</td></tr>
+<tr><td>2</td><td>5</td><td>9</td><td>{6, 9}</td></tr>
+<tr><td>3</td><td>6</td><td>2, 7</td><td>{9, 2, 7}</td></tr>
+<tr><td>4</td><td>9</td><td>10</td><td>{2, 7, 10}</td></tr>
+<tr><td>5</td><td>2</td><td>3</td><td>{7, 10, 3}</td></tr>
+<tr><td>6</td><td>7</td><td>8, 11</td><td>{10, 3, 8, 11}</td></tr>
+<tr><td>7</td><td>10</td><td>—</td><td>{3, 8, 11}</td></tr>
+<tr><td>8</td><td>3</td><td>4</td><td>{8, 11, 4}</td></tr>
+<tr><td>9</td><td>8</td><td>12</td><td>{11, 4, 12}</td></tr>
+<tr><td>10</td><td>11</td><td>—</td><td>{4, 12}</td></tr>
+<tr><td>11</td><td>4</td><td>—</td><td>{12}</td></tr>
+<tr><td>12</td><td>12</td><td>—</td><td>∅</td></tr>
+</table>
+</div>
+<p>L'ordine in coda dipende dall'ordine in <code>Adj[u]</code>: da 6 si visitano prima 2 poi 7, quindi 2 esce prima di 7 al dequeue.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità — O(|V| + |E|)</div>
+  <p>Argomento delle slide (righe 106–109):</p>
+  <ol>
+    <li>Si mette in coda un vertice solo se è WHITE → si colora subito GRAY → <strong>al massimo un enqueue per vertice</strong>.</li>
+    <li>Il ciclo <code>while</code> (dequeue) esegue <span class="cx cx-log">O(|V|)</span> iterazioni.</li>
+    <li>Per ogni <code>u</code>, il ciclo su <code>Adj[u]</code> costa <span class="cx cx-log">Θ(|E<sub>u</sub>|)</span>; sommato su tutti i <code>u</code>: <span class="cx cx-log">O(|E|)</span>.</li>
+    <li>Inizializzazione: <span class="cx cx-log">O(|V|)</span>. Totale: <span class="cx cx-log">O(|V| + |E|)</span>.</li>
+  </ol>
+</div>
+
+<h3>Proprietà dell'albero BFS</h3>
+<div class="box box-thm">
+  <div class="box-label">Lemma — distanze e cammini minimi (non pesati)</div>
+  Su grafi <strong>non pesati</strong> (ogni arco costa 1), BFS calcola la <strong>distanza minima</strong> in numero di archi da <code>s</code> a ogni vertice raggiungibile. L'albero BFS (archi <code>(π[v], v)</code>) contiene un <strong>cammino minimo</strong> da <code>s</code> a ogni <code>v</code>.
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>v</th><th>d[v]</th><th>π[v]</th><th>Cammino minimo da 1</th></tr>
+<tr><td>1</td><td>0</td><td>NIL</td><td>1</td></tr>
+<tr><td>5</td><td>1</td><td>1</td><td>1 → 5</td></tr>
+<tr><td>6</td><td>1</td><td>1</td><td>1 → 6</td></tr>
+<tr><td>9</td><td>2</td><td>5</td><td>1 → 5 → 9</td></tr>
+<tr><td>7</td><td>2</td><td>6</td><td>1 → 6 → 7</td></tr>
+<tr><td>10</td><td>3</td><td>9</td><td>1 → 5 → 9 → 10</td></tr>
+<tr><td>12</td><td>4</td><td>8</td><td>1 → 6 → 7 → 8 → 12</td></tr>
+</table>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Invariante dei colori</div>
+  <ul>
+    <li>WHITE — mai scoperto</li>
+    <li>GRAY — scoperto, in coda, discendenti bianchi possibili</li>
+    <li>BLACK — tutti i vicini esaminati</li>
+  </ul>
+  Quando <code>u</code> diventa BLACK, tutti i vertici a distanza <code>d[u]+1</code> sono già GRAY o BLACK — questo garantisce l'ordine per strati.
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Implementazione pratica della coda</div>
+  <code>ENQUEUE</code> / <code>DEQUEUE</code> con array circolare o <code>std::deque</code> costano <span class="cx cx-1">O(1)</span> ammortizzato. Evitare <code>shift</code> su array lineare (<span class="cx cx-n">O(|V|)</span> per dequeue) che degraderebbe BFS a <span class="cx cx-n">O(|V|²)</span>.
+</div>
+</section>
+
+<!-- ═══ 6. DFS ═══ -->
+<section id="s6">
+<h2><span class="num">06</span>Depth-First Search (DFS)</h2>
+
+<div class="box box-def">
+  <div class="box-label">Idea — backtrack</div>
+  Segui subito i link del vertice appena visitato (il più recente). Quando non ci sono più vicini <strong>bianchi</strong>, fai <strong>backtrack</strong> al vertice precedente. Esplora in profondità prima di tornare indietro.
+</div>
+
+<p><strong>Input:</strong> <code>G = (V, E)</code> — visita tutti i vertici (anche non connessi, tramite ciclo esterno). Produce una <strong>foresta DFS</strong>: insieme di alberi DFS radicati nei vertici da cui parte una nuova chiamata.</p>
+
+<h3 id="s6-dfs">Pseudocodice e timestamp</h3>
+<pre><span class="fn">DFS</span>(G)
+<span class="kw">for each</span> vertex u ∈ V(G)
+    color[u] = WHITE
+    π[u] = NIL
+time = 0
+<span class="kw">for each</span> vertex u ∈ V(G)
+    <span class="kw">if</span> color[u] = WHITE
+        <span class="fn">DFS-VISIT</span>(u)
+
+<span class="fn">DFS-VISIT</span>(u)
+color[u] = GRAY
+time = time + 1
+d[u] = time
+<span class="kw">for each</span> v ∈ Adj[u]
+    <span class="kw">if</span> color[v] = WHITE
+        π[v] = u
+        <span class="fn">DFS-VISIT</span>(v)
+color[u] = BLACK
+time = time + 1
+f[u] = time</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Timestamp d[] e f[]</div>
+  <ul>
+    <li><code>time</code> — variabile <strong>globale</strong> incrementata a ogni scoperta e chiusura</li>
+    <li><code>d[u]</code> — tempo di <strong>scoperta</strong> (prima visita a <code>u</code>, riga 3 di DFS-VISIT)</li>
+    <li><code>f[u]</code> — tempo di <strong>chiusura</strong> (dopo aver esaminato tutti i discendenti, prima del backtrack, riga 10)</li>
+    <li>Intervallo <code>[d[u], f[u]]</code> descrive il sottoalbero DFS radicato in <code>u</code></li>
+  </ul>
+  In DFS, <strong>GRAY</strong> significa «scoperto, esplorazione in corso» (non «in coda» come in BFS).
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità — Θ(|V| + |E|)</div>
+  <p>Argomento delle slide (righe 117–119):</p>
+  <ol>
+    <li><code>DFS-VISIT(u)</code> viene invocato solo se <code>color[u] = WHITE</code>, poi subito <code>GRAY</code> → <strong>una visita per vertice</strong>.</li>
+    <li>Il ciclo <code>for each v ∈ Adj[u]</code> (righe 4–7) costa <span class="cx cx-log">Θ(|E<sub>u</sub>|)</span>; sommato: <span class="cx cx-log">Θ(|E|)</span>.</li>
+    <li>Il ciclo esterno in <code>DFS(G)</code> aggiunge <span class="cx cx-log">O(|V|)</span> per avviare DFS su componenti disconnesse.</li>
+    <li>Totale: <span class="cx cx-log">Θ(|V| + |E|)</span> — stesso ordine di grandezza di BFS.</li>
+  </ol>
+</div>
+
+<h3>Foresta DFS e ciclo esterno</h3>
+<p>Se il grafo non è connesso, il ciclo <code>for each u</code> in <code>DFS(G)</code> avvia una nuova DFS da ogni vertice bianco — si ottiene una <strong>foresta DFS</strong> con più alberi. Su grafi orientati, la foresta dipende dall'ordine dei vertici nel ciclo esterno.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Confronto BFS vs DFS (stesso grafo, sorgente 1)</div>
+  <strong>BFS</strong> — espansione a strati; usa coda; <code>d[v]</code> = distanza da <code>s</code>.<br>
+  <strong>DFS</strong> — espansione in profondità; usa stack/ricorsione; <code>d[v], f[v]</code> = timestamp di scoperta/chiusura. DFS non calcola distanze minime, ma è la base per topological sort, componenti fortemente connesse, rilevamento cicli.
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Proprietà parentesi (intuizione)</div>
+  Per due vertici <code>u, v</code> nella stessa DFS, gli intervalli <code>[d[u], f[u]]</code> e <code>[d[v], f[v]]</code> sono o <strong>disgiunti</strong> o uno <strong>contiene</strong> l'altro — mai parzialmente sovrapposti. Il figlio ha intervallo strettamente contenuto nel padre.
+</div>
+</section>
+
+<!-- ═══ 7. TOPOLOGICAL SORT ═══ -->
+<section id="s7">
+<h2><span class="num">07</span>Ordinamento topologico</h2>
+
+<div class="box box-def">
+  <div class="box-label">Problema — DAG</div>
+  Dato un grafo <strong>orientato aciclico</strong> (DAG), trovare un <strong>ordinamento lineare</strong> dei vertici tale che ogni arco <code>(u, v)</code> vada da <code>u</code> prima di <code>v</code> nell'ordine (solo <em>forward links</em>).
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — vestirsi (slide)</div>
+  DAG con nodi: socks, shoes, pants, belt, shirt, tie, jacket, watch, briefs. Dipendenze tipiche (archi orientati «prima → dopo»):
+</div>
+<div class="tbl-wrap">
+<table>
+<tr><th>Arco (dipendenza)</th><th>Significato</th></tr>
+<tr><td>socks → shoes</td><td>Calzini prima delle scarpe</td></tr>
+<tr><td>pants → belt, pants → shoes</td><td>Pantaloni prima di cintura e scarpe</td></tr>
+<tr><td>shirt → belt, shirt → tie</td><td>Camicia prima di cintura e cravatta</td></tr>
+<tr><td>tie → jacket, belt → jacket</td><td>Cravatta e cintura prima del giacca</td></tr>
+</table>
+</div>
+<p><code>watch</code> e <code>briefs</code> sono indipendenti nelle slide — possono comparire in qualsiasi punto compatibile dell'ordine.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — pacchetti software</div>
+  Grafo delle dipendenze APT: ogni pacchetto dipende da altri (<code>libx11-6 → libc6</code>). L'ordinamento topologico dà un ordine di <strong>installazione</strong> valido.
+</div>
+
+<pre><span class="fn">Topological-Sort</span>(G)
+<span class="fn">DFS</span>(G)
+output V ordinati per <span class="hl">f[·] decrescente</span>   <span class="cm">← stampa in ordine inverso di chiusura</span></pre>
+
+<div class="box box-thm">
+  <div class="box-label">Correttezza (intuizione)</div>
+  Se <code>(u, v)</code> è un arco, <code>v</code> viene scoperto e chiuso <em>dopo</em> <code>u</code> nella DFS → <code>f[v] > f[u]</code>. Ordinando per <code>f</code> decrescente, <code>u</code> precede <code>v</code>. Funziona solo su <strong>DAG</strong>: in un grafo con cicli non esiste ordinamento topologico.
+</div>
+
+<h3>Procedura completa</h3>
+<pre><span class="fn">Topological-Sort</span>(G)
+<span class="fn">DFS</span>(G)                              <span class="cm">← calcola d[·] e f[·] per ogni vertice</span>
+<span class="kw">for each</span> vertex u ∈ V sort by f[u] <span class="kw">descending</span>
+    print u</pre>
+
+<div class="box box-warn">
+  <div class="box-label">DAG obbligatorio</div>
+  Se il grafo ha un ciclo orientato, nessun ordinamento lineare soddisfa tutti gli archi. La DFS su grafi con cicli produce comunque <code>f[]</code>, ma l'ordine decrescente <strong>non</strong> è un ordinamento topologico valido.
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Alternativa — Kahn (non nelle slide)</div>
+  Un altro approccio classico: ripetutamente rimuovere vertici con <strong>in-degree 0</strong> e decrementare i vicini. Anche Kahn è <span class="cx cx-log">O(|V|+|E|)</span>. Le slide usano DFS + <code>f[]</code> decrescente perché riusa codice già scritto.
+</div>
+</section>
+
+<hr class="part">
+<p class="part-label">Parte interattiva</p>
+
+<!-- ═══ SIMULATORE BFS ═══ -->
+<section id="sim-bfs">
+<h2>Simulatore — BFS passo-passo</h2>
+
+<div class="interactive-panel">
+  <h4>Grafo a 12 nodi — BFS(G, 1) come nelle slide</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Grigio = in coda · Verde scuro = processato (BLACK) · Arancione = vertice corrente · Linee blu = albero BFS (π). Usa «Avanti» o «Play».</p>
+  <div class="color-legend">
+    <span class="cl-white">WHITE</span>
+    <span class="cl-gray">GRAY (in coda)</span>
+    <span class="cl-black">BLACK</span>
+    <span class="cl-cur">Corrente (dequeue)</span>
+  </div>
+  <svg id="graphSvg" viewBox="0 0 640 380"></svg>
+  <div class="state-grid">
+    <div class="state-box"><strong>Coda Q</strong><span id="bfsQueue">—</span></div>
+    <div class="state-box"><strong>Vertice u (dequeue)</strong><span id="bfsCurrent">—</span></div>
+    <div class="state-box"><strong>Distanze d[]</strong><span id="bfsDist">—</span></div>
+    <div class="state-box"><strong>Passo</strong><span id="bfsStep">0 / 0</span></div>
+  </div>
+  <div class="btn-row" style="justify-content:center;margin-top:16px">
+    <button class="primary" id="bfsPlay">▶ Play</button>
+    <button id="bfsNext">Avanti ▶</button>
+    <button id="bfsPrev">◀ Indietro</button>
+    <button id="bfsReset">↺ Reset</button>
+  </div>
+  <div class="log-area" id="bfsLog">Pronto — BFS(G, 1).</div>
+  <h4 style="margin-top:20px">Strati BFS (distanza da s = 1)</h4>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th>d</th><th>Vertici</th><th>Colore layer (simulatore)</th></tr>
+  <tr><td>0</td><td>{1}</td><td>Radice — d=0 sotto il nodo</td></tr>
+  <tr><td>1</td><td>{5, 6}</td><td>Vicini diretti di 1</td></tr>
+  <tr><td>2</td><td>{9, 2, 7}</td><td>Scoperti da 5 o 6</td></tr>
+  <tr><td>3</td><td>{10, 3, 8, 11}</td><td>Terzo strato</td></tr>
+  <tr><td>4</td><td>{4, 12}</td><td>Foglie più lontane da 1</td></tr>
+  </table>
+  </div>
+  <p style="font-size:13px;color:var(--text-dim)">Le etichette <code>d=…</code> sotto ogni nodo mostrano lo strato corrente. Gli archi blu evidenziano l'albero BFS costruito da <code>π[]</code>.</p>
+</div>
+</section>
+
+<div class="box box-breve" style="margin-top:32px">
+  <div class="box-label">Riepilogo — cosa portare all'esame</div>
+  <div class="grid2" style="margin:0">
+    <ul>
+      <li><code>G=(V,E)</code> — orientato vs non orientato</li>
+      <li>Lista: spazio <span class="cx cx-log">Θ(|V|+|E|)</span>, scan E ok, check arco <span class="cx cx-n">O(deg)</span></li>
+      <li>Matrice: spazio <span class="cx cx-n">Θ(|V|²)</span>, scan E bad, check arco <span class="cx cx-1">O(1)</span></li>
+    </ul>
+    <ul>
+      <li>BFS: coda, WHITE/GRAY/BLACK, <code>d[]</code>, <code>π[]</code>, <span class="cx cx-log">O(|V|+|E|)</span></li>
+      <li>DFS: backtrack, <code>d[]</code>/<code>f[]</code>, foresta DFS, <span class="cx cx-log">Θ(|V|+|E|)</span></li>
+      <li>Topological-Sort: DAG + DFS + output <code>f[]</code> decrescente</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="part">
+<p class="part-label">Verifica</p>
+
+<!-- ═══ QUIZ ═══ -->
+<section id="quiz">
+<h2>Quiz — 8 domande Vero/Falso</h2>
+<div id="quizPanel"></div>
+<div class="quiz-score" id="quizScore">Rispondi alle 8 domande.</div>
+<button class="btn-reset" id="quizReset">↺ Ricomincia quiz</button>
+</section>
+
+<!-- ═══ ESERCIZI ═══ -->
+<section id="ex">
+<h2>6 esercizi con soluzioni</h2>
+
+<details>
+<summary><strong>Esercizio 1</strong> — Grado e archi <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Nel grafo a 12 nodi delle slide, quanti archi ha il grafo non orientato? Qual è il grado massimo?</p>
+  <p><strong>Soluzione:</strong> Somma dei gradi = 2| E |. Gradi: 1→2, 2→2, 3→2, 4→1, 5→1, 6→3, 7→3, 8→2, 9→1, 10→0, 11→1, 12→0 → somma 18 → <strong>|E| = 9</strong> archi non orientati (la lista conta ogni arco una volta per estremo, totale 18 entry). Grado massimo: <strong>3</strong> (nodi 6 e 7).</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 2</strong> — Check arco con lista <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Quanto costa verificare se l'arco (7, 11) esiste usando la lista di adiacenza? E con la matrice?</p>
+  <p><strong>Soluzione:</strong> Lista: scorrere <code>Adj[7] = {8, 10, 11}</code> — 3 confronti → <span class="cx cx-log">O(deg(7)) = O(3)</span>. Matrice: leggere <code>A[7][11]</code> → <span class="cx cx-1">O(1)</span>.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 3</strong> — BFS distanze da s=1 <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Esegui BFS(G, 1) mentalmente: quali vertici hanno <code>d[v] = 3</code>? Qual è il predecessore π[8]?</p>
+  <p><strong>Soluzione:</strong> <code>d=3</code>: vertici scoperti da 7 e 9 al terzo strato → <strong>{10, 3, 8, 11}</strong> (10 da 9, 3 da 2, 8 e 11 da 7). <code>π[8] = 7</code> (8 scoperto da 7 quando si espande il nodo 7).</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 4</strong> — Scelta rappresentazione <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Un grafo ha |V| = 10 000 e |E| = 15 000. Conviene lista o matrice per (a) BFS ripetuto, (b) 10⁶ query «esiste arco (u,v)?»?</p>
+  <p><strong>Soluzione:</strong> (a) <strong>Lista</strong> — BFS è <span class="cx cx-log">O(|V|+|E|)</span> e scorre le liste naturalmente; matrice non aiuta. (b) Dipende: lista costa <span class="cx cx-n">O(deg)</span> per query → fino a 10⁶ × 1.5 in media; matrice <span class="cx cx-1">O(1)</span> per query ma <span class="cx cx-n">10⁸</span> celle di spazio. Per molte query random su grafo sparso, spesso si usa <strong>lista + hash set degli archi</strong> o matrice sparsa; le slide privilegiano matrice se servono accessi casuali frequenti.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 5</strong> — Timestamp DFS <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Su un grafo a 4 nodi con archi 1→2, 1→3, 2→4, DFS parte da 1. Quali relazioni tra d[] e f[] valgono per ogni coppia padre-figlio?</p>
+  <p><strong>Soluzione:</strong> Ordine tipico: scoperta 1 (d=1), poi 2 (d=2), poi 4 (d=3), chiusura 4 (f=4), chiusura 2 (f=5), scoperta 3 (d=6), chiusura 3 (f=7), chiusura 1 (f=8). Per ogni arco albero: <strong>d[figlio] > d[padre]</strong> e <strong>f[figlio] < f[padre]</strong> (il figlio è chiuso prima del padre — «contenimento intervalli»).</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 6</strong> — Ordinamento topologico <span class="ex-diff avanzato">Avanzato</span></summary>
+<div class="sol-body">
+  <p>DAG vestirsi: socks→shoes, pants→belt, pants→shoes, shirt→belt, shirt→tie, tie→jacket, belt→jacket. Un DFS produce f[socks]=2, f[pants]=6, f[shirt]=10, f[shoes]=4, f[belt]=8, f[tie]=12, f[jacket]=14. Qual è l'ordinamento topologico?</p>
+  <p><strong>Soluzione:</strong> Output in ordine <strong>decrescente di f[]</strong>: jacket(14), tie(12), shirt(10), belt(8), pants(6), shoes(4), socks(2). Verifica: ogni dipendenza va da f più basso a f più alto → nell'ordine decrescente la dipendenza punta «avanti» nella lista. Un ordine valido: <code>socks, pants, shirt, shoes, belt, tie, jacket</code> (non unico).</p>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+/* ── NAV + TEMA ─────────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => navObs.observe(s));
+
+const themeBtn = document.getElementById('themeToggle');
+const saved = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', saved);
+themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  drawBfs();
+});
+
+/* ── GRAFO 12 NODI + BFS ────────────────────────── */
+const ADJ = {
+  1:[5,6], 2:[3,7], 3:[4,7], 4:[7], 5:[9], 6:[2,7,9],
+  7:[8,10,11], 8:[11,12], 9:[10], 10:[], 11:[12], 12:[]
+};
+const POS = {
+  1:[100,60], 2:[240,60], 3:[380,60], 4:[520,60],
+  5:[100,180], 6:[240,180], 7:[380,180], 8:[520,180],
+  9:[100,300], 10:[240,300], 11:[380,300], 12:[520,300]
+};
+
+function buildEdges() {
+  const edges = [], seen = new Set();
+  for (const u of Object.keys(ADJ)) {
+    for (const v of ADJ[u]) {
+      const key = u < v ? `${u}-${v}` : `${v}-${u}`;
+      if (!seen.has(key)) { seen.add(key); edges.push([+u, +v]); }
+    }
+  }
+  return edges;
+}
+const EDGES = buildEdges();
+
+function runBfs(source) {
+  const steps = [];
+  const color = {}, d = {}, pi = {};
+  for (let i = 1; i <= 12; i++) { color[i] = 'WHITE'; d[i] = Infinity; pi[i] = null; }
+  color[source] = 'GRAY'; d[source] = 0; pi[source] = null;
+  const Q = [source];
+  steps.push({ action: 'init', u: null, Q: [...Q], color: {...color}, d: {...d}, pi: {...pi}, msg: `Inizializzazione: s=${source}, ENQUEUE(${source})` });
+
+  while (Q.length) {
+    const u = Q.shift();
+    const enqueued = [];
+    for (const v of ADJ[u]) {
+      if (color[v] === 'WHITE') {
+        color[v] = 'GRAY'; d[v] = d[u] + 1; pi[v] = u;
+        Q.push(v); enqueued.push(v);
+      }
+    }
+    color[u] = 'BLACK';
+    const qStr = Q.length ? '{' + Q.join(', ') + '}' : '∅';
+    let msg = `DEQUEUE(${u}). `;
+    if (enqueued.length) msg += `Scoperti: ${enqueued.map(v => `${v} (d=${d[v]}, π=${u})`).join(', ')}. `;
+    else msg += `Nessun vicino bianco. `;
+    msg += `color[${u}] = BLACK. Q = ${qStr}`;
+    steps.push({ action: 'dequeue', u, Q: [...Q], color: {...color}, d: {...d}, pi: {...pi}, msg });
+  }
+  steps.push({ action: 'done', u: null, Q: [], color: {...color}, d: {...d}, pi: {...pi}, msg: 'BFS completata. Tutti i vertici raggiungibili visitati.' });
+  return steps;
+}
+
+const bfsSteps = runBfs(1);
+let bfsIdx = 0;
+let bfsTimer = null;
+
+function drawBfs() {
+  const svg = document.getElementById('graphSvg');
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const step = bfsSteps[bfsIdx];
+  const { color, d, pi, u, Q, msg } = step;
+
+  const treeEdges = [];
+  for (let v = 1; v <= 12; v++) if (pi[v] != null) treeEdges.push([pi[v], v]);
+
+  let html = '';
+  EDGES.forEach(([a, b]) => {
+    const isTree = treeEdges.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+    const p1 = POS[a], p2 = POS[b];
+    const dx = p2[0] - p1[0], dy = p2[1] - p1[1];
+    const len = Math.sqrt(dx*dx + dy*dy) || 1;
+    const r = 20;
+    const x1 = p1[0] + dx/len*r, y1 = p1[1] + dy/len*r;
+    const x2 = p2[0] - dx/len*r, y2 = p2[1] - dy/len*r;
+    html += `<line class="g-edge${isTree ? ' bfs-tree' : ''}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isTree ? accent : border}" />`;
+  });
+
+  for (let id = 1; id <= 12; id++) {
+    const [x, y] = POS[id];
+    let cls = 'g-node ' + (color[id] || 'WHITE').toLowerCase();
+    if (step.action === 'dequeue' && u === id) cls += ' current';
+    const dist = d[id] === Infinity ? '∞' : d[id];
+    html += `<g class="${cls}"><circle cx="${x}" cy="${y}" r="22"/>`;
+    html += `<text x="${x}" y="${y}">${id}</text>`;
+    if (d[id] !== Infinity) html += `<text class="layer-badge" x="${x}" y="${y+34}">d=${dist}</text>`;
+    html += `</g>`;
+  }
+  svg.innerHTML = html;
+
+  document.getElementById('bfsQueue').textContent = Q.length ? '{' + Q.join(', ') + '}' : '∅';
+  document.getElementById('bfsCurrent').textContent = u != null ? u : (step.action === 'init' ? '—' : '—');
+  const distStr = Array.from({length:12}, (_, i) => {
+    const v = i + 1;
+    return `${v}:${d[v] === Infinity ? '∞' : d[v]}`;
+  }).join('  ');
+  document.getElementById('bfsDist').textContent = distStr;
+  document.getElementById('bfsStep').textContent = `${bfsIdx} / ${bfsSteps.length - 1}`;
+  document.getElementById('bfsLog').textContent = msg;
+  document.getElementById('bfsPlay').textContent = bfsTimer ? '⏸ Pausa' : '▶ Play';
+}
+
+function stopBfs() { if (bfsTimer) { clearInterval(bfsTimer); bfsTimer = null; } }
+
+document.getElementById('bfsNext').onclick = () => { stopBfs(); if (bfsIdx < bfsSteps.length - 1) { bfsIdx++; drawBfs(); } };
+document.getElementById('bfsPrev').onclick = () => { stopBfs(); if (bfsIdx > 0) { bfsIdx--; drawBfs(); } };
+document.getElementById('bfsReset').onclick = () => { stopBfs(); bfsIdx = 0; drawBfs(); };
+document.getElementById('bfsPlay').onclick = () => {
+  if (bfsTimer) { stopBfs(); drawBfs(); return; }
+  document.getElementById('bfsPlay').textContent = '⏸ Pausa';
+  bfsTimer = setInterval(() => {
+    if (bfsIdx >= bfsSteps.length - 1) { stopBfs(); drawBfs(); return; }
+    bfsIdx++; drawBfs();
+  }, 1200);
+};
+drawBfs();
+
+/* ── Verifica ordine BFS atteso (slide pag. 81–103) ──
+   Dequeue: 1,5,6,9,2,7,10,3,8,11,4,12
+   Q evolution matches Carzaniga slides exactly when
+   Adj order is preserved (1→5,6; 6→2,7,9; etc.) */
+
+/* ── QUIZ ───────────────────────────────────────── */
+const quizData = [
+  { q: 'In un grafo non orientato, se (u,v) è un arco allora (v,u) è anch\'esso un arco?', a: true, why: 'La relazione è simmetrica: gli archi sono insiemi {u,v}.' },
+  { q: 'La lista di adiacenza usa spazio Θ(|V|²) nel caso peggiore?', a: false, why: 'Spazio Θ(|V|+|E|) — ottimale. Θ(|V|²) è la matrice.' },
+  { q: 'Con la matrice di adiacenza, verificare (u,v) ∈ E costa O(1)?', a: true, why: 'Basta leggere A[u][v].' },
+  { q: 'BFS visita i vertici in ordine di distanza crescente da s?', a: true, why: 'La coda FIFO garantisce strati con d crescente.' },
+  { q: 'In BFS un vertice può essere messo in coda più di una volta?', a: false, why: 'Si colora subito GRAY all\'enqueue — al massimo una volta.' },
+  { q: 'La complessità di BFS e DFS con lista di adiacenza è O(|V|+|E|)?', a: true, why: 'Ogni vertice e ogni arco processati un numero costante di volte.' },
+  { q: 'DFS usa una coda FIFO per gestire i vertici grigi?', a: false, why: 'DFS usa la ricorsione (stack implicito) o uno stack esplicito — non una coda.' },
+  { q: 'Topological-Sort funziona su qualsiasi grafo orientato?', a: false, why: 'Richiede un DAG (aciclico). Con cicli non esiste ordinamento topologico.' }
+];
+let qAns = 0, qOk = 0;
+
+function renderQuiz() {
+  document.getElementById('quizPanel').innerHTML = quizData.map((item, i) => `
+    <div class="quiz-q" id="qq${i}">
+      <p><strong>${i+1}.</strong> ${item.q}</p>
+      <div class="quiz-btns">
+        <button onclick="answerQuiz(${i},true)">Vero</button>
+        <button onclick="answerQuiz(${i},false)">Falso</button>
+      </div>
+      <div class="quiz-feedback" id="qf${i}"></div>
+    </div>`).join('');
+  qAns = 0; qOk = 0;
+  document.getElementById('quizScore').textContent = 'Rispondi alle 8 domande.';
+}
+function answerQuiz(i, ans) {
+  const el = document.getElementById('qq'+i);
+  if (el.classList.contains('answered-correct') || el.classList.contains('answered-wrong')) return;
+  const ok = ans === quizData[i].a;
+  el.classList.add(ok ? 'answered-correct' : 'answered-wrong');
+  const fb = document.getElementById('qf'+i);
+  fb.classList.add('show');
+  fb.innerHTML = (ok ? '<span class="good">✓</span> ' : '<span class="bad">✗</span> ') + quizData[i].why;
+  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  qAns++; if (ok) qOk++;
+  document.getElementById('quizScore').textContent = `Punteggio: ${qOk}/${qAns}` + (qAns < quizData.length ? ` — ancora ${quizData.length-qAns}` : ' — Completato!');
+}
+document.getElementById('quizReset').onclick = renderQuiz;
+renderQuiz();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

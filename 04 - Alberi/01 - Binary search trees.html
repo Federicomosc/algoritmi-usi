@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Search Trees — Appunti USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --accent: #98c379; --chart-grid: #2e2e3e; --chart-text: #7a7890; --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32; --accent: #3a7a32;
+  --chart-grid: #d4cfc4; --chart-text: #6a6878; --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--accent); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--accent); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(152,195,121,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #101810 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(152,195,121,.18) 0%, transparent 70%); pointer-events: none; }
+.hero::after { content: ''; position: absolute; bottom: -40px; left: 20%; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(152,195,121,.08) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--accent); color: var(--accent); background: rgba(152,195,121,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--accent); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(152,195,121,.12); border-radius: 3px; padding: 0 2px; }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(152,195,121,.07); border-color: var(--accent); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(152,195,121,.1); border-color: var(--accent); border-left-width: 4px; }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-breve .box-label, .box-thm .box-label { color: var(--accent); }
+.box-def .box-label { color: var(--blue); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--accent); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-1 { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-n { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-log { background: rgba(152,195,121,.15); color: var(--accent); }
+hr.part { border: none; border-top: 1px solid var(--accent); opacity: .3; margin: 64px 0 48px; }
+.ex-diff { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.ex-diff.facile { background: rgba(152,195,121,.15); color: var(--green); }
+.ex-diff.medio { background: rgba(97,175,239,.15); color: var(--blue); }
+.ex-diff.avanzato { background: rgba(224,108,117,.15); color: var(--red); }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.nota { border-bottom: 1px dashed var(--accent); cursor: help; position: relative; color: var(--accent); font-weight: 600; }
+.nota::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); width: max-content; max-width: 320px; padding: 10px 14px; background: var(--tooltip-bg); border: 1px solid var(--accent); border-radius: 8px; font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.5; white-space: normal; opacity: 0; visibility: hidden; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,.3); pointer-events: none; }
+.nota:hover::after, .nota:focus::after { opacity: 1; visibility: visible; }
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--accent); font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.btn-row button { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; font-weight: 600; }
+.btn-row button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-row button:hover { filter: brightness(1.1); }
+.btn-row button.active-key { border-color: var(--accent); color: var(--accent); background: rgba(152,195,121,.12); }
+#treeSvg { width: 100%; height: 340px; display: block; }
+.tree-node circle { fill: var(--bg4); stroke: var(--border); stroke-width: 2; transition: all .25s; }
+.tree-node text { fill: var(--text-bright); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.tree-node.current circle { fill: rgba(152,195,121,.25); stroke: var(--accent); stroke-width: 3; }
+.tree-node.visited circle { fill: rgba(97,175,239,.15); stroke: var(--blue); }
+.tree-node.found circle { fill: rgba(152,195,121,.4); stroke: var(--accent); stroke-width: 3; }
+.tree-edge { stroke: var(--border); stroke-width: 2; fill: none; }
+.tree-edge.active { stroke: var(--accent); stroke-width: 3; }
+.log-area { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg4); padding: 12px; border-radius: 6px; max-height: 120px; overflow-y: auto; margin-top: 12px; }
+.chart-wrap { position: relative; height: 280px; margin-top: 12px; }
+.quiz-q { background: var(--bg4); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); }
+.quiz-q.answered-correct { border-color: var(--green); background: rgba(152,195,121,.08); }
+.quiz-q.answered-wrong { border-color: var(--red); background: rgba(224,108,117,.08); }
+.quiz-q p { margin-bottom: 10px; font-size: 14px; }
+.quiz-btns { display: flex; gap: 8px; margin-top: 8px; }
+.quiz-btns button { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.quiz-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btns button:disabled { opacity: .5; cursor: default; }
+.quiz-feedback { font-size: 12px; margin-top: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-score { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--teal); margin-top: 16px; padding: 12px; background: var(--bg4); border-radius: 8px; text-align: center; }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset:hover { background: rgba(78,201,168,.1); }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 04 — Alberi</div>
+    <div class="sub">PDF 01 · Binary Search Trees</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Teoria</div>
+    <a class="nav-link" href="#s1">1. Insieme dinamico e interfaccia</a>
+    <a class="nav-link" href="#s2">2. Struttura del nodo</a>
+    <a class="nav-link" href="#s3">3. Proprietà BST</a>
+    <a class="nav-link" href="#s4">4. Tree-walk</a>
+    <a class="nav-link sub" href="#s4-walks">I quattro ordini</a>
+    <a class="nav-link" href="#s5">5. Minimo e massimo</a>
+    <a class="nav-link" href="#s6">6. Successore e predecessore</a>
+    <a class="nav-link" href="#s7">7. Ricerca</a>
+    <a class="nav-link sub" href="#s7-iter">Versione iterativa</a>
+    <a class="nav-link" href="#s8">8. Inserimento</a>
+    <a class="nav-link" href="#s9">9. Cancellazione</a>
+    <a class="nav-link sub" href="#s9-cases">I tre casi</a>
+    <a class="nav-link" href="#s10">10. Complessità Θ(h)</a>
+    <a class="nav-link" href="#s11">11. BST randomizzati</a>
+    <a class="nav-link sub" href="#s11-rot">Rotazioni</a>
+    <a class="nav-link" href="#s12">12. Strategie worst-case</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#sim-search">Simulatore ricerca BST</a>
+    <a class="nav-link" href="#chart">Grafico h vs n</a>
+    <a class="nav-link" href="#quiz">Quiz (8 domande)</a>
+    <div class="nav-label">Esercizi</div>
+    <a class="nav-link" href="#ex">6 esercizi guidati</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Binary Search Trees</span><br>— Alberi di ricerca binaria</h1>
+  <p>Appunti didattici completi — Antonio Carzaniga (USI, 30 marzo 2026). Dal dizionario dinamico alle operazioni fondamentali, fino alla randomizzazione e alle strategie per il worst case.</p>
+  <div class="hero-tags">
+    <span class="tag g">Θ(h) operazioni</span>
+    <span class="tag g">h = O(log n) medio</span>
+    <span class="tag t">In-order → ordinato</span>
+    <span class="tag b">Randomized BST</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — cosa impari qui</div>
+  Un <strong>BST</strong> (binary search tree) implementa un <em>insieme dinamico</em> su un dominio totalmente ordinato: inserisce, cancella e cerca chiavi in tempo <span class="cx cx-log">Θ(h)</span>, dove <code>h</code> è l'altezza dell'albero. La <strong>proprietà BST</strong> garantisce che ogni nodo separa chiavi più piccole (sottoalbero sinistro) da chiavi più grandi o uguali (destro). La visita <strong>in-order</strong> produce le chiavi in ordine crescente in <span class="cx cx-n">Θ(n)</span>. Il problema: inserendo sequenze ordinate l'albero degenera (<code>h = n</code>). Le slide mostrano come la <strong>randomizzazione</strong> (inserimento randomizzato, root-insert, rotazioni) e le strutture <strong>auto-bilanciate</strong> (ponte verso gli alberi rosso-neri) affrontano il worst case.
+</div>
+
+<!-- ═══ 1. INTERFACCIA ═══ -->
+<section id="s1">
+<h2><span class="num">01</span>Insieme dinamico e interfaccia</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — BST come dizionario dinamico</div>
+  Un <strong>binary search tree</strong> implementa un <em>insieme dinamico</em> (dizionario) su un dominio <strong>totalmente ordinato</strong>. L'albero <code>T</code> rappresenta l'insieme <code>D</code> delle chiavi memorizzate.
+</div>
+
+<p>L'<strong>interfaccia</strong> delle slide include le operazioni fondamentali su un dizionario dinamico:</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Operazione</th><th>Descrizione</th><th>Complessità</th></tr>
+<tr><td><code>Tree-Insert(T, k)</code></td><td>Aggiunge la chiave <code>k</code> a <code>D</code></td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Delete(T, k)</code></td><td>Rimuove la chiave <code>k</code> da <code>D</code></td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Search(T, k)</code></td><td>Verifica se <code>k ∈ D</code>; restituisce il nodo o NIL</td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Walk</code></td><td>Attraversa tutte le chiavi (in-order, pre-order, …)</td><td class="mark"><span class="cx cx-n">Θ(n)</span></td></tr>
+<tr><td><code>Tree-Minimum(T)</code></td><td>Trova la chiave minima in <code>D</code></td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Maximum(T)</code></td><td>Trova la chiave massima in <code>D</code></td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Successor(x)</code></td><td>Prossima chiave &gt; <code>x.key</code> nell'ordine totale</td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+<tr><td><code>Tree-Predecessor(x)</code></td><td>Chiave precedente &lt; <code>x.key</code></td><td class="mark"><span class="cx cx-log">Θ(h)</span></td></tr>
+</table>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Perché un albero e non un array?</div>
+  Un array ordinato offre ricerca binaria in <span class="cx cx-log">O(log n)</span>, ma inserimento e cancellazione costano <span class="cx cx-n">Θ(n)</span> per gli shift. Il BST combina ricerca guidata e modifiche strutturali locali — efficiente quando <code>h</code> è piccolo.
+</div>
+</section>
+
+<!-- ═══ 2. NODO ═══ -->
+<section id="s2">
+<h2><span class="num">02</span>Struttura del nodo</h2>
+
+<p>L'implementazione usa un insieme di <strong>nodi</strong>. L'albero <code>T</code> ha un puntatore <code>T.root</code> alla radice (oppure <code>T</code> punta direttamente alla radice).</p>
+
+<div class="box box-def">
+  <div class="box-label">Campi del nodo x</div>
+  <ul>
+    <li><code>x.parent</code> — puntatore al padre (NIL per la radice)</li>
+    <li><code>x.key</code> — chiave memorizzata nel nodo</li>
+    <li><code>x.left</code> — figlio sinistro (NIL se assente)</li>
+    <li><code>x.right</code> — figlio destro (NIL se assente)</li>
+  </ul>
+</div>
+
+<pre><span class="cm">// Struttura concettuale (pseudocodice slide)</span>
+<span class="kw">struct</span> Node {
+    Node <span class="op">*</span>parent;
+    Key   key;
+    Node <span class="op">*</span>left;
+    Node <span class="op">*</span>right;
+}</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Il puntatore parent</div>
+  <code>parent</code> non è strettamente necessario per ricerca e inserimento, ma semplifica <strong>successore</strong>, <strong>predecessore</strong> e <strong>cancellazione</strong> (risalire verso gli antenati). Negli alberi rosso-neri sarà indispensabile per le rotazioni.
+</div>
+</section>
+
+<!-- ═══ 3. PROPRIETÀ BST ═══ -->
+<section id="s3">
+<h2><span class="num">03</span>Proprietà BST</h2>
+
+<p>Esempio canonico delle slide — chiavi <code>[12, 5, 18, 2, 9, 15, 19, 4, 13, 17]</code>:</p>
+
+<div class="box box-thm">
+  <div class="box-label">Proprietà binary-search-tree</div>
+  Per ogni nodo <code>x</code> e per ogni nodo <code>y</code> nel sottoalbero sinistro e <code>z</code> nel sottoalbero destro:
+  <ul>
+    <li><code>y ∈ left-subtree(x) ⇒ y.key ≤ x.key</code></li>
+    <li><code>z ∈ right-subtree(x) ⇒ z.key ≥ x.key</code></li>
+  </ul>
+  Intuizione: a sinistra di <code>x</code> stanno chiavi <strong>≤ x.key</strong>; a destra chiavi <strong>≥ x.key</strong>.
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Nodo</th><th>Sinistro (≤)</th><th>Destro (≥)</th></tr>
+<tr><td>12</td><td>5, 2, 9, 4</td><td>18, 15, 19, 13, 17</td></tr>
+<tr><td>5</td><td>2, 4</td><td>9</td></tr>
+<tr><td>18</td><td>15, 13, 17</td><td>19</td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Attenzione — duplicati</div>
+  Le slide usano <code>≤</code> a sinistra e <code>≥</code> a destra, quindi i duplicati possono finire in entrambi i lati a seconda dell'implementazione. L'importante è essere <strong>coerenti</strong> in tutte le operazioni.
+</div>
+</section>
+
+<!-- ═══ 4. TREE-WALK ═══ -->
+<section id="s4">
+<h2><span class="num">04</span>Tree-walk — visite dell'albero</h2>
+
+<p>Le <strong>tree-walk</strong> attraversano tutti i nodi. L'<strong>in-order</strong> produce le chiavi in ordine crescente — proprietà fondamentale del BST.</p>
+
+<h3 id="s4-walks">I quattro ordini di visita</h3>
+
+<div class="grid2">
+  <div>
+    <h4>In-Order (simmetrica)</h4>
+    <pre><span class="fn">In-Order-Tree-Walk</span>(x)
+<span class="kw">if</span> x ≠ NIL
+    <span class="fn">In-Order-Tree-Walk</span>(x.left)
+    print x.key
+    <span class="fn">In-Order-Tree-Walk</span>(x.right)</pre>
+    <p>Output esempio: <code>2 4 5 9 12 13 15 17 18 19</code></p>
+    <pre><span class="fn">In-Order-Tree-Walk-Start</span>(T)   <span class="cm">← starter delle slide</span>
+<span class="fn">In-Order-Tree-Walk</span>(T.root)</pre>
+  </div>
+  <div>
+    <h4>Pre-Order (prefissa)</h4>
+    <pre><span class="fn">Pre-Order-Tree-Walk</span>(x)
+<span class="kw">if</span> x ≠ NIL
+    print x.key
+    <span class="fn">Pre-Order-Tree-Walk</span>(x.left)
+    <span class="fn">Pre-Order-Tree-Walk</span>(x.right)</pre>
+    <p>Output: <code>12 5 2 4 9 18 15 13 17 19</code></p>
+  </div>
+  <div>
+    <h4>Post-Order (postfissa)</h4>
+    <pre><span class="fn">Post-Order-Tree-Walk</span>(x)
+<span class="kw">if</span> x ≠ NIL
+    <span class="fn">Post-Order-Tree-Walk</span>(x.left)
+    <span class="fn">Post-Order-Tree-Walk</span>(x.right)
+    print x.key</pre>
+    <p>Output: <code>4 2 9 5 13 17 15 19 18 12</code></p>
+  </div>
+  <div>
+    <h4>Reverse-Order</h4>
+    <pre><span class="fn">Reverse-Order-Tree-Walk</span>(x)
+<span class="kw">if</span> x ≠ NIL
+    <span class="fn">Reverse-Order</span>(x.right)
+    print x.key
+    <span class="fn">Reverse-Order</span>(x.left)</pre>
+    <p>Output: <code>19 18 17 15 13 12 9 5 4 2</code> (decrescente)</p>
+  </div>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità delle visite — Θ(n)</div>
+  Ogni visita visita ogni nodo esattamente una volta. La ricorrenza generale è:
+  <div class="formula">T(n) = T(n<sub>L</sub>) + T(n − n<sub>L</sub> − 1) + Θ(1)</div>
+  Tutte le visite hanno complessità <span class="cx cx-n">Θ(n)</span>. Non si può fare meglio: la lunghezza dell'output è <span class="cx cx-n">Θ(n)</span>.
+</div>
+</section>
+
+<!-- ═══ 5. MIN/MAX ═══ -->
+<section id="s5">
+<h2><span class="num">05</span>Tree-Minimum e Tree-Maximum</h2>
+
+<p>Dalla proprietà BST: il <strong>minimo</strong> è il nodo più a sinistra; il <strong>massimo</strong> il più a destra.</p>
+
+<pre><span class="fn">Tree-Minimum</span>(x)
+<span class="kw">while</span> x.left ≠ NIL
+    x = x.left
+<span class="kw">return</span> x
+
+<span class="fn">Tree-Maximum</span>(x)
+<span class="kw">while</span> x.right ≠ NIL
+    x = x.right
+<span class="kw">return</span> x</pre>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio sull'albero delle slide</div>
+  <code>Tree-Minimum(T.root)</code> → nodo con chiave <strong>2</strong> (percorso: 12 → 5 → 2).<br>
+  <code>Tree-Maximum(T.root)</code> → nodo con chiave <strong>19</strong> (percorso: 12 → 18 → 19).<br>
+  Tempo: <span class="cx cx-log">Θ(h)</span> — proporzionale all'altezza.
+</div>
+</section>
+
+<!-- ═══ 6. SUCCESSORE ═══ -->
+<section id="s6">
+<h2><span class="num">06</span>Tree-Successor e Tree-Predecessor</h2>
+
+<p>Dato un nodo <code>x</code>, il <strong>successore</strong> è il nodo con la chiave immediatamente successiva nell'ordine totale.</p>
+
+<div class="box box-def">
+  <div class="box-label">Due casi per il successore di x</div>
+  <ol>
+    <li>Se <code>x.right ≠ NIL</code>: il successore è <code>Tree-Minimum(x.right)</code> — il più piccolo nel sottoalbero destro.</li>
+    <li>Altrimenti: risali verso il primo antenato <code>a</code> tale che <code>x</code> stia nel sottoalbero <strong>sinistro</strong> di <code>a</code>.</li>
+  </ol>
+</div>
+
+<pre><span class="fn">Tree-Successor</span>(x)
+<span class="kw">if</span> x.right ≠ NIL
+    <span class="kw">return</span> <span class="fn">Tree-Minimum</span>(x.right)
+y = x.parent
+<span class="kw">while</span> y ≠ NIL <span class="kw">and</span> x = y.right
+    x = y
+    y = y.parent
+<span class="kw">return</span> y</pre>
+
+<pre><span class="fn">Tree-Predecessor</span>(x)          <span class="cm">← simmetrico al successore</span>
+<span class="kw">if</span> x.left ≠ NIL
+    <span class="kw">return</span> <span class="fn">Tree-Maximum</span>(x.left)
+y = x.parent
+<span class="kw">while</span> y ≠ NIL <span class="kw">and</span> x = y.left
+    x = y
+    y = y.parent
+<span class="kw">return</span> y</pre>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Nodo x</th><th>Successore</th><th>Predecessore</th><th>Caso usato</th></tr>
+<tr><td>9</td><td>12</td><td>5</td><td>Succ.: risalita (9 figlio destro di 5)</td></tr>
+<tr><td>15</td><td>17</td><td>13</td><td>Succ.: min del destro; Pred.: max del sinistro</td></tr>
+<tr><td>19</td><td>NIL</td><td>18</td><td>19 è massimo → nessun successore</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ═══ 7. RICERCA ═══ -->
+<section id="s7">
+<h2><span class="num">07</span>Tree-Search — ricerca binaria sull'albero</h2>
+
+<p>Il nome <em>binary search tree</em> deriva dalla ricerca: ad ogni nodo si confronta <code>k</code> con <code>x.key</code> e si scende a sinistra o a destra — come la ricerca binaria, ma sulla struttura ad albero.</p>
+
+<pre><span class="fn">Tree-Search</span>(x, k)              <span class="cm">← versione ricorsiva</span>
+<span class="kw">if</span> x = NIL <span class="kw">or</span> k = x.key
+    <span class="kw">return</span> x
+<span class="kw">if</span> k &lt; x.key
+    <span class="kw">return</span> <span class="fn">Tree-Search</span>(x.left, k)
+<span class="kw">else</span> <span class="kw">return</span> <span class="fn">Tree-Search</span>(x.right, k)</pre>
+
+<div class="box box-thm">
+  <div class="box-label">Correttezza</div>
+  Grazie alla <strong>proprietà BST</strong>, se <code>k &lt; x.key</code> allora <code>k</code> non può trovarsi nel sottoalbero destro (né in quello corrente se diverso). La ricerca esplora solo il ramo corretto.
+</div>
+
+<h3 id="s7-iter">Versione iterativa</h3>
+
+<pre><span class="fn">Iterative-Tree-Search</span>(T, k)
+x = T.root
+<span class="kw">while</span> x ≠ NIL <span class="kw">and</span> k ≠ x.key
+    <span class="kw">if</span> k &lt; x.key
+        x = x.left
+    <span class="kw">else</span> x = x.right
+<span class="kw">return</span> x</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Risultato della ricerca</div>
+  Se <code>k</code> è presente, restituisce il nodo con quella chiave. Se assente, restituisce <code>NIL</code> (versione ricorsiva) o il nodo dove la ricerca si è fermata (utile per l'inserimento).
+</div>
+</section>
+
+<!-- ═══ 8. INSERIMENTO ═══ -->
+<section id="s8">
+<h2><span class="num">08</span>Tree-Insert</h2>
+
+<div class="box box-breve">
+  <div class="box-label">Idea</div>
+  Per inserire <code>z</code>, si <strong>cerca</strong> <code>z.key</code>. Se non si trova, si aggiunge <code>z</code> come foglia nel punto dove la ricerca si è fermata — preservando la proprietà BST.
+</div>
+
+<pre><span class="fn">Tree-Insert</span>(T, z)
+y = NIL
+x = T.root
+<span class="kw">while</span> x ≠ NIL
+    y = x
+    <span class="kw">if</span> z.key &lt; x.key
+        x = x.left
+    <span class="kw">else</span> x = x.right
+z.parent = y
+<span class="kw">if</span> y = NIL
+    T.root = z
+<span class="kw">else if</span> z.key &lt; y.key
+    y.left = z
+<span class="kw">else</span> y.right = z</pre>
+
+<h3>Traccia slide — inserimento di <code>6</code></h3>
+<div class="tbl-wrap">
+<table>
+<tr><th>Passo</th><th>x corrente</th><th>Confronto</th><th>Azione</th></tr>
+<tr><td>1</td><td>12</td><td>6 &lt; 12</td><td>scendi a sinistra (5)</td></tr>
+<tr><td>2</td><td>5</td><td>6 &gt; 5</td><td>scendi a destra (9)</td></tr>
+<tr><td>3</td><td>9</td><td>6 &lt; 9</td><td>9.right = NIL → aggancia z qui</td></tr>
+</table>
+</div>
+<p>Albero dopo: radice 12, foglia <code>6</code> come figlio sinistro di <code>9</code>. Stesso schema per ogni nuova chiave: la ricerca determina il padre <code>y</code>, poi si collega <code>z</code> a <code>y.left</code> o <code>y.right</code>.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità</div>
+  <code>Tree-Insert</code> esegue una ricerca più agganciamento costante → <span class="cx cx-log">Θ(h)</span>.
+</div>
+</section>
+
+<!-- ═══ 9. CANCELLAZIONE ═══ -->
+<section id="s9">
+<h2><span class="num">09</span>Tree-Delete — cancellazione</h2>
+
+<h3 id="s9-cases">I tre casi</h3>
+
+<ol class="steps">
+  <li><strong>z senza figli</strong> — rimuovi <code>z</code> direttamente, aggiornando il puntatore del padre a NIL.</li>
+  <li><strong>z con un solo figlio</strong> — rimuovi <code>z</code> e collega il padre di <code>z</code> al figlio non NIL di <code>z</code> («salta» <code>z</code>).</li>
+  <li><strong>z con due figli</strong> — sostituisci <code>z</code> con <code>y = Tree-Successor(z)</code> (che ha al più un figlio!), copia <code>y.key</code> in <code>z</code>, poi rimuovi <code>y</code> (caso 1 o 2).</li>
+</ol>
+
+<pre><span class="fn">Tree-Delete</span>(T, z)
+<span class="kw">if</span> z.left = NIL <span class="kw">or</span> z.right = NIL
+    y = z
+<span class="kw">else</span> y = <span class="fn">Tree-Successor</span>(z)
+<span class="kw">if</span> y.left ≠ NIL
+    x = y.left
+<span class="kw">else</span> x = y.right
+<span class="kw">if</span> x ≠ NIL
+    x.parent = y.parent
+<span class="kw">if</span> y.parent = NIL
+    T.root = x
+<span class="kw">else if</span> y = y.parent.left
+    y.parent.left = x
+<span class="kw">else</span> y.parent.right = x
+<span class="kw">if</span> y ≠ z
+    z.key = y.key
+    <span class="cm">// copia eventuali altri dati da y in z</span></pre>
+
+<div class="box box-warn">
+  <div class="box-label">Perché il successore nel caso 3?</div>
+  <code>Tree-Successor(z)</code> è il minimo del sottoalbero destro → ha <strong>al più un figlio</strong> (il sinistro, se esiste). Sostituire <code>z</code> con il successore preserva la proprietà BST senza gestire due figli nella rimozione effettiva.
+</div>
+
+<h3>Esempi dalle slide — albero con radice 23</h3>
+<div class="grid2">
+  <div class="box box-ex">
+    <div class="box-label">Caso 1 — foglia</div>
+    Rimuovi un nodo senza figli (es. foglia <code>27</code>): aggiorna il puntatore del padre a NIL. Costo: <span class="cx cx-log">Θ(h)</span> per trovare il nodo + O(1) unlink.
+  </div>
+  <div class="box box-ex">
+    <div class="box-label">Caso 2 — un figlio</div>
+    Rimuovi un nodo con un solo figlio (es. <code>23</code> con solo sottoalbero sinistro dopo altre cancellazioni): «salta» il nodo collegando il padre direttamente al figlio.
+  </div>
+</div>
+<div class="box box-ex">
+  <div class="box-label">Caso 3 — due figli (slide)</div>
+  Cancelli un nodo <code>z</code> con due figli → <code>y = Tree-Successor(z)</code> (es. cancellare <code>5</code> con figli 2 e 9: successore <code>y = 9</code>). Copi <code>y.key</code> in <code>z</code>, poi rimuovi <code>y</code> (che ha al più un figlio). Il pseudocodice unifica i casi 1–2 in <code>y</code> e usa <code>y ≠ z</code> solo nel caso 3.
+</div>
+</section>
+
+<!-- ═══ 10. COMPLESSITÀ ═══ -->
+<section id="s10">
+<h2><span class="num">10</span>Complessità — Θ(h)</h2>
+
+<div class="box box-thm">
+  <div class="box-label">Teorema (slide)</div>
+  Ricerca, inserimento e cancellazione hanno complessità <span class="cx cx-log">Θ(h)</span>, dove <code>h</code> è l'<strong>altezza</strong> dell'albero (lunghezza del cammino più lungo dalla radice a una foglia).
+</div>
+
+<div class="grid2">
+  <div class="box box-ex">
+    <div class="box-label">Caso medio — inserimenti casuali</div>
+    <code>h = O(log n)</code> → operazioni in <span class="cx cx-log">O(log n)</span> in media.
+  </div>
+  <div class="box box-warn">
+    <div class="box-label">Worst case — sequenza ordinata</div>
+    Inserendo <code>1, 2, 3, …, n</code> in ordine si ottiene una catena (albero degenerato): <code>h = n − 1</code> → <span class="cx cx-n">Θ(n)</span> per operazione. Il worst case <strong>non è raro</strong> in pratica.
+  </div>
+</div>
+
+<div class="formula">T(n) = Θ(h) &nbsp;&nbsp; con &nbsp;&nbsp; h = O(log n) medio &nbsp;|&nbsp; h = O(n) peggio</div>
+</section>
+
+<!-- ═══ 11. RANDOMIZZAZIONE ═══ -->
+<section id="s11">
+<h2><span class="num">11</span>BST randomizzati</h2>
+
+<p><strong>Idea:</strong> usare la randomizzazione per trasformare ogni sequenza di inserimenti nel «caso medio».</p>
+
+<h3>Idea 1 — permutazione casuale</h3>
+<p>Inserire una permutazione casuale di <code>⟨1, 2, …, n⟩</code>. Problema: la sequenza non è nota in anticipo (inserimenti online).</p>
+
+<h3>Idea 2 — alternanza tail/root insert</h3>
+<pre><span class="fn">Randomized-Insert-One</span>(T, z)
+r = valore casuale uniforme in {1, …, T.size + 1}
+<span class="kw">if</span> r = 1
+    <span class="fn">Root-Insert</span>(T, z)       <span class="cm">← inserisce z come primo elemento</span>
+<span class="kw">else</span>
+    <span class="fn">Tree-Insert</span>(T, z)       <span class="cm">← inserimento in coda (standard)</span></pre>
+
+<div class="box box-warn">
+  <div class="box-label">Limitazione di Randomized-Insert-One</div>
+  Non simula una permutazione uniforme: l'ultimo elemento può finire solo in cima o in fondo. Però ogni nodo ha la stessa probabilità di essere inserito in cima — suggerendo una versione ricorsiva.
+</div>
+
+<h3>Randomized-Insert ricorsivo</h3>
+<pre><span class="fn">Randomized-Insert</span>(t, z)
+<span class="kw">if</span> t = NIL
+    <span class="kw">return</span> z
+r = casuale uniforme in {1, …, t.size + 1}
+<span class="kw">if</span> r = 1                    <span class="cm">← Pr[r=1] = 1/(t.size+1)</span>
+    z.size = t.size + 1
+    <span class="kw">return</span> <span class="fn">Root-Insert</span>(t, z)
+<span class="kw">if</span> z.key &lt; t.key
+    t.left = <span class="fn">Randomized-Insert</span>(t.left, z)
+<span class="kw">else</span> t.right = <span class="fn">Randomized-Insert</span>(t.right, z)
+t.size = t.size + 1
+<span class="kw">return</span> t</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Probabilità e permutazioni (slide)</div>
+  Con probabilità <code>1/(t.size + 1)</code> ogni nuova chiave diventa radice del sottoalbero corrente. La versione ricorsiva simula una <strong>permutazione uniforme</strong> dell'ordine di inserimento — a differenza di <code>Randomized-Insert-One</code>, che non equiprobabilizza tutti gli <code>n!</code> ordini (l'ultimo elemento può finire solo in cima o in fondo).
+</div>
+
+<h3 id="s11-rot">Root-Insert e rotazioni</h3>
+<p><code>Root-Insert</code> inserisce <code>z</code> come radice del sottoalbero, usando <strong>rotazioni</strong> per risalire:</p>
+
+<pre><span class="fn">Root-Insert</span>(x, z)
+<span class="kw">if</span> x = NIL
+    <span class="kw">return</span> z
+<span class="kw">if</span> z.key &lt; x.key
+    x.left = <span class="fn">Root-Insert</span>(x.left, z)
+    <span class="kw">return</span> <span class="fn">Right-Rotate</span>(x)
+<span class="kw">else</span>
+    x.right = <span class="fn">Root-Insert</span>(x.right, z)
+    <span class="kw">return</span> <span class="fn">Left-Rotate</span>(x)
+
+<span class="fn">Right-Rotate</span>(x)                <span class="cm">← rotazione a destra</span>
+l = x.left
+x.left = l.right
+l.right = x
+<span class="kw">return</span> l
+
+<span class="fn">Left-Rotate</span>(x)                 <span class="cm">← rotazione a sinistra</span>
+r = x.right
+x.right = r.left
+r.left = x
+<span class="kw">return</span> r</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Rotazioni — proprietà chiave</div>
+  Una rotazione è un'operazione <strong>locale</strong> che preserva la proprietà BST e l'ordine in-order. Costo: <span class="cx cx-1">O(1)</span> puntatori aggiornati. Saranno la base degli alberi rosso-neri.
+</div>
+</section>
+
+<!-- ═══ 12. STRATEGIE ═══ -->
+<section id="s12">
+<h2><span class="num">12</span>Strategie per il worst case</h2>
+
+<p>Le slide chiudono con tre strategie generali per affrontare la complessità nel worst case:</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Strategia</th><th>Idea</th><th>Esempio BST</th><th>Garanzia</th></tr>
+<tr><td><strong>Randomizzazione</strong></td><td>Trasforma ogni caso nel caso medio; worst case improbabile</td><td>Randomized-Insert</td><td>Probabile <span class="cx cx-log">O(log n)</span></td></tr>
+<tr><td><strong>Manutenzione ammortizzata</strong></td><td>Operazioni costose occasionali, costo medio basso</td><td>Ribilanciamento periodico</td><td>Ammortizzato <span class="cx cx-log">O(log n)</span></td></tr>
+<tr><td><strong>Struttura auto-bilanciata</strong></td><td>Invarianti strutturali garantiscono altezza logaritmica</td><td>Alberi rosso-neri, AVL</td><td><span class="cx cx-log">O(log n)</span> garantito</td></tr>
+</table>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Ponte verso RB trees</div>
+  Gli <strong>alberi rosso-neri</strong> (prossima lezione) combinano rotazioni e invarianti di colore per garantire <code>h ≤ 2 log(n+1)</code> — eliminando il rischio del worst case deterministico senza dipendere dal caso.
+</div>
+</section>
+
+<hr class="part">
+<p class="part-label">Parte interattiva</p>
+
+<!-- ═══ SIMULATORE ═══ -->
+<section id="sim-search">
+<h2>Simulatore — Tree-Search passo-passo</h2>
+
+<div class="interactive-panel">
+  <h4>Albero esempio: [12, 5, 18, 2, 9, 15, 19, 4, 13, 17]</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Verde = nodo corrente · Blu = già visitato · Prova <code>13</code> (trovata) o <code>7</code> (assente) · Clicca una chiave, poi «Avanti».</p>
+  <svg id="treeSvg" viewBox="0 0 600 340"></svg>
+  <div class="btn-row" id="keyBtns"></div>
+  <p id="searchCaption" style="text-align:center;font-size:14px;margin:16px 0 8px;color:var(--text-bright)">Seleziona una chiave da cercare.</p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="searchPlay">▶ Play</button>
+    <button id="searchNext">Avanti ▶</button>
+    <button id="searchReset">↺ Reset</button>
+  </div>
+  <div class="log-area" id="searchLog">Pronto.</div>
+</div>
+</section>
+
+<!-- ═══ CHART ═══ -->
+<section id="chart">
+<h2>Grafico — altezza h vs n</h2>
+
+<div class="interactive-panel">
+  <h4>Confronto: BST bilanciato vs BST degenerato</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Verde = h ≈ log₂(n) (caso medio/bilanciato) · Rosso tratteggiato = h = n−1 (sequenza ordinata).</p>
+  <div class="chart-wrap"><canvas id="heightChart"></canvas></div>
+</div>
+</section>
+
+<!-- ═══ QUIZ ═══ -->
+<section id="quiz">
+<h2>Quiz — 8 domande Vero/Falso</h2>
+<div id="quizPanel"></div>
+<div class="quiz-score" id="quizScore">Rispondi alle 8 domande.</div>
+<button class="btn-reset" id="quizReset">↺ Ricomincia quiz</button>
+</section>
+
+<hr class="part">
+<p class="part-label">Esercizi guidati</p>
+
+<!-- ═══ ESERCIZI ═══ -->
+<section id="ex">
+<h2>6 esercizi con soluzioni</h2>
+
+<details>
+<summary><strong>Esercizio 1</strong> — In-order walk <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Esegui l'in-order walk sull'albero con radice 12 e chiavi [12, 5, 18, 2, 9, 15, 19, 4, 13, 17]. Qual è la sequenza stampata?</p>
+  <p><strong>Soluzione:</strong> L'in-order visita sinistro → nodo → destro, producendo chiavi ordinate: <code>2, 4, 5, 9, 12, 13, 15, 17, 18, 19</code>. Tempo: <span class="cx cx-n">Θ(n)</span> con n = 10.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 2</strong> — Tree-Minimum <span class="ex-diff facile">Facile</span></summary>
+<div class="sol-body">
+  <p>Quale cammino segue <code>Tree-Minimum(T.root)</code> sull'albero esempio? Quante comparazioni?</p>
+  <p><strong>Soluzione:</strong> Cammino: 12 → 5 → 2. Il minimo è <strong>2</strong>. Si scende sempre a sinistra finché <code>left = NIL</code>: 3 passi, <span class="cx cx-log">Θ(h)</span>.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 3</strong> — Successore di 9 <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Trova il successore del nodo con chiave 9 nell'albero esempio, spiegando quale caso del pseudocodice si applica.</p>
+  <p><strong>Soluzione:</strong> <code>9.right = NIL</code>, quindi caso 2: risalita. <code>x = 9</code>, padre <code>y = 5</code>; <code>9 = y.right</code> → continua. <code>x = 5</code>, padre <code>y = 12</code>; <code>5 = y.left</code> → stop. Successore = nodo <strong>12</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 4</strong> — Ricerca di 13 <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Traccia <code>Tree-Search(T.root, 13)</code>: elenca i nodi visitati e i confronti.</p>
+  <p><strong>Soluzione:</strong> 13 &lt; 12? No → destra (18). 13 &lt; 18? Sì → sinistra (15). 13 &lt; 15? Sì → sinistra (13). Trovato! Cammino: <strong>12 → 18 → 15 → 13</strong>. 4 nodi, 3 confronti prima del match.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 5</strong> — Cancellazione caso 3 <span class="ex-diff medio">Medio</span></summary>
+<div class="sol-body">
+  <p>Nell'albero delle slide (sezione Delete), si cancella il nodo 5 (con figli 2 e 9). Descrivi i passi.</p>
+  <p><strong>Soluzione:</strong> 5 ha due figli → caso 3. <code>y = Tree-Successor(5) = 9</code> (min del destro). <code>9</code> ha solo figlio sinistro 4 (o foglia). Si copia <code>9.key</code> in <code>5</code>, poi si rimuove il nodo 9 collegando 4 al padre di 9. Alternativa equivalente: sostituire con successore e rimuovere il successore.</p>
+</div>
+</details>
+
+<details>
+<summary><strong>Esercizio 6</strong> — Altezza e sequenza ordinata <span class="ex-diff avanzato">Avanzato</span></summary>
+<div class="sol-body">
+  <p>Si inseriscono le chiavi 1, 2, 3, 4, 5 in ordine crescente in un BST vuoto con <code>Tree-Insert</code>. Qual è l'altezza? Confronta con <code>Randomized-Insert</code>.</p>
+  <p><strong>Soluzione:</strong> Inserimenti ordinati producono una catena a destra: radice 1, figlio 2, … → albero degenerato con <code>h = n − 1 = 4</code>. Ogni operazione costa <span class="cx cx-n">Θ(n)</span>. Con <code>Randomized-Insert</code>, ogni chiave ha probabilità 1/(k+1) di diventare radice al k-esimo inserimento → altezza attesa <span class="cx cx-log">O(log n)</span>. Per n = 5, altezza media ≈ 2–3 vs 4 nel worst case deterministico.</p>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+/* ── NAV + TEMA ─────────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => navObs.observe(s));
+
+const themeBtn = document.getElementById('themeToggle');
+let heightChart = null;
+const saved = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', saved);
+themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  buildHeightChart();
+  drawTree();
+});
+
+/* ── BST DATA + LAYOUT ─────────────────────────── */
+const BST = {
+  key: 12,
+  left: { key: 5, left: { key: 2, left: null, right: { key: 4, left: null, right: null } }, right: { key: 9, left: null, right: null } },
+  right: { key: 18, left: { key: 15, left: { key: 13, left: null, right: null }, right: { key: 17, left: null, right: null } }, right: { key: 19, left: null, right: null } }
+};
+
+const ALL_KEYS = [2, 4, 5, 6, 7, 9, 12, 13, 15, 17, 18, 19];
+
+function layoutTree(node, depth, xMin, xMax) {
+  if (!node) return null;
+  const x = (xMin + xMax) / 2;
+  const y = 40 + depth * 70;
+  const span = (xMax - xMin) / 4;
+  const left = layoutTree(node.left, depth + 1, xMin, x);
+  const right = layoutTree(node.right, depth + 1, x, xMax);
+  return { key: node.key, x, y, left, right };
+}
+
+function collectEdges(layout, edges = []) {
+  if (!layout) return edges;
+  if (layout.left) { edges.push({ x1: layout.x, y1: layout.y, x2: layout.left.x, y2: layout.left.y }); collectEdges(layout.left, edges); }
+  if (layout.right) { edges.push({ x1: layout.x, y1: layout.y, x2: layout.right.x, y2: layout.right.y }); collectEdges(layout.right, edges); }
+  return edges;
+}
+
+function collectNodes(layout, nodes = []) {
+  if (!layout) return nodes;
+  nodes.push(layout);
+  collectNodes(layout.left, nodes);
+  collectNodes(layout.right, nodes);
+  return nodes;
+}
+
+function computeSearchPath(target) {
+  const path = [];
+  let node = BST;
+  while (node) {
+    path.push(node.key);
+    if (target === node.key) return { path, found: true };
+    node = target < node.key ? node.left : node.right;
+  }
+  return { path, found: false };
+}
+
+let treeLayout = layoutTree(BST, 0, 40, 560);
+let searchTarget = null;
+let searchStep = 0;
+let searchPath = [];
+let searchFound = false;
+let searchTimer = null;
+
+function drawTree() {
+  const svg = document.getElementById('treeSvg');
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  const edges = collectEdges(treeLayout);
+  const nodes = collectNodes(treeLayout);
+  const activeEdges = new Set();
+  for (let i = 0; i < searchStep && i < searchPath.length - 1; i++) {
+    const a = nodes.find(n => n.key === searchPath[i]);
+    const b = nodes.find(n => n.key === searchPath[i + 1]);
+    if (a && b) activeEdges.add(`${a.key}-${b.key}`);
+  }
+  let html = '';
+  edges.forEach(e => {
+    const from = nodes.find(n => n.x === e.x1 && n.y === e.y1);
+    const to = nodes.find(n => n.x === e.x2 && n.y === e.y2);
+    const id = from && to ? `${from.key}-${to.key}` : '';
+    const cls = activeEdges.has(id) ? 'tree-edge active' : 'tree-edge';
+    html += `<line class="${cls}" x1="${e.x1}" y1="${e.y1 + 18}" x2="${e.x2}" y2="${e.y2 - 18}" stroke="${activeEdges.has(id) ? accent : border}" />`;
+  });
+  nodes.forEach(n => {
+    let cls = 'tree-node';
+    const idx = searchPath.indexOf(n.key);
+    if (idx >= 0 && idx < searchStep) cls += ' visited';
+    if (idx === searchStep - 1 && searchStep > 0) cls += ' current';
+    if (searchFound && n.key === searchTarget && searchStep >= searchPath.length) cls = 'tree-node found';
+    if (!searchFound && searchStep >= searchPath.length && idx === searchPath.length - 1) cls = 'tree-node current';
+    html += `<g class="${cls}"><circle cx="${n.x}" cy="${n.y}" r="22"/><text x="${n.x}" y="${n.y}">${n.key}</text></g>`;
+  });
+  svg.innerHTML = html;
+}
+
+function buildKeyBtns() {
+  document.getElementById('keyBtns').innerHTML = ALL_KEYS.map(k =>
+    `<button data-key="${k}" class="${searchTarget === k ? 'active-key' : ''}">${k}</button>`
+  ).join('');
+  document.querySelectorAll('#keyBtns button').forEach(btn => {
+    btn.onclick = () => startSearch(+btn.dataset.key);
+  });
+}
+
+function startSearch(key) {
+  stopSearch();
+  searchTarget = key;
+  const res = computeSearchPath(key);
+  searchPath = res.path;
+  searchFound = res.found;
+  searchStep = 0;
+  buildKeyBtns();
+  updateSearchUI();
+  drawTree();
+}
+
+function updateSearchUI() {
+  const cap = document.getElementById('searchCaption');
+  const log = document.getElementById('searchLog');
+  if (!searchTarget) {
+    cap.textContent = 'Seleziona una chiave da cercare.';
+    return;
+  }
+  if (searchStep === 0) {
+    cap.innerHTML = `Ricerca di <strong>${searchTarget}</strong> — premi Avanti per iniziare dalla radice (12).`;
+    log.textContent = `Tree-Search(T.root, ${searchTarget})`;
+    return;
+  }
+  const cur = searchPath[searchStep - 1];
+  if (searchStep < searchPath.length) {
+    const next = searchPath[searchStep];
+    const cmp = searchTarget < cur ? `${searchTarget} < ${cur} → sinistra` : searchTarget > cur ? `${searchTarget} > ${cur} → destra` : `${searchTarget} = ${cur}`;
+    cap.innerHTML = `<span style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text-dim)">${searchStep}/${searchPath.length}</span> Nodo <strong>${cur}</strong>: ${cmp}`;
+    log.textContent = `Visita nodo ${cur}. ${cmp}. Prossimo: ${next}.`;
+  } else if (searchFound) {
+    cap.innerHTML = `<strong class="good">Trovato!</strong> Chiave ${searchTarget} nel nodo ${searchPath[searchPath.length - 1]}. Costo: ${searchPath.length} nodi = Θ(h).`;
+    log.textContent = `return nodo(${searchTarget}); // Θ(h)`;
+  } else {
+    cap.innerHTML = `<strong class="bad">Non trovato.</strong> Ricerca terminata a NIL dopo nodo ${searchPath[searchPath.length - 1]}.`;
+    log.textContent = `return NIL; // chiave ${searchTarget} assente`;
+  }
+  document.getElementById('searchPlay').textContent = searchTimer ? '⏸ Pausa' : '▶ Play';
+}
+
+function goSearch(n) {
+  if (!searchTarget) return;
+  searchStep = Math.max(0, Math.min(searchPath.length + (searchFound ? 0 : 1), n));
+  if (!searchFound) searchStep = Math.min(searchStep, searchPath.length);
+  else searchStep = Math.min(searchStep, searchPath.length);
+  updateSearchUI();
+  drawTree();
+}
+
+function stopSearch() {
+  if (searchTimer) { clearInterval(searchTimer); searchTimer = null; }
+  document.getElementById('searchPlay').textContent = '▶ Play';
+}
+
+document.getElementById('searchNext').onclick = () => { stopSearch(); goSearch(searchStep + 1); };
+document.getElementById('searchReset').onclick = () => { stopSearch(); searchTarget = null; searchStep = 0; searchPath = []; buildKeyBtns(); updateSearchUI(); drawTree(); };
+document.getElementById('searchPlay').onclick = () => {
+  if (!searchTarget) return;
+  if (searchTimer) { stopSearch(); return; }
+  document.getElementById('searchPlay').textContent = '⏸ Pausa';
+  searchTimer = setInterval(() => {
+    const max = searchFound ? searchPath.length : searchPath.length;
+    if (searchStep >= max) { stopSearch(); return; }
+    goSearch(searchStep + 1);
+  }, 1400);
+};
+
+buildKeyBtns();
+drawTree();
+
+/* ── CHART h vs n ───────────────────────────────── */
+function chartColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    grid: s.getPropertyValue('--chart-grid').trim(),
+    text: s.getPropertyValue('--chart-text').trim(),
+    accent: s.getPropertyValue('--accent').trim(),
+    red: s.getPropertyValue('--red').trim()
+  };
+}
+
+function buildHeightChart() {
+  const labels = [], balanced = [], degenerate = [];
+  for (let n = 1; n <= 40; n++) {
+    labels.push(n);
+    balanced.push(Math.ceil(Math.log2(n)));
+    degenerate.push(n - 1);
+  }
+  const ctx = document.getElementById('heightChart');
+  if (heightChart) heightChart.destroy();
+  const c = chartColors();
+  heightChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'h ≈ ⌈log₂ n⌉ (bilanciato/medio)', data: balanced, borderColor: c.accent, backgroundColor: 'rgba(152,195,121,.12)', borderWidth: 2.5, tension: 0, fill: true, pointRadius: 0 },
+        { label: 'h = n − 1 (sequenza ordinata)', data: degenerate, borderColor: c.red, borderWidth: 1.5, borderDash: [6, 4], tension: 0, fill: false, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: c.text, font: { size: 11 } } } },
+      scales: {
+        x: { title: { display: true, text: 'n (numero chiavi)', color: c.text }, ticks: { color: c.text, maxTicksLimit: 12 }, grid: { color: c.grid } },
+        y: { title: { display: true, text: 'altezza h', color: c.text }, ticks: { color: c.text }, grid: { color: c.grid }, min: 0 }
+      }
+    }
+  });
+}
+buildHeightChart();
+
+/* ── QUIZ ───────────────────────────────────────── */
+const quizData = [
+  { q: 'La visita in-order di un BST stampa le chiavi in ordine crescente?', a: true, why: 'In-order: sinistro → nodo → destro; la proprietà BST garantisce l\'ordine totale.' },
+  { q: 'Tree-Minimum scende sempre verso destra fino a NIL?', a: false, why: 'Il minimo è il nodo più a sinistra: while x.left ≠ NIL, x = x.left.' },
+  { q: 'Tree-Search ha complessità Θ(h) dove h è l\'altezza dell\'albero?', a: true, why: 'Percorre un cammino radice-foglia di lunghezza h.' },
+  { q: 'Inserendo 1,2,…,n in ordine si ottiene h = O(log n)?', a: false, why: 'Si ottiene una catena con h = n−1, il worst case deterministico.' },
+  { q: 'Nel caso 3 di Tree-Delete si usa Tree-Successor perché ha al più un figlio?', a: true, why: 'Il successore è il min del sottoalbero destro → nessun figlio destro.' },
+  { q: 'Tutte le tree-walk hanno complessità Θ(n)?', a: true, why: 'Ogni nodo visitato una volta; l\'output ha lunghezza Θ(n).' },
+  { q: 'Randomized-Insert-One simula una permutazione uniforme di tutti gli n! ordini?', a: false, why: 'L\'ultimo elemento può finire solo in cima o in fondo — non tutte le permutazioni sono equiprobabili.' },
+  { q: 'Una rotazione Left/Right preserva la proprietà BST?', a: true, why: 'Riorganizza puntatori localmente senza cambiare l\'ordine in-order delle chiavi.' }
+];
+let qAns = 0, qOk = 0;
+
+function renderQuiz() {
+  document.getElementById('quizPanel').innerHTML = quizData.map((item, i) => `
+    <div class="quiz-q" id="qq${i}">
+      <p><strong>${i+1}.</strong> ${item.q}</p>
+      <div class="quiz-btns">
+        <button onclick="answerQuiz(${i},true)">Vero</button>
+        <button onclick="answerQuiz(${i},false)">Falso</button>
+      </div>
+      <div class="quiz-feedback" id="qf${i}"></div>
+    </div>`).join('');
+  qAns = 0; qOk = 0;
+  document.getElementById('quizScore').textContent = 'Rispondi alle 8 domande.';
+}
+function answerQuiz(i, ans) {
+  const el = document.getElementById('qq'+i);
+  if (el.classList.contains('answered-correct') || el.classList.contains('answered-wrong')) return;
+  const ok = ans === quizData[i].a;
+  el.classList.add(ok ? 'answered-correct' : 'answered-wrong');
+  const fb = document.getElementById('qf'+i);
+  fb.classList.add('show');
+  fb.innerHTML = (ok ? '<span class="good">✓</span> ' : '<span class="bad">✗</span> ') + quizData[i].why;
+  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  qAns++; if (ok) qOk++;
+  document.getElementById('quizScore').textContent = `Punteggio: ${qOk}/${qAns}` + (qAns < quizData.length ? ` — ancora ${quizData.length-qAns}` : ' — Completato!');
+}
+document.getElementById('quizReset').onclick = renderQuiz;
+renderQuiz();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

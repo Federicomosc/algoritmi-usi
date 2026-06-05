@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grafi, BFS e connettività — Final USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=JetBrains+Mono&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#61afef;
+}
+html[data-theme="light"]{
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:40px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-link{display:block;padding:5px 20px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+#main{margin-left:var(--sidebar-w);max-width:880px;padding:48px 48px 80px}
+.hero{background:linear-gradient(135deg,#1a1814,#12121c);border:1px solid var(--border);border-radius:12px;padding:36px 40px;margin-bottom:40px}
+.hero h1{font-family:'Lora',serif;font-size:26px;color:var(--text-bright)}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px}
+.hero-sub{font-size:13px;color:var(--teal);margin-top:8px;font-style:italic}
+.ex-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:28px;border-left:3px solid var(--accent)}
+.ex-header{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ex-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:rgba(255,255,255,.06);padding:3px 10px;border-radius:4px;color:var(--accent)}
+.ex-years{font-size:12px;color:var(--text-dim)}
+.ex-card h3{font-size:15px;color:var(--text-bright);margin-bottom:12px;line-height:1.4}
+.note-dup{font-size:12px;color:var(--orange);margin-bottom:10px}
+.box{border-radius:8px;padding:16px 18px;margin:14px 0;border-left:3px solid}
+.box-strat{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.strat-list{padding-left:18px}.strat-list li{margin-bottom:8px;font-size:14px}
+details{background:var(--bg4);border:1px solid var(--border);border-radius:8px;margin:10px 0}
+details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text-bright);font-size:13px}
+.detail-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.code-block{background:var(--bg2);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.code-block.sol{border-left:3px solid var(--accent)}
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer}
+.back-link{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+@media(max-width:768px){#main{margin-left:0;padding:24px}}
+</style>
+<link rel="stylesheet" href="../../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle">☀</button>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Final · Grafi, BFS e connettiv</div>
+    <div class="sub">2021 – 2025</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice Final</a>
+  <a class="nav-link" href="../../index.html">← Indice corso</a>
+  <a class="nav-link" href="#ex-258">Ex. 258</a><a class="nav-link" href="#ex-271">Ex. 271</a><a class="nav-link" href="#ex-275">Ex. 275</a><a class="nav-link" href="#ex-294">Ex. 294</a><a class="nav-link" href="#ex-303">Ex. 303</a>
+</nav>
+<main id="main">
+<a class="back-link" href="../index.html">← Torna all'indice Final</a>
+<div class="hero">
+  <h1><span>Grafi, BFS e connettività</span></h1>
+  <p>Componenti, raggio, reachability</p>
+  <p class="hero-sub">Esercizi tratti dagli esami finali 2021–2025 (exercises-2.pdf, Carzaniga USI)</p>
+</div>
+
+<article class="ex-card" id="ex-258">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 258</span>
+    <span class="ex-years">Final 2021</span>
+  </div>
+  <h3>You are given a set of n persons represented by the set P = {1, 2, . . . , n}, a</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Q1 (P):** conta grado di ogni persona, verifica ≥ℓ, conta quante ≥k.</li><li>**Q2 (NP):** insieme indipendente size k — certificato S, verifica O(k²).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">You are given a set of n persons represented by the set P = {1, 2, . . . , n}, and
+a symmetric relation knows ⊆ P × P represented as a Boolean function knows(p, q), with p, q ∈ P ,
+such that knows(p, q) = true (and knows(q, p) = true) if persons p and q have met at least
+once, or knows(p, q) = knows(q, p) = false otherwise. We are only interested in the relation
+p knows q between two distinct persons p ̸=q, so knows(p, p) is always false, by deﬁnition.
+Question 1: With P and the knows function, you are also given two positive integers k and ℓ, and (10’)
+with that you must decide whether there are at least k persons that have each met at least ℓ other
+persons. Is this decision problem in P? Write an algorithm th at proves it is, or argue otherwise.
+Question 2: With P and the knows function, you are also given a positive integers k, and with (20’)
+that you must decide whether there are at least k persons that have never met each other. Is this
+decision problem in NP? Write an algorithm that proves it is, or argue otherwise.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+Again we are given a graph over the vertex set P , with an edge (p, q) whenever knows(p, q) = true,
+and we are asked whether there is a set S of at least k vertices such that no two vertices in S
+are adjacent, meaning that no two persons in S have met each other. That is, for all p, q ∈ S,
+knows(p, q) = false. This deﬁnition immediately suggests a veriﬁcation algorithm that proves
+that the problem is in NP. The veriﬁcation algorithm takes th e set S as a proof of a true answer.
+Verification(P ,knows, k, S)
+1 if |S| &lt; k
+2 return false
+3 for all p ∈ P
+4 d = 0
+5 for all q ∈ P
+6 if p ̸=q and knows(p, q)
+7 return false
+8 return true</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-271">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 271</span>
+    <span class="ex-years">Final 2022</span>
+  </div>
+  <h3>Some sensors equipped with a radio transmitter/receiver ar e deployed over</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Check-Connectivity:** grafo distanza≤r, BFS da base. O(n²).</li><li>**Minimal-Range:** binary search su r monotono. O(n² log(r/t)).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Some sensors equipped with a radio transmitter/receiver ar e deployed over
+a ﬂat region. The location of each sensor is identiﬁed by its C artesian coordinates (x, y) . The
+sensors are supposed to send data to a central station locate d at coordinates (0, 0), which is also
+equipped with the same radio transmitter/receiver. All tra nsmitters/receivers have an eﬀective
+range r , meaning that two radios can communicate if and only if their distance is at most r .
+However, the sensors and the base station establish a networ k, such that two devices that are not
+within direct radio communication can still communicate in directly through one or more other
+devices that act as relay stations. See the example below.
+S
+a b
+c
+d
+r
+We have four sensors, a, b, c, d, and a base station S. The
+circles represent the range of each radio. Sensor a can
+communicate with the base station directly, and sensor b
+can also communicate with the base station through a act-
+ing as a relay. Sensors c and d can communicate with each
+other but not with S.
+Question 1: Write an algorithm Check-Connectivity(X, Y , r ) that, given the coordinates of all (20’)
+the sensors stored in arrays X and Y , such that sensor i is located at coordinates (X[i], Y [i]), and
+given the communication range r , returns true if all sensors can transmit their data to the base
+station, or false if one or more sensors can not do that. Also, analyze the compl exity of your
+solution.
+Question 2: Write an algorithm Minimal-Connectivity-Range(X, Y , t) that, given the coordinates (20’)
+of all the sensors stored in arrays X and Y , and given a precision threshold t, returns the minimal
+radio range r that would guarantee full connectivity. The resulting radi us r may be an approxi-
+mation of the actual minimal radius r up to a threshold t, meaning that |r − r | ≤ t. Hint: you
+can use the Check-Connectivity algorithm of Question 1. You may use Check-Connectivity
+even if you did not write that algorithm correctly or at all. A nalyze the complexity of Minimal-
+Connectivity-Range.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+The minimal connectivity range is at most equal to the maxima l distance of any sensor from
+the base station. This is because, with that range, each sens or would be directly connected
+to the base station. We set that distance as rmax, and then use Check-Connectivity(X, Y , r )
+to perform a binary search on the result r . The binary search works because, by deﬁnition,
+Check-Connectivity(X, Y , r ) returns true for any value r greater or equal to the minimal con-
+nectivity range r , and false for any value r less than the minimal connectivity range r .
+Minimal-Connectivity-Range(X, Y , t)
+1 rmax = 0
+2 for i = 1 to X. length / /note that X. length = Y .length = n
+3 if
+√
+(X[i]) 2 + (Y [i])2 &gt; r max
+4 rmax =
+√
+(X[i]) 2 + (Y [i])2
+5 rmin = 0
+6 while rmax − rmin &gt; t
+7 r = (rmax + rmin)/2
+8 if Check-Connectivity(X, Y , r )
+9 rmax = r
+10 else rmin = r
+11 return (rmax + rmin)/2
+The complexity is given by the numeric values of the maximal d istance rmax and the threshold t.
+More speciﬁcally, starting from a range rmax, we divide by 2 repeatedly until we reach t. Therefore,
+the while-loop runs for log 2 (rmax/t) iterations. At each iteration, we invoke Check-Connectivity,
+which costs us Θ(n2). Therefore, the complexity is Θ(n2 log (rmax/t))</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-275">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 275</span>
+    <span class="ex-years">Final 2022 B, Final 2022 C</span>
+  </div>
+  <h3>A social network N is deﬁned by a set of users U and by a constant-time func-</h3>
+  <p class="note-dup"><em>Stessa domanda in più sessioni d'esame.</em></p>
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Diametro > d:** BFS da ogni u, se dist(a,b)>d → true. In P.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">A social network N is deﬁned by a set of users U and by a constant-time func-
+tion F (u1, u2) that tells whether users u1 and u2 are “friends”. We say that a social network can
+be covered by a social circle of diameter D ≥ 1 when, for all pairs of users a and b, either F (a, b)
+or there is a chain u1, u2, . . . , uk of k &lt; D other users such that F (a, u1), F (u1, u2), . . . , F (uk, b).
+Given a social network N = (U , F )and a number d, consider the problem of determining whether
+the social network can not be covered by a social circle of diameter d.
+Question 1: Is this problem in NP? Write an algorithm that proves it, or ar gue the opposite. (10’)
+Question 2: Is the problem in P? Write an algorithm that proves it, or argu e the opposite. (20’)</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+The problem is in P. We prove that by showing an algorithm that solves the problem in polynomial
+time.
+Solve(U , F , d)
+1 for u ∈ U
+2 D = BFS(U , F , u)
+3 for v ∈ U
+4 if D[v] &gt; d
+5 return true
+6 return false
+⊲
+Solution 276.1
+Algo-X returns the maximal length of any contiguous subsequence of A whose total value is equal
+to an element of B. If no such sequence exists, the result is 0.
+The worst-case is when the result is 0, which happens when the algorithm iterates through its four
+nested loops. So, intuitively, the complexity is O(n4). As it turns out, a slightly more involved
+analysis shows that this intuitive upper bound is also tight .
+The algorithm eﬀectively iterates over all the pairs (SA, b) where SA is a contiguous subsequence
+of A, and b is an element of B. For each of the nA − ℓ + 1 subsequences of length ℓ, the algorithm
+computes the sum of the subsequence in ℓ steps. So, the overall cost of the computations of all
+the subsequences is 1 (nA) + 2(nA − 1) + 3(nA − 2) + · · · + (nA − 1)(2) + (nA)(1). Intuitively,
+this sum is O((nA)3) and Ω((nA)2). It is also possible to show, for example using a geometric
+argument, that the O((nA)3) upper bound is also tight, so the overall complexity for the s ums of
+all the subsequences is Θ((nA)3). And the algorithm runs this for every element of B, so the overall
+complexity is Θ(nB(nA)3). And since we can choose nA = n/2 and nB = n/2, the total complexity
+is Θ(n4).</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-294">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 294</span>
+    <span class="ex-years">Final 2023</span>
+  </div>
+  <h3>Write an algorithm Minimal-Additional-Edges(G) that takes an undirected (30’)</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Archi minimi:** c componenti → servono c−1 archi. BFS ripetuto.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Write an algorithm Minimal-Additional-Edges(G) that takes an undirected (30’)
+graph G and returns the minimal number of edges that must be added to G to make it connected.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">Notice that G can be seen as the union of c connected components, with 1 ≤ c ≤ n, where each
+connected component is a maximal set of vertexes that form a c onnected subgraph of G. We can
+then connect those components by adding c − 1 edges to form a spanning tree of the connected
+components.
+In practice, we can start from any vertex v0, then visit all the vertexes reachable from v0, directly
+or indirectly using BFS, then ﬁnd the ﬁrst vertex v1 that was not already visited, and therefore
+implicitly count an additional edge (v0, v1), and again visit all the vertexes reachable from v1
+(BFS); then again ﬁnd the next non-visited vertex v2, implicitly count an additional edge (v1, v2),
+and so on until we visited every vertex in G.
+Minimal-Additional-Edges(G = (V , E))
+1 Visited = ∅ / /vertexes that were already visited
+2 c = 0 / /number of connected components
+3 while Visited ̸=V
+4 u = any vertex that is not in Visited / /must exist, since Visited ̸=V
+5 c = c + 1 / /we now run a BFS starting from u
+6 Q = empty queue
+7 enqueue u in Q
+8 Visited = Visited ∪ {u}
+9 while Q is not empty
+10 v = dequeue vertex from Q
+11 for w ∈ Adj(v)
+12 if w ̸∈Visited
+13 enqueue w in Q
+14 Visited = Visited ∪ {w}
+15 return c − 1</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-303">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 303</span>
+    <span class="ex-years">Final 2024</span>
+  </div>
+  <h3>A program consists of a set of functions. When the code of func tion f con- (30’</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Interdependenza k:** BFS su grafo chiamate + grafo inverso per ogni f.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">A program consists of a set of functions. When the code of func tion f con- (30’)
+tains a call to function g, we say that f may call g. This would be a direct call. A function f
+may also call a function g indirectly through a chain of direct calls. And of course a function f
+may also call itself, directly or indirectly. With these deﬁ nitions, we say that a program X has a
+code interdependence level k if X contains at least one function f such that f may call k or more
+functions, directly or indirectly, and f may be called by k or more functions, directly or indirectly.
+Below is an example program X in Python in which aaa may call abc, bbb may call abc, abc may
+call f , f may call g and h, g may call h, and h may call f . Program X has code interdependence level
+3, because function f may call at least three functions ( g, h, and f itself), and may also be called
+by three functions ( aaa, bbb, and abc).
+def abc():
+# ...
+f(1)
+# ...
+def f(x):
+# ...
+y = g(x) + h(x+1)
+# ...
+def g(a):
+# ...
+b = h(7 *a)
+# ...
+def h(x):
+# ...
+f (x+1)
+# ...
+def aaa():
+# ...
+abc(2)
+# ...
+def bbb():
+# ...
+abc(3)
+# ...
+Given a program X, you know that X consists of n = Funcs(X) functions, f1, f2, . . . , fn. For each
+pair of functions fi and fj, you can check whether fi may call fj directly with May-Call(X, i, j).
+Both Funcs(X) and May-Call(X, i, j) run in constant time.
+Consider now the following decision problem: given a progra m X and a positive integer k, check
+whether X has code interdependence level k. Is this decision problem in P? Show a proof of your
+answer.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">The problem is in P. We prove that by showing an algorithm Code-Interdependence(X, k) that
+solves the decision problem. In essence, for each function f , we count the functions that are
+directly or indirectly called by f using a BFS over the graph of the may-call relation. And similarly,
+we use BFS on the graph of the opposite relation—meaning the s ame may-call graph but with all
+the arcs in the opposite direction—to count the functions th at may call f . If those two counts are
+greater or equal to k for some function f , then we return true, otherwise we return false.
+Code-Interdependence(X, k)
+1 n = Funcs(X)
+2 G = empty adjacency list for n nodes
+3 G′ = empty adjacency list for n nodes
+4 for i = 1 to n
+5 for j = 1 to n
+6 if May-Call(X, i, j)
+7 append j to G[i]
+8 append i to G′[j]
+9 for f = 1 to n
+10 if BFS-Count(G, f ) ≥ k and BFS-Count(G′, f ) ≥ k
+11 return true
+12 return false
+BFS-Count(G, s)
+1 c = 0
+2 V = array of n = |G| Boolean values, all initially false
+3 Q = empty queue
+4 enqueue s into Q
+5 while Q is not empty
+6 u = dequeue from Q
+7 for v ∈ G[u]
+8 if not V [v]
+9 V [v] = true
+10 enqueue v into Q
+11 c = c + 1
+12 return c</pre></div>
+  </details>
+</article>
+</main>
+<script>
+const tb=document.getElementById('themeToggle');
+const s=localStorage.getItem('algo-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+tb.textContent=s==='light'?'🌙':'☀';
+tb.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('algo-theme',n);tb.textContent=n==='light'?'🌙':'☀';};
+</script>
+<script src="../../mobile.js"></script>
+</body>
+</html>

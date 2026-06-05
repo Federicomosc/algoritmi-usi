@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guida allo studio — Algoritmi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:280px;
+}
+html[data-theme="light"] {
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+  --gold:#9a7b10;--teal:#1a7a62;--red:#b8323c;--blue:#2a6cb8;
+  --purple:#7a3a9a;--orange:#a85a18;--green:#3a7a32;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.75}
+
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:48px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-header .title{color:var(--teal);font-family:'Lora',serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-label{padding:4px 20px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:12px}
+.nav-link{display:block;padding:6px 20px 6px 28px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:all .15s}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--teal)}
+
+#main{margin-left:var(--sidebar-w);max-width:860px;padding:48px 52px 100px}
+.hero{background:linear-gradient(135deg,#141a18,#12121c);border:1px solid var(--border);border-radius:12px;padding:40px 44px;margin-bottom:48px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-70px;right:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(78,201,168,.12) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-family:'Lora',serif;font-size:30px;font-weight:700;color:var(--text-bright);line-height:1.25}
+.hero h1 span{color:var(--teal)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:12px;max-width:580px}
+
+section{margin-bottom:52px;scroll-margin-top:24px}
+section h2{font-family:'Lora',serif;font-size:22px;font-weight:700;color:var(--text-bright);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:22px}
+section h2 .n{color:var(--teal);margin-right:8px;font-size:16px}
+section h3{font-size:14px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin:28px 0 12px}
+p{margin-bottom:12px}
+ul,ol{padding-left:20px;margin-bottom:14px}
+li{margin-bottom:6px}
+strong{color:var(--text-bright);font-weight:600}
+a{color:var(--teal);text-decoration:none;font-weight:500}
+a:hover{text-decoration:underline}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg4);color:var(--teal);padding:1px 6px;border-radius:4px}
+
+.box{border-radius:8px;padding:16px 20px;margin:18px 0;border-left:3px solid}
+.box-tip{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-warn{background:rgba(224,108,117,.07);border-color:var(--red)}
+.box-gold{background:rgba(232,197,71,.07);border-color:var(--gold)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.box-tip .box-label{color:var(--teal)}
+.box-warn .box-label{color:var(--red)}
+.box-gold .box-label{color:var(--gold)}
+
+/* Timeline percorso */
+.path{display:flex;flex-direction:column;gap:0;margin:20px 0}
+.path-step{display:grid;grid-template-columns:48px 1fr;gap:16px;position:relative;padding-bottom:24px}
+.path-step:not(:last-child)::before{content:'';position:absolute;left:23px;top:40px;bottom:0;width:2px;background:var(--border)}
+.path-num{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0;z-index:1}
+.path-body{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.path-body h4{font-size:14px;color:var(--text-bright);margin-bottom:6px}
+.path-body p{font-size:13px;color:var(--text-dim);margin:0 0 8px}
+.path-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid;text-decoration:none;transition:filter .15s}
+.chip:hover{filter:brightness(1.15);text-decoration:none}
+.chip-gold{border-color:var(--gold);color:var(--gold);background:rgba(232,197,71,.08)}
+.chip-purple{border-color:var(--purple);color:var(--purple);background:rgba(198,120,221,.08)}
+.chip-orange{border-color:var(--orange);color:var(--orange);background:rgba(229,149,58,.08)}
+.chip-green{border-color:var(--green);color:var(--green);background:rgba(152,195,121,.08)}
+.chip-blue{border-color:var(--blue);color:var(--blue);background:rgba(97,175,239,.08)}
+
+/* Tabella metodo */
+.tbl-wrap{overflow-x:auto;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg4);color:var(--teal);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+
+/* Fasi settimana */
+.phases{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media(max-width:640px){.phases{grid-template-columns:1fr}}
+.phase{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;border-top:3px solid var(--teal)}
+.phase h4{font-size:14px;color:var(--text-bright);margin-bottom:8px}
+.phase .when{font-size:11px;color:var(--text-dim);margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.phase ul{font-size:13px;margin:0}
+
+/* Checklist */
+.checklist{list-style:none;padding:0}
+.checklist li{padding:10px 14px 10px 40px;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;font-size:14px}
+.checklist li::before{content:'☐';position:absolute;left:14px;color:var(--teal);font-size:16px}
+
+/* Pattern esame */
+.patterns{display:grid;gap:12px}
+.pattern{display:grid;grid-template-columns:140px 1fr;gap:14px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;align-items:start}
+@media(max-width:600px){.pattern{grid-template-columns:1fr}}
+.pattern-type{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--orange);padding-top:2px}
+.pattern-body{font-size:13px}
+.pattern-body strong{display:block;color:var(--text-bright);margin-bottom:4px;font-size:14px}
+
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--teal);font-size:18px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+@media(max-width:768px){#main{margin-left:0;padding:24px 20px 60px}}
+</style>
+<link rel="stylesheet" href="./mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Guida allo studio</div>
+    <div class="sub">Algoritmi · USI · Carzaniga</div>
+  </div>
+  <a class="nav-link" href="index.html">← Indice appunti</a>
+  <div class="nav-label">Contenuto</div>
+  <a class="nav-link" href="#mindset">Mindset</a>
+  <a class="nav-link" href="#ordine">Ordine di studio</a>
+  <a class="nav-link" href="#metodo">Metodo per capitolo</a>
+  <a class="nav-link" href="#fasi">Piano per fasi</a>
+  <a class="nav-link" href="#esame">Tipi domanda esame</a>
+  <a class="nav-link" href="#cosa">Cosa imparare a memoria</a>
+  <a class="nav-link" href="#errori">Errori comuni</a>
+  <a class="nav-link" href="#checklist">Checklist pre-esame</a>
+  <a class="nav-link" href="#mobile">Studiare da telefono</a>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Come studiare</span><br>Algoritmi & Strutture Dati</h1>
+  <p>Una guida pratica su <em>cosa</em> studiare, in <em>che ordine</em>, e <em>come</em> usare gli appunti, i simulatori, i quiz e i finali per arrivare preparato all'esame.</p>
+</div>
+
+<!-- ═══ 1. MINDSET ═══ -->
+<section id="mindset">
+<h2><span class="n">1</span>Il mindset giusto</h2>
+
+<div class="box box-gold">
+  <div class="box-label">Regola d'oro</div>
+  <p>Non studiare algoritmi <strong>leggendo</strong> — li studi <strong>facendo</strong>: tracci a mano, esegui il simulatore, scrivi pseudocodice, spiega ad alta voce «perché questo passo».</p>
+</div>
+
+<p>Il corso di Carzaniga non chiede solo definizioni: chiede di <strong>ragionare</strong>. All'esame vedrai domande del tipo:</p>
+<ul>
+  <li>«Cosa fa questo algoritmo?» (semantica, non parafrasi del codice)</li>
+  <li>«Scrivi una versione migliore» (complessità più bassa, stesso risultato)</li>
+  <li>«Questo problema è in P o in NP?» (algoritmo o certificato + verificatore)</li>
+  <li>«Scrivi l'algoritmo e analizza la complessità»</li>
+</ul>
+
+<p>Ogni appunto HTML che hai è strutturato per questo: box <strong>«In parole semplici»</strong> → teoria → esempio numerico → simulatore → quiz → esercizi. Segui sempre quell'ordine.</p>
+
+<div class="box box-tip">
+  <div class="box-label">Tempo consigliato per capitolo</div>
+  <p>Capitolo medio (es. Grafi BFS): <strong>2–3 ore</strong> la prima volta (lettura + simulatore + quiz). Ripasso: <strong>45 min</strong>. Capitoli difficili (DP, RB-tree): <strong>4–5 ore</strong>.</p>
+</div>
+</section>
+
+<!-- ═══ 2. ORDINE ═══ -->
+<section id="ordine">
+<h2><span class="n">2</span>Ordine di studio consigliato</h2>
+
+<p>Segui l'ordine del corso: ogni capitolo usa quelli precedenti. Non saltare avanti se non hai capito complessità asintotica o liste/hash.</p>
+
+<div class="path">
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(232,197,71,.15);color:var(--gold)">01</div>
+  <div class="path-body">
+    <h4>Complessità — le fondamenta</h4>
+    <p>Devi saper leggere Θ, O, Ω e analizzare un ciclo annidato <em>prima</em> di tutto il resto. Senza questo, non capisci perché un algoritmo «migliore» è davvero migliore.</p>
+    <div class="path-links">
+      <a class="chip chip-gold" href="01 - Complessita/01 - Analisi della complessita.html">Analisi complessità</a>
+      <a class="chip chip-gold" href="01 - Complessita/02 - Teoria della complessita.html">Teoria P/NP</a>
+    </div>
+    <p style="margin-top:10px;font-size:12px"><strong>Obiettivo:</strong> dato un pseudocodice, dire la complessità e giustificarla in 2 righe.</p>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(198,120,221,.15);color:var(--purple)">02</div>
+  <div class="path-body">
+    <h4>Strutture dati elementari</h4>
+    <p>Liste, pile, code, hash table. Servono ovunque dopo (grafo = lista adiacenze, heap = array, ecc.).</p>
+    <div class="path-links">
+      <a class="chip chip-purple" href="02 - Strutture dati/01 - Strutture elementari e hash tables.html">Hash & strutture</a>
+    </div>
+    <p style="margin-top:10px;font-size:12px"><strong>Obiettivo:</strong> sapere quando lista vs matrice di adiacenza; chaining vs open addressing.</p>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(229,149,58,.15);color:var(--orange)">03</div>
+  <div class="path-body">
+    <h4>Ordinamento</h4>
+    <p>Insertion sort → MergeSort (D&C + master theorem) → QuickSort + HeapSort. Capisci <em>perché</em> QuickSort è O(n log n) medio e O(n²) worst case.</p>
+    <div class="path-links">
+      <a class="chip chip-orange" href="03 - Ordinamento/01 - Insertion sort.html">Insertion sort</a>
+      <a class="chip chip-orange" href="03 - Ordinamento/02 - Divide and conquer.html">Divide & conquer</a>
+      <a class="chip chip-orange" href="03 - Ordinamento/03 - Quick sort e heap sort.html">Quick & heap sort</a>
+    </div>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(152,195,121,.15);color:var(--green)">04</div>
+  <div class="path-body">
+    <h4>Alberi</h4>
+    <p>BST → Red-Black → B-tree. Focus su insert/delete, rotazioni, invarianti. All'esame spesso: «conta chiavi in range» o «altezza differenza foglie».</p>
+    <div class="path-links">
+      <a class="chip chip-green" href="04 - Alberi/01 - Binary search trees.html">BST</a>
+      <a class="chip chip-green" href="04 - Alberi/02 - Red-black trees.html">Red-black</a>
+      <a class="chip chip-green" href="04 - Alberi/03 - B-trees.html">B-trees</a>
+    </div>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(97,175,239,.15);color:var(--blue)">05</div>
+  <div class="path-body">
+    <h4>Grafi</h4>
+    <p>BFS, DFS, MST (Kruskal/Prim), Dijkstra. Impara a tracciare la coda BFS e l'ordine di visita DFS a mano su un grafo piccolo.</p>
+    <div class="path-links">
+      <a class="chip chip-blue" href="05 - Grafi/01 - Rappresentazione e algoritmi base.html">BFS & DFS</a>
+      <a class="chip chip-blue" href="05 - Grafi/02 - Minimal spanning trees.html">MST</a>
+      <a class="chip chip-blue" href="05 - Grafi/03 - Dijkstra.html">Dijkstra</a>
+    </div>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(229,149,58,.15);color:var(--orange)">06</div>
+  <div class="path-body">
+    <h4>Tecniche algoritmiche — il cuore dell'esame</h4>
+    <p>Greedy e DP sono i capitoli più difficili e più presenti ai finali. Studiali con calma, esempi numerici passo-passo, simulatori.</p>
+    <div class="path-links">
+      <a class="chip chip-orange" href="06 - Tecniche algoritmiche/01 - Greedy algorithms.html">Greedy</a>
+      <a class="chip chip-orange" href="06 - Tecniche algoritmiche/02 - Programmazione dinamica.html">Programmazione dinamica</a>
+    </div>
+  </div>
+</div>
+
+<div class="path-step">
+  <div class="path-num" style="background:rgba(224,108,117,.15);color:var(--red)">★</div>
+  <div class="path-body">
+    <h4>Finali 2021–2025 — simulazione esame</h4>
+    <p>Dopo aver fatto almeno cartelle 01–06, passa ai finali raggruppati per tipo di domanda. Non farlo prima: ti frustreresti senza le basi.</p>
+    <div class="path-links">
+      <a class="chip" style="border-color:var(--red);color:var(--red);background:rgba(224,108,117,.08)" href="final/index.html">Final 2021–2025</a>
+    </div>
+  </div>
+</div>
+
+</div>
+</section>
+
+<!-- ═══ 3. METODO ═══ -->
+<section id="metodo">
+<h2><span class="n">3</span>Metodo: cosa fare in ogni capitolo</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Passo</th><th>Cosa fare</th><th>Tempo</th></tr>
+<tr>
+  <td><strong>1. Box «In parole semplici»</strong></td>
+  <td>Leggi senza saltare. Se non lo capisci, non andare avanti — è la mappa del capitolo.</td>
+  <td>5 min</td>
+</tr>
+<tr>
+  <td><strong>2. Teoria + pseudocodice</strong></td>
+  <td>Segui con penna e foglio. Copia il pseudocodice e aggiungi commenti tuoi in italiano.</td>
+  <td>20–40 min</td>
+</tr>
+<tr>
+  <td><strong>3. Esempio numerico</strong></td>
+  <td>Rifai i calcoli <em>senza guardare</em>. Poi confronta. Es.: tabella OPT, traccia Huffman, passi Dijkstra.</td>
+  <td>15–30 min</td>
+</tr>
+<tr>
+  <td><strong>4. Simulatore</strong></td>
+  <td>Premi Avanti lentamente. Dopo ogni step chiediti: «perché ha scelto questo?»</td>
+  <td>10–20 min</td>
+</tr>
+<tr>
+  <td><strong>5. Quiz V/F</strong></td>
+  <td>Obiettivo: <strong>8/8</strong> al primo colpo dopo il ripasso. Se sbagli, rileggi la sezione collegata.</td>
+  <td>10 min</td>
+</tr>
+<tr>
+  <td><strong>6. Esercizi guidati</strong></td>
+  <td>Prova da solo, poi apri la soluzione. Chiudi e rifai senza guardare.</td>
+  <td>20–40 min</td>
+</tr>
+<tr>
+  <td><strong>7. Riepilogo esame</strong></td>
+  <td>Box in fondo al capitolo: copialo su un foglio «cheat sheet» personale (solo per ripasso, non all'esame!).</td>
+  <td>5 min</td>
+</tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Cosa NON fare</div>
+  <ul style="margin:0">
+    <li>Leggere tutto il corso una volta e pensare di aver finito</li>
+    <li>Saltare i simulatori («li guardo dopo»)</li>
+    <li>Memorizzare pseudocodice senza capire <em>perché</em> funziona</li>
+    <li>Fare solo quiz senza rifare esempi a mano</li>
+  </ul>
+</div>
+</section>
+
+<!-- ═══ 4. FASI ═══ -->
+<section id="fasi">
+<h2><span class="n">4</span>Piano per fasi (se hai poco tempo)</h2>
+
+<p>Adatta le settimane al tempo che hai. Se mancano 2 settimane all'esame, concentrati su fase 2 + 3 + finali.</p>
+
+<div class="phases">
+
+<div class="phase">
+  <div class="when">Fase 1 · Settimane 1–2</div>
+  <h4>Costruire le basi</h4>
+  <ul>
+    <li>Cartella 01 (complessità) — tutto</li>
+    <li>Cartella 02 (hash, liste)</li>
+    <li>Cartella 03 (ordinamento) — almeno MergeSort e QuickSort</li>
+    <li>Quiz di ogni capitolo completato</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="when">Fase 2 · Settimane 3–4</div>
+  <h4>Strutture avanzate</h4>
+  <ul>
+    <li>Cartella 04 (BST + RB-tree; B-tree se c'è tempo)</li>
+    <li>Cartella 05 (BFS, DFS, MST, Dijkstra)</li>
+    <li>Tracciare BFS e Dijkstra a mano su grafo 6 nodi</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="when">Fase 3 · Settimane 5–6</div>
+  <h4>Tecniche + consolidamento</h4>
+  <ul>
+    <li>Cartella 06 (Greedy poi DP — in questo ordine)</li>
+    <li>Weighted activity selection: capire perché greedy fallisce</li>
+    <li>Knapsack 0-1: riempire tabella K(w,j) a mano</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <div class="when">Fase 4 · Settimana 7+</div>
+  <h4>Simulazione esame</h4>
+  <ul>
+    <li><a href="final/index.html">Final 2021–2025</a> — una categoria al giorno</li>
+    <li>Midterm PDF sotto tempo (2–3 ore)</li>
+    <li>Ripasso cheat sheet + quiz sbagliati</li>
+  </ul>
+</div>
+
+</div>
+</section>
+
+<!-- ═══ 5. ESAME ═══ -->
+<section id="esame">
+<h2><span class="n">5</span>Tipi di domanda all'esame — come affrontarli</h2>
+
+<p>I finali Carzaniga (2021–2025) ripetono pochi pattern. Impara a riconoscerli:</p>
+
+<div class="patterns">
+
+<div class="pattern">
+  <div class="pattern-type">ALGO-X / Y</div>
+  <div class="pattern-body">
+    <strong>«Cosa fa?» + «Scrivi Better-Algo-X»</strong>
+    Passo 1: descrivi in <em>una frase</em> cosa calcola (non riga per riga). Passo 2: complessità worst case con input patologico. Passo 3: idea miglioramento (sort, two pointers, sliding window, counting array). Passo 4: pseudocodigo + complessità nuova.
+    <br><a href="final/01 - Analisi e miglioramento algoritmi/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+<div class="pattern">
+  <div class="pattern-type">BST / ALBERI</div>
+  <div class="pattern-body">
+    <strong>«Conta chiavi in [a,b]» o «differenza altezze foglie»</strong>
+    Sfrutta proprietà BST: poda il ramo sinistro se key > b, destro se key < a. Con campo <code>size</code> → O(h). Scrivi ricorsione o iterazione con conteggio.
+    <br><a href="final/02 - BST e alberi binari/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+<div class="pattern">
+  <div class="pattern-type">GRAFI / BFS</div>
+  <div class="pattern-body">
+    <strong>Connettività, componenti, raggio minimo</strong>
+    Modello come grafo → BFS/DFS. Componenti connesse: ripeti BFS finché ci sono vertici non visitati. Raggio minimo: binary search su r + Check(r) monotono.
+    <br><a href="final/03 - Grafi BFS e connettivita/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+<div class="pattern">
+  <div class="pattern-type">DP</div>
+  <div class="pattern-body">
+    <strong>Ricorrenza + tabella</strong>
+    Identifica sottoproblema (prefisso, coppia indici, gioco a due pile). Scrivi ricorrenza. Casi base. Riempi tabella bottom-up. Analizza O(dimensione tabella).
+    <br><a href="final/04 - Programmazione dinamica/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+<div class="pattern">
+  <div class="pattern-type">P / NP</div>
+  <div class="pattern-body">
+    <strong>«È in P? È in NP?»</strong>
+    <em>In NP:</em> certificato + Verification(p, cert) polinomiale. <em>In P:</em> algoritmo Solve(p) polinomiale esplicito. Non confondere: NP ≠ «non si risolve» — significa «si verifica velocemente con un certificato».
+    <br><a href="final/08 - Problemi decisionali P e NP/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+<div class="pattern">
+  <div class="pattern-type">HEAP</div>
+  <div class="pattern-body">
+    <strong>Insert, delete, extract, change</strong>
+    Delete posizione i = sposta ultimo in i + heapify up/down. O(log n). Conosci Heap-Extract-Max a memoria.
+    <br><a href="final/05 - Heap/index.html">→ Esercizi finali</a>
+  </div>
+</div>
+
+</div>
+
+<h3>Strategia il giorno dell'esame</h3>
+<ol>
+  <li>Leggi tutti gli esercizi (5 min) — segna quali riconosci per pattern</li>
+  <li>Inizia da quello che sai fare meglio (confidence boost)</li>
+  <li>Per Algo-X: prima Q1 (semantica + complessità), poi Q2 (Better) — i punti Q1 sono «gratis» se capisci il codice</li>
+  <li>Scrivi pseudocodice pulito con indentazione — Carzaniga valuta chiarezza</li>
+  <li>Alla fine: analisi complessità per ogni algoritmo scritto</li>
+</ol>
+</section>
+
+<!-- ═══ 6. COSA MEMORIZZARE ═══ -->
+<section id="cosa">
+<h2><span class="n">6</span>Cosa imparare a memoria vs capire</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Imparare a memoria</th><th>Capire (non memorizzare parrot)</th></tr>
+<tr>
+  <td>
+    <ul style="margin:0">
+      <li>Definizioni Θ, O, Ω</li>
+      <li>Proprietà heap (padre ≥ figli)</li>
+      <li>Invarianti RB-tree (5 regole)</li>
+      <li>Schema GENERIC-MST, BFS, DFS</li>
+      <li>Ricorrenze DP classiche (LIS, edit distance, knapsack)</li>
+      <li>Greedy-choice vs optimal substructure</li>
+    </ul>
+  </td>
+  <td>
+    <ul style="margin:0">
+      <li><em>Quando</em> usare greedy vs DP</li>
+      <li>Tracciare algoritmo su input nuovo</li>
+      <li>Dimostrare perché greedy funziona (exchange argument)</li>
+      <li>Costruire ricorrenza per problema nuovo</li>
+      <li>Progettare Better-Algo-X</li>
+      <li>Dimostrare P/NP con algoritmo o certificato</li>
+    </ul>
+  </td>
+</tr>
+</table>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Foglio personale di ripasso</div>
+  <p>Crea un foglio A4 per capitolo con: pseudocodice chiave, complessità, 1 esempio numerico mini, 1 errore da evitare. Usa i box «Riepilogo esame» negli appunti come base.</p>
+</div>
+</section>
+
+<!-- ═══ 7. ERRORI ═══ -->
+<section id="errori">
+<h2><span class="n">7</span>Errori comuni da evitare</h2>
+
+<ul>
+  <li><strong>Parafrasare il codice</strong> invece di spiegare la semantica («il ciclo incrementa j» ≠ risposta valida)</li>
+  <li><strong>Confondere O e Θ</strong> — O è upper bound, Θ è tight bound</li>
+  <li><strong>Greedy su knapsack 0-1</strong> — funziona solo frazionario</li>
+  <li><strong>Dijkstra con pesi negativi</strong> — serve Bellman-Ford</li>
+  <li><strong>DP senza casi base</strong> — tabella sbagliata da subito</li>
+  <li><strong>NP = «impossibile»</strong> — NP = verificabile in tempo polinomiale con certificato</li>
+  <li><strong>Dimenticare analisi complessità</strong> — ogni algoritmo scritto all'esame va analizzato</li>
+  <li><strong>Non podare BST</strong> — visitare tutto l'albero quando il range esclude un ramo</li>
+</ul>
+</section>
+
+<!-- ═══ 8. CHECKLIST ═══ -->
+<section id="checklist">
+<h2><span class="n">8</span>Checklist pre-esame</h2>
+
+<p>Stampa o copia questa lista. Segna ogni voce quando ti senti pronto.</p>
+
+<h3>Basi</h3>
+<ul class="checklist">
+  <li>So analizzare complessità di un doppio ciclo e di un algoritmo ricorsivo</li>
+  <li>So spiegare differenza tra P, NP, NP-completo</li>
+  <li>Conosco lista vs matrice di adiacenza (pro/contro)</li>
+</ul>
+
+<h3>Algoritmi core</h3>
+<ul class="checklist">
+  <li>So tracciare MergeSort e QuickSort su array 8 elementi</li>
+  <li>So tracciare BFS con coda e colori WHITE/GRAY/BLACK</li>
+  <li>So tracciare Dijkstra con tabella D[] e P[]</li>
+  <li>So costruire MST con Kruskal (Union-Find) o Prim</li>
+  <li>So inserire/cancellare in BST e spiegare rotazione RB</li>
+</ul>
+
+<h3>Tecniche</h3>
+<ul class="checklist">
+  <li>So quando greedy funziona (activity selection, Huffman, fractional knapsack)</li>
+  <li>So quando greedy fallisce e serve DP (0-1 knapsack, weighted activity)</li>
+  <li>So scrivere ricorrenza OPT[i] per weighted activity selection</li>
+  <li>So riempire tabella knapsack K(w,j) e LIS L(j)</li>
+</ul>
+
+<h3>Simulazione esame</h3>
+<ul class="checklist">
+  <li>Ho fatto almeno 5 esercizi dalla cartella <a href="final/index.html">final/</a> senza guardare soluzione</li>
+  <li>So spiegare un Algo-X e scrivere Better-Algo-X in &lt; 25 min</li>
+  <li>So scrivere verificatore NP per un problema decisionale</li>
+  <li>Ho ripassato midterm PDF almeno una volta</li>
+</ul>
+
+<div class="box box-gold" style="margin-top:28px">
+  <div class="box-label">Punto di partenza ogni sessione</div>
+  <p>Apri <a href="index.html">index.html</a> → scegli capitolo → segui i 7 passi del §3. Quando hai finito un capitolo, spunta il quiz 8/8 e aggiungi una riga al tuo foglio di ripasso.</p>
+</div>
+
+</section>
+
+<!-- ═══ 9. MOBILE ═══ -->
+<section id="mobile">
+<h2><span class="n">9</span>Studiare da telefono</h2>
+
+<p>Gli appunti funzionano su smartphone e tablet. Su schermi stretti la barra laterale diventa un <strong>menu a cassetto</strong>: tocca il pulsante <strong>☰</strong> in alto a sinistra per aprire la navigazione.</p>
+
+<h3>Come aprire i file sul telefono</h3>
+
+<div class="box box-tip">
+  <div class="box-label">Opzione 1 — Cloud (più semplice)</div>
+  <p>Copia la cartella <code>algoritmi final</code> su <strong>iCloud Drive</strong>, Google Drive o Dropbox. Dal telefono apri il file <code>index.html</code> con Safari o Chrome. Mantieni intatta la struttura delle sottocartelle.</p>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Opzione 2 — Stessa rete Wi‑Fi</div>
+  <p>Sul Mac, nella cartella del progetto:</p>
+  <pre style="background:var(--bg4);padding:12px 16px;border-radius:8px;font-size:12px;overflow-x:auto;margin:10px 0 12px"><code>python3 -m http.server 8080</code></pre>
+  <p>Trova l'IP del Mac (Impostazioni → Rete, es. <code>192.168.1.42</code>). Sul telefono apri <code>http://192.168.1.42:8080</code> nel browser.</p>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Opzione 3 — Online (sempre disponibile)</div>
+  <p>Carica la cartella su <strong>GitHub Pages</strong>, Netlify o Vercel. Ottieni un link permanente accessibile da qualsiasi dispositivo.</p>
+</div>
+
+<h3>Suggerimenti su mobile</h3>
+<ul>
+  <li>Le tabelle larghe si scorrono orizzontalmente — trascina con il dito</li>
+  <li>I simulatori interattivi funzionano anche al touch</li>
+  <li>Il tema chiaro/scuro (☀ in alto a destra) si ricorda tra le sessioni</li>
+  <li>Aggiungi <code>index.html</code> ai preferiti del browser per un accesso rapido</li>
+</ul>
+</section>
+
+</main>
+
+<script>
+const tb = document.getElementById('themeToggle');
+const s = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', s);
+tb.textContent = s === 'light' ? '🌙' : '☀';
+tb.onclick = () => {
+  const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('algo-theme', n);
+  tb.textContent = n === 'light' ? '🌙' : '☀';
+};
+</script>
+<script src="./mobile.js"></script>
+</body>
+</html>

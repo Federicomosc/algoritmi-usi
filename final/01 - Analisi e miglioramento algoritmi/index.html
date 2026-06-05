@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analisi e miglioramento algoritmi — Final USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=JetBrains+Mono&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#c678dd;
+}
+html[data-theme="light"]{
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:40px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-link{display:block;padding:5px 20px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+#main{margin-left:var(--sidebar-w);max-width:880px;padding:48px 48px 80px}
+.hero{background:linear-gradient(135deg,#1a1814,#12121c);border:1px solid var(--border);border-radius:12px;padding:36px 40px;margin-bottom:40px}
+.hero h1{font-family:'Lora',serif;font-size:26px;color:var(--text-bright)}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px}
+.hero-sub{font-size:13px;color:var(--teal);margin-top:8px;font-style:italic}
+.ex-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:28px;border-left:3px solid var(--accent)}
+.ex-header{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ex-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:rgba(255,255,255,.06);padding:3px 10px;border-radius:4px;color:var(--accent)}
+.ex-years{font-size:12px;color:var(--text-dim)}
+.ex-card h3{font-size:15px;color:var(--text-bright);margin-bottom:12px;line-height:1.4}
+.note-dup{font-size:12px;color:var(--orange);margin-bottom:10px}
+.box{border-radius:8px;padding:16px 18px;margin:14px 0;border-left:3px solid}
+.box-strat{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.strat-list{padding-left:18px}.strat-list li{margin-bottom:8px;font-size:14px}
+details{background:var(--bg4);border:1px solid var(--border);border-radius:8px;margin:10px 0}
+details summary{padding:12px 16px;cursor:pointer;font-weight:600;color:var(--text-bright);font-size:13px}
+.detail-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.code-block{background:var(--bg2);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.code-block.sol{border-left:3px solid var(--accent)}
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer}
+.back-link{display:inline-block;margin-bottom:24px;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+@media(max-width:768px){#main{margin-left:0;padding:24px}}
+</style>
+<link rel="stylesheet" href="../../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle">☀</button>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Final · Analisi e migliorament</div>
+    <div class="sub">2021 – 2025</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice Final</a>
+  <a class="nav-link" href="../../index.html">← Indice corso</a>
+  <a class="nav-link" href="#ex-257">Ex. 257</a><a class="nav-link" href="#ex-273">Ex. 273</a><a class="nav-link" href="#ex-276">Ex. 276</a><a class="nav-link" href="#ex-277">Ex. 277</a><a class="nav-link" href="#ex-293">Ex. 293</a><a class="nav-link" href="#ex-304">Ex. 304</a><a class="nav-link" href="#ex-306">Ex. 306</a><a class="nav-link" href="#ex-317">Ex. 317</a>
+</nav>
+<main id="main">
+<a class="back-link" href="../index.html">← Torna all'indice Final</a>
+<div class="hero">
+  <h1><span>Analisi e miglioramento algoritmi</span></h1>
+  <p>Domanda tipo: «cosa fa Algo-X?» + scrivi Better-Algo-X più efficiente</p>
+  <p class="hero-sub">Esercizi tratti dagli esami finali 2021–2025 (exercises-2.pdf, Carzaniga USI)</p>
+</div>
+
+<article class="ex-card" id="ex-257">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 257</span>
+    <span class="ex-years">Final 2021</span>
+  </div>
+  <h3>Consider the following algorithm Algo-X(A) that takes a sequence A of n</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** ordina l'array per resto modulo 4 (bucket sort a inserimento). Complessità Θ(n²).</li><li>**Better-Algo-X:** two pointers i/j; per ogni resto m mod 4, sposta elementi con scambi. O(n).</li><li>**Pattern esame:** riconoscere semantica ad alto livello, poi partition O(n) se dominio piccolo.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-X(A) that takes a sequence A of n
+numbers.
+Algo-X(A)
+1 for i = 2 to A. length
+2 j = i − 1
+3 a = remainder of the integer division A[i]/4
+4 s = true
+5 while j &gt; 0
+6 b = remainder of the integer division A[j]/4
+7 if a &lt; b
+8 swap A[j] ↔ A[j + 1]
+9 j = j − 1
+10 else j = 0
+Question 1: Explain what Algo-X does. Do not simply paraphrase the code. Instead, explain th e (5’)
+high-level semantics, independent of the code. Also, analy ze the complexity of Algo-X.
+Question 2: Write an algorithm called Linear-Algo-X that does exactly the same thing as Algo-X, (25’)
+but with a O(n) time complexity. Notice that if Algo-X modiﬁes the content of the input array
+A, then Linear-Algo-X must do the same. Otherwise, if Algo-X does not modify A, then Linear-
+Algo-X must not modify A.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+Linear-Algo-X(A)
+1 m = 0
+2 i = 1
+3 while i &lt; A. length
+4 j = A. length
+5 while i &lt; j
+6 if A[i] = = m mod 4
+7 i = i + 1
+8 elseif A[j] ̸=m mod 4
+9 j = j − 1
+10 else swap A[i] ↔ A[j]
+11 i = i + 1
+12 j = j − 1
+13 m = m + 1</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-273">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 273</span>
+    <span class="ex-years">Final 2022</span>
+  </div>
+  <h3>Consider the following algorithm Algo-X(A, B) operating on two arrays of</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** verifica se A e B sono multiset uguali. Worst case Θ(n²).</li><li>**Better-Algo-X:** ordina copie → confronta elemento per elemento. O(n log n).</li><li>**Pattern:** confronto multiset → sort + scan.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-X(A, B) operating on two arrays of
+numbers A and B of total length A. length + B. length = n:
+Algo-X(A, B)
+1 C = [false] ∗ A. length / /array of A. length Boolean values all initially false
+2 for j = 1 to B. length
+3 i = 1
+4 while i ≤ A. length and (C[i] = = true or A[i] ̸=B[j])
+5 i = i + 1
+6 if i ≤ A. length
+7 C[i] = true
+8 else return false
+9 for i = 1 to A. length
+10 if C[i] = = false
+11 return false
+12 return true
+Question 1: Explain what Algo-X does. Do not simply paraphrase the code. Instead, explain th e (10’)
+high-level semantics, independent of the code. Also, analy ze the best and worst-case complexity
+of Algo-X.
+Question 2: Write an algorithm called Better-Algo-X that does exactly the same thing as Algo- (20’)
+X, but with a strictly better worst-case time complexity and e qual or better best-case complexity.
+Analyze the complexity of Better-Algo-X. Notice that if Algo-X modiﬁes the content of the input
+arrays A and B, then Better-Algo-X must do the same. Otherwise, if Algo-X does not modify A
+and B, then Better-Algo-X must not modify A and B.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+We must compare the sequences as multi-sets. We do that by ﬁrs t sorting the two sequences, so
+that we can then compare the sequences element-by-element i n each position.
+Better-Algo-X(A, B)
+1 if A. length ̸=B. length
+2 return false
+3 C = sorted copy of A
+4 D = sorted copy of B
+5 for i = 1 to A. length
+6 if C[i] ̸=D[j]
+7 return false
+8 return true</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-276">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 276</span>
+    <span class="ex-years">Final 2022 B, Final 2022 C</span>
+  </div>
+  <h3>Consider the following algorithm Algo-X(A, B) operating on two arrays of</h3>
+  <p class="note-dup"><em>Stessa domanda in più sessioni d'esame.</em></p>
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** max lunghezza sottosequenza contigua di A con somma in B. Θ(n⁴).</li><li>**Better-Algo-X:** sliding sum — aggiorna somma in O(1) spostando finestra.</li><li>**Pattern:** somme su sottosequenze contigue → prefix/sliding sum.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-X(A, B) operating on two arrays of
+numbers A and B of total length A. length + B. length = n:
+Algo-X(A, B)
+1 for ℓ = A. length downto 1
+2 for j = 1 to B. length
+3 for i = 1 to A. length − ℓ + 1
+4 s = 0
+5 for k = i to i + ℓ − 1
+6 s = s + A[k]
+7 if s = = B[j]
+8 return ℓ
+9 return 0
+Question 1: Explain what Algo-X does. Do not simply paraphrase the code. Instead, explain th e (10’)
+high-level semantics, independent of the code. Also, analy ze the best and worst-case complexity
+of Algo-X.
+Question 2: Write an algorithm called Better-Algo-X that does exactly the same thing as Algo- (20’)
+X, but with a strictly better worst-case time complexity and e qual or better best-case complexity.
+Analyze the complexity of Better-Algo-X. Notice that if Algo-X modiﬁes the content of the input
+arrays A and B, then Better-Algo-X must do the same. Otherwise, if Algo-X does not modify A
+and B, then Better-Algo-X must not modify A and B.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+We can get an immediate improvement of a factor of n by simply computing the sums of the
+various subsequences incrementally. That is, once you have a sum of a subsequence of length ℓ
+starting at position i, you can get the next sequence starting at position i + 1 in constant time by
+adding the element at position i + ℓ and subtracting the element at position i.
+Better-Algo-X(A, B)
+1 for ℓ = A. length downto 1
+2 for j = 1 to B. length
+3 s = 0
+4 for k = 1 to ℓ
+5 s = s + A[k]
+6 if s = = B[j]
+7 return ℓ
+8 for i = 2 to A. length − ℓ + 1
+9 s = s − A[i] + A[i + ℓ − 1]
+10 if s = = B[j]
+11 return ℓ
+12 return 0</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-277">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 277</span>
+    <span class="ex-years">Final 2022 B, Final 2022 C</span>
+  </div>
+  <h3>Consider the following algorithm that takes an array A of numbers:</h3>
+  <p class="note-dup"><em>Stessa domanda in più sessioni d'esame.</em></p>
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-Y:** stampa valori con frequenza massima. Θ(n²).</li><li>**Better-Algo-Y:** sort + due scan lineari per max run. Θ(n log n).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm that takes an array A of numbers:
+Algo-Y(A)
+1 B = [nil] ∗ A. length / /empty array of size A. length
+2 h = 0
+3 ℓ = 0
+4 for i = 1 to A. length
+5 k = 1
+6 for j = i + 1 to A. length
+7 if A[i] = = A[j]
+8 k = k + 1
+9 if ℓ = = 0 or h &lt; k
+10 ℓ = 1
+11 B[ℓ] = A[i]
+12 h = k
+13 elseif h = = k
+14 ℓ = ℓ + 1
+15 B[ℓ] = A[i]
+16 sort the ﬁrst ℓ elements of B
+17 for i = 1 to ℓ
+18 print B[i]
+Question 1: Brieﬂy explain what Algo-Y does and analyze the complexity of Algo-Y by describing
+a worst-case input. Do not simply paraphrase the code. Inste ad, explain the high-level semantics,
+independent of the code. (10’)
+Question 2: Write an algorithm Better-Algo-Y that does the same as Algo-Y but with a strictly
+better time complexity. Also analyze the complexity of Better-Algo-Y. Notice that if Algo-Y
+modiﬁes the content of the input array A, then Better-Algo-Y must do the same. Otherwise, if
+Algo-Y does not modify A, then Better-Algo-Y must not modify A either. (20’)</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+Better-Algo-Y(A)
+1 B = copy of A
+2 sort B
+3 if B. length = = 0
+4 return 0
+5 m = 1
+6 c = 1
+7 for i = 2 to B. length
+8 if B[i] = = B[i − 1]
+9 c = c + 1
+10 if c &gt; m
+11 m = c
+12 else c = 1
+13 c = 1
+14 for i = 1 to B. length
+15 if i &gt; 1 and B[i] = = B[i − 1]
+16 c = c + 1
+17 else c = 1
+18 if c = = m
+19 print B[i]
+The complexity of Better-Algo-Y is dominated by the complexity of sorting the input array A, so
+Θ(n log n). The rest of the algorithm amounts to two linear scans, so Θ(n).</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-293">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 293</span>
+    <span class="ex-years">Final 2023</span>
+  </div>
+  <h3>Consider the following algorithm that takes two strings A and B. You may</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** multiset uguale su stringhe. Θ(n·m).</li><li>**Better O(n log n):** sort + merge-like compare.</li><li>**Bonus O(n):** counting array su alfabeto piccolo (ASCII m≤127).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm that takes two strings A and B. You may
+assume that characters have numeric codes between 0 and m for some relatively small constant
+m. For example, ASCII characters are encoded by numbers betwe en 0 and 127.
+Algo-X(A, B)
+1 V = [] / /empty array
+2 for i = 1 to B. length
+3 append 0 to V
+4 for i = 1 to A. length
+5 x = false
+6 j = 1
+7 while j ≤ B. length and x = = false
+8 if A[i] = = B[j] and V [j] = = 0
+9 x = true
+10 V [j] = 1
+11 else j = j + 1
+12 for j = 1 to B. length
+13 if V [j] = = 0
+14 return false
+15 return true
+Question 1: Explain what Algo-X does. Do not simply paraphrase the code. Instead, explain th e (10’)
+high-level semantics, independent of the code. Also, analy ze the complexity of Algo-X.
+Question 2: Write an algorithm called Better-Algo-X that does exactly the same thing as Algo- (20’)
+X, but with a strictly better complexity. Analyze the complex ity of Better-Algo-X. Notice that if
+Algo-X modiﬁes the content of the input strings, then Better-Algo-X must do the same. Other-
+wise, Better-Algo-X must not modify A and B.
+Bonus: extra points if your Better-Algo-X runs in linear time. (5’)</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+We must compare the sequences as multi-sets. We can do that by ﬁrst sorting the two sequences,
+so that we can then compare them element-by-element as if we w ere performing a merge of the
+two (sorted) sequences.
+Better-Algo-X(A, B)
+1 C = sorted copy of A
+2 D = sorted copy of B
+3 j = 1
+4 for i = 1 to A. length
+5 if j &gt; B. length
+6 return true
+7 elseif C[i]
+= = D[j]
+8 j = j + 1
+9 elseif C[i] &gt; D[j]
+10 return false
+11 if j ≤ B. length
+12 return false
+13 else return true
+The main body of this algorithm runs in O(n) time, so the overall complexity is Θ(n log n) for
+sorting A and B.
+Since the values of the characters in A and B are numbers from a ﬁxed and small range, we can
+also develop an O(n) solution:
+Better-Algo-X-Linear(A, B)
+1 C = []
+2 D = []
+3 for i = 1 to m / /m is the size of the alphabet
+4 append 0 to C
+5 append 0 to D
+6 for i = 1 to A. length
+7 C[A[i]] = C[A[i]] + 1
+8 for i = 1 to B. length
+9 D[B[i]] = D[B[i]] + 1
+10 for i = 1 to m
+11 if C[i] &lt; D[j]
+12 return false
+13 return true</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-304">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 304</span>
+    <span class="ex-years">Final 2024</span>
+  </div>
+  <h3>Consider the following algorithm Algo-X(A, B) taking two arrays of numbers.</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** max segmento dove B[j+c]=(A[i+c])². O(n²m).</li><li>**DP:** DP[i,j]=1+DP[i-1,j-1] se A[i]²=B[j], else 0. O(nm).</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-X(A, B) taking two arrays of numbers.
+Algo-X(A, B)
+1 m = 0
+2 for i = 1 to A. length
+3 for j = 1 to B. length
+4 c = 0
+5 while i + c ≤ A. length and j + c ≤ B. length and (A[i + c])2 = = B[j + c]
+6 c = c + 1
+7 if c &gt; m
+8 m = c
+9 return m
+Question 1: Brieﬂy explain what Algo-X does. Do not simply paraphrase the code. Instead, explain (10’)
+the high-level semantics of Algo-X independent of the code. Also, analyze the complexity of Algo-
+X by describing a worst-case input.
+Question 2: Write an algorithm Better-Algo-X that does the same as Algo-X but with a strictly (20’)
+better time complexity. If Algo-X modiﬁes the content of the input arrays A and B, then Better-
+Algo-X must do the same. Otherwise, if Algo-X does not modify its input arrays, then Better-
+Algo-X must not modify its input either. Also analyze the complexit y of Better-Algo-X.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+We can develop a dynamic-programming solution. The sub-pro blem structure is as follows. Let
+DP(i, j) be the maximal length of two matching sub-sequences X of A and Y of B, where X ends at
+position i and Y ends at position j. Then, given DP (i, j), we can extend the sub-sequences at (i, j)
+and compute DP (i + 1, j + 1) as follows:
+DP(i + 1, j + 1) =
+{
+DP(i, j) + 1 if B[j + 1] = (A[i + 1])2
+0 otherwise
+The concrete algorithm can be then developed by ﬁlling the DP matrix from top-left to bottom-
+right.
+Better-Algo-X(A, B)
+1 DP = matrix with row-indexes from 0 to A. length and columns from 0 to B. length
+2 DP[0, 0] = 0
+3 for i = 1 to A. length
+4 DP[i, 0] = 0
+5 for j = 1 to B. length
+6 DP[0, j] = 0
+7 m = 0
+8 for i = 1 to A. length
+9 for j = 1 to B. length
+10 if A[i] · A[i]
+= = B[j]
+11 DP[i, j] = 1 + DP[i − 1, j − 1]
+12 if m &lt; DP[i, j]
+13 m = DP[i, j]
+14 return m</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-306">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 306</span>
+    <span class="ex-years">Final 2024</span>
+  </div>
+  <h3>Consider the following algorithm Algo-Y(A) that takes an array of n distinct</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-Y:** conta coppie con somma s. O(n²).</li><li>**Better:** sort + two pointers. Bonus: gestire duplicati con combinatoria.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-Y(A) that takes an array of n distinct
+numbers and a number s.
+Algo-Y(A, s)
+1 x = 0
+2 for i = 1 to A. length
+3 for j = i + 1 to A. length
+4 if A[i] + A[j] = = s
+5 x = x + 1
+6 return x
+Question 1: Brieﬂy explain what Algo-Y does. Do not simply paraphrase the code. Instead, explain (5’)
+the high-level semantics of Algo-Y independent of the code.
+Question 2: Write an algorithm Better-Algo-Y that does exactly the same thing as Algo-Y but (25’)
+with a strictly better time complexity. Also, analyze the co mplexity of Better-Algo-Y.
+Bonus: extra points if Better-Algo-Y(A, s) works correctly even when the values in A are not (10’)
+distinct, meaning that A might contain multiple elements with the same value.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+Algo-Y(A, s)
+/ /elements of A must be distinct
+1 A′ = sorted copy of A
+2 c = 0
+3 i = 1
+4 j = A. length
+5 while i &lt; j
+6 if A′[i] + A′[j] &gt; s
+7 j = j − 1
+8 elseif A′[i] + A′[j] &lt; s
+9 i = i + 1
+10 else c = c + 1
+11 i = i + 1
+12 j = j − 1
+13 return c
+Algo-Y(A, s)
+/ /also works with repeated values in A
+1 A′ = sorted copy of A
+2 c = 0
+3 i = 1
+4 j = A. length
+5 while i &lt; j
+6 if A′[i] + A′[j] &gt; s
+7 j = j − 1
+8 elseif A′[i] + A′[j] &lt; s
+9 i = i + 1
+10 else if A′[i] = = A′[j]
+11 ℓ = j − i + 1
+12 return c + ℓ(ℓ − 1)/2
+13 else ℓi = 1
+14 ℓj = 1
+15 while A′[i + ℓi] = = A[i]
+16 ℓi = ℓi + 1
+17 while A′[j − ℓj] = = A[j]
+18 ℓj = ℓj + 1
+19 c = c + ℓiℓj
+20 i = i + ℓi
+21 j = j − ℓj
+22 return c
+The idea is to sort the input array and then to consider the sum of a “low” (leftmost) element and
+a “high” (rightmost) element. If the sum is lower than the tar get sum s, then we shift to the next
+“low” element (one step to the right). Similalry, if the sum i s higher, we shift to the next “high”
+element (one step to the left). When the sum equals the target , we count +1 and shift both the low
+and high elements. This works well only when there are no repe ated values. Whenever we have
+repeated values, we have to consider all the possible combin ations of the diﬀerent elements with
+the same value. For example, if the target is 10 and there are t wo low elements equal to 4 and
+three high elements equal to 6, then the count must be increme nted by 2 × 3 = 6. We also need
+to take care of the case in which the low and high elements are e qual. For example, with a target
+s = 10, if both the low and high valies are 5, and in total we have th ree elements equal to 5 in the
+input, then the count must be incremented by
+(
+3
+2
+)
+= 3.
+⊲
+Solution 307
+The high-level idea is as follows: if x is greater than the initial value H[i], then we might have to
+pull x up in the heap; if x is less than the initial value H[i], then we might have to push x down
+in the heap; and if there is no change, then of course we won’t h ave to do anything.
+Max-Heap-Change-Value(H, i, x)
+1 if x &gt; H[i]
+2 H[i] = x
+3 while i &gt; 1 and H[⌊i/2⌋] &lt; H[i]
+4 swap H[⌊i/2⌋] ↔ H[i]
+5 i = ⌊ i/2⌋
+6 elseif x &lt; H[i]
+7 H[i] = x
+8 while 2i ≤ H. heap-size
+9 j = i
+10 if H[2i] &gt; H[j]
+11 j = 2i
+12 if 2i + 1 ≤ H. heap-size and H[2i + 1] &gt; H[j]
+13 j = 2i + 1
+14 if j = = i
+15 return
+16 swap H[i] ↔ H[j]
+17 i = j
+The complexity is O(log n) because, in both cases, the loops are limited by the height of the binary
+heap, which is O(log n). More speciﬁcally, we either pull x up reducing i by a factor of 2 as long
+as i &gt; 1, or we push it down increasing i by a factor of 2 as long as 2 i ≤ H. heap-size.</pre></div>
+  </details>
+</article>
+<article class="ex-card" id="ex-317">
+  <div class="ex-header">
+    <span class="ex-badge">Ex. 317</span>
+    <span class="ex-years">Final 2025</span>
+  </div>
+  <h3>Consider the following algorithm Algo-X(A, k) that takes an array A of inte- (30</h3>
+  
+  <div class="box box-strat">
+    <div class="box-label">Come ragionare — passo per passo</div>
+    <ol class="strat-list"><li>**Cosa fa Algo-X:** trova la lunghezza massima di una sottosequenza contigua con **esattamente k numeri pari**. Algo naïvo O(n²).</li><li>**Linear-Algo-X:** sliding window [i,j): mantieni contatore e = pari nella finestra. Se e<k espandi j; se e>k restringi i; se e=k aggiorna max lunghezza. i,j solo aumentano → O(n).</li><li>**Pattern esame:** «sottosequenza contigua con k elementi che soddisfano proprietà X» → sliding window + contatore.</li></ol>
+  </div>
+  <details>
+    <summary>Testo completo dell'esercizio (PDF)</summary>
+    <div class="detail-body"><pre class="code-block">Consider the following algorithm Algo-X(A, k) that takes an array A of inte- (30’)
+gers, and an integer k:
+Algo-X(A, k)
+1 y = 0
+2 i = 1
+3 j = 1
+4 x = 0
+5 while i ≤ A. length
+6 if A[j] is even
+7 x = x + 1
+8 if x = = k and j − i + 1 &gt; y
+9 y = j − i + 1
+10 if j = = A. length
+11 i = i + 1
+12 j = i
+13 x = 0
+14 else j = j + 1
+15 return y
+Question 1: Explain what Algo-X does. Do not simply paraphrase the code. Instead, explain th e (5’)
+high-level semantics of the algorithm independent of the co de. Also, analyze the complexity of
+Algo-X.
+Question 2: Write an algorithm called Linear-Algo-X that does exactly the same thing as Algo-X (25’)
+in O(n) time.</pre></div>
+  </details>
+  <details>
+    <summary>Soluzione ufficiale (PDF Carzaniga)</summary>
+    <div class="detail-body"><pre class="code-block sol">.2
+A good idea for a linear algorithm is to perform a scan of the ar ray with a “sliding window”. The
+two indexes, i and j, delimit the “window” that represents the subsequence [i, j), meaning the
+sequence starting at i and going up to j − 1. i and j can only increase, which guarantees that
+the worst-case complexity is linear. During the scan, we can keep a running total count e of the
+even numbers within the window. We open the window when we hav e less than or exactly k even
+numbers in the window, and we close the window when we have mor e than k even numbers.
+Linear-Algo-X(A, k)
+1 i = 1
+2 j = 1
+3 m = 0
+4 e = 0
+5 while i ≤ A. length and j ≤ A. length
+6 if e = = k and j − i &gt; m
+7 m = j − i
+8 if e ≤ k / /open the window
+9 if A[j] is even
+10 e = e + 1
+11 j = j + 1
+12 else / /close the window
+13 if A[i] is even
+14 e = e − 1
+15 i = i + 1
+16 return m</pre></div>
+  </details>
+</article>
+</main>
+<script>
+const tb=document.getElementById('themeToggle');
+const s=localStorage.getItem('algo-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+tb.textContent=s==='light'?'🌙':'☀';
+tb.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('algo-theme',n);tb.textContent=n==='light'?'🌙':'☀';};
+</script>
+<script src="../../mobile.js"></script>
+</body>
+</html>

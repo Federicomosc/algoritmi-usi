@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algoritmi & Strutture Dati — Appunti Midterm</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12;
+  --bg2: #14141a;
+  --bg3: #1c1c24;
+  --bg4: #24242e;
+  --border: #2e2e3e;
+  --text: #d4d0c8;
+  --text-dim: #7a7890;
+  --text-bright: #f0ece0;
+  --gold: #e8c547;
+  --gold-dim: #a8902a;
+  --teal: #4ec9a8;
+  --red: #e06c75;
+  --blue: #61afef;
+  --purple: #c678dd;
+  --orange: #e5953a;
+  --green: #98c379;
+  --sidebar-w: 270px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  padding-bottom: 40px;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.sidebar-header .title { color: var(--gold); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+
+.nav-section { padding: 6px 0; }
+.nav-label {
+  padding: 4px 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+.nav-link {
+  display: block;
+  padding: 5px 20px 5px 28px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 13px;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+}
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--gold); }
+.nav-link.active { color: var(--gold); border-left-color: var(--gold); background: rgba(232,197,71,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+
+/* ── MAIN ─────────────────────────────────────────── */
+#main {
+  margin-left: var(--sidebar-w);
+  max-width: 900px;
+  padding: 48px 56px 80px;
+}
+
+/* ── HERO ─────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, #1a1a26 0%, #12121c 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px 44px;
+  margin-bottom: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,197,71,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--gold); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  border: 1px solid;
+}
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.g { border-color: var(--gold); color: var(--gold); background: rgba(232,197,71,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+
+/* ── SECTION ─────────────────────────────────────── */
+.part-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px;
+}
+section { margin-bottom: 56px; }
+section h2 {
+  font-family: 'Lora', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--text-bright);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+section h2 .num { color: var(--gold); margin-right: 8px; font-size: 16px; }
+section h3 {
+  font-size: 14px; font-weight: 600; color: var(--teal);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin: 28px 0 12px;
+}
+section h4 {
+  font-size: 14px; font-weight: 600; color: var(--text-bright);
+  margin: 20px 0 8px;
+}
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--gold); font-style: italic; }
+
+/* ── CODE ────────────────────────────────────────── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  background: var(--bg4);
+  color: var(--teal);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+pre {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+}
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(232,197,71,.12); border-radius: 3px; padding: 0 2px; }
+
+/* ── BOXES ───────────────────────────────────────── */
+.box {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  border-left: 3px solid;
+}
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(232,197,71,.07); border-color: var(--gold); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.box-def .box-label { color: var(--blue); }
+.box-thm .box-label { color: var(--gold); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+
+/* ── TABLES ──────────────────────────────────────── */
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  background: var(--bg4);
+  color: var(--gold);
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.ok { color: var(--orange); }
+.mark { color: var(--gold); font-weight: 600; }
+
+/* ── GRID ────────────────────────────────────────── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+/* ── STEP LIST ───────────────────────────────────── */
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li {
+  counter-increment: step;
+  padding: 10px 16px 10px 48px;
+  position: relative;
+  margin-bottom: 8px;
+  background: var(--bg3);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px;
+  background: var(--gold);
+  color: var(--bg);
+  border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+/* ── MATH INLINE ─────────────────────────────────── */
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula {
+  text-align: center;
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--blue);
+  padding: 14px 0;
+  margin: 8px 0;
+}
+/* ── COMPLEXITY BADGE ────────────────────────────── */
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-n2 { background: rgba(224,108,117,.15); color: var(--red); }
+.cx-nlogn { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-n { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-logn { background: rgba(78,201,168,.15); color: var(--teal); }
+.cx-exp { background: rgba(198,120,221,.15); color: var(--purple); }
+.cx-1 { background: rgba(232,197,71,.15); color: var(--gold); }
+
+/* ── DIVIDER ─────────────────────────────────────── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+hr.part { border-color: var(--gold); opacity: .3; margin: 64px 0 48px; }
+</style>
+<link rel="stylesheet" href="./mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<!-- ══════════════════ SIDEBAR ══════════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Algoritmi & Strutture Dati</div>
+    <div class="sub">USI — Prof. Carzaniga — Midterm</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Parte I — Teoria</div>
+    <a class="nav-link" href="#s1">1. Modello RAM</a>
+    <a class="nav-link" href="#s2">2. Notazione Asintotica</a>
+    <a class="nav-link sub" href="#s2-o">Big-O, Ω, Θ</a>
+    <a class="nav-link sub" href="#s2-props">Proprietà</a>
+    <a class="nav-link sub" href="#s2-ord">Ordine di dominanza</a>
+    <a class="nav-link" href="#s3">3. Sorting O(n²)</a>
+    <a class="nav-link sub" href="#s3-ins">Insertion Sort</a>
+    <a class="nav-link sub" href="#s3-sel">Selection Sort</a>
+    <a class="nav-link sub" href="#s3-bub">Bubble Sort</a>
+    <a class="nav-link" href="#s4">4. Divide & Conquer</a>
+    <a class="nav-link sub" href="#s4-bs">Binary Search</a>
+    <a class="nav-link sub" href="#s4-ms">MergeSort</a>
+    <a class="nav-link sub" href="#s4-qs">QuickSort</a>
+    <a class="nav-link sub" href="#s4-master">Teorema Master</a>
+    <a class="nav-link" href="#s5">5. Heap & HeapSort</a>
+    <a class="nav-link sub" href="#s5-struct">Struttura</a>
+    <a class="nav-link sub" href="#s5-ops">Operazioni</a>
+    <a class="nav-link sub" href="#s5-hs">HeapSort</a>
+    <a class="nav-link" href="#s6">6. BST</a>
+    <a class="nav-link" href="#s7">7. Liste Concatenate</a>
+    <div class="nav-label">Parte II — Problem Solving</div>
+    <a class="nav-link" href="#p1">8. Analizza un Algoritmo</a>
+    <a class="nav-link" href="#p2">9. Migliora un Algoritmo</a>
+    <a class="nav-link" href="#p3">10. Pattern Classici</a>
+    <a class="nav-link" href="#p4">11. Strutture Dati: Template</a>
+    <a class="nav-link" href="#p5">12. Recap Complessità</a>
+  </div>
+</nav>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main id="main">
+
+<div class="hero">
+  <h1>Appunti per il <span>Midterm</span><br>Algoritmi &amp; Strutture Dati</h1>
+  <p>Prof. Antonio Carzaniga — Università della Svizzera italiana &nbsp;·&nbsp; Copertura completa: teoria + strategie d'esame</p>
+  <div class="hero-tags">
+    <span class="tag g">RAM Model</span>
+    <span class="tag g">Θ / O / Ω</span>
+    <span class="tag g">Sorting</span>
+    <span class="tag t">Heap</span>
+    <span class="tag t">BST</span>
+    <span class="tag t">Linked Lists</span>
+    <span class="tag b">Analisi algoritmi</span>
+    <span class="tag b">Pattern di ottimizzazione</span>
+  </div>
+</div>
+
+<!-- ═══ PARTE I ═══════════════════════════════════ -->
+<div class="part-label">— Parte I &nbsp;·&nbsp; Teoria</div>
+
+<!-- ─── 1. MODELLO RAM ─────────────────────────── -->
+<section id="s1">
+<h2><span class="num">01</span>Il Modello RAM</h2>
+
+<h3>Cos'è</h3>
+<p>Il <strong>modello RAM (Random-Access Machine)</strong> è il modello standard per analizzare la complessità. Assume che ogni operazione "elementare" costi esattamente <strong>1 passo</strong>, indipendentemente dai valori coinvolti.</p>
+
+<div class="box box-def">
+  <div class="box-label">Definizione</div>
+  Sono <strong>passi elementari</strong>: assegnamenti (<code>x = 5</code>), operazioni aritmetiche (<code>a + b</code>), confronti (<code>a &lt; b</code>), branch (<code>if/while</code>), chiamate a funzione. Ogni passo conta come <strong>1 unità di costo costante</strong>.
+</div>
+
+<h3>Come si calcola T(n)</h3>
+<p>Si costruisce una <strong>tabella costo × volte</strong>: per ogni riga di codice si scrive il costo (costante c<sub>i</sub>) e quante volte viene eseguita in funzione di n.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — PINGALA-INC(n)</div>
+<pre><span class="fn">PINGALA-INC</span>(n)             <span class="cm">costo   volte (n &gt; 2)</span>
+1  <span class="kw">if</span> n ≤ 2               c₁      1
+2    <span class="kw">return</span> n              c₂      0
+3  pprev = 1               c₃      1
+4  prev  = 2               c₄      1
+5  <span class="kw">for</span> i = 3 <span class="kw">to</span> n         c₅      n−1   <span class="cm">← header del for</span>
+6    P = prev + pprev      c₆      n−2
+7    pprev = prev          c₇      n−2
+8    prev  = P             c₈      n−2
+9  <span class="kw">return</span> P               c₉      1
+
+T(n) = c₁ + c₃ + c₄ + c₉ + (n−1)c₅ + (n−2)(c₆+c₇+c₈)
+     = <span class="hl">n·C₁ + C₂</span>   →  T(n) = <span class="hl">Θ(n)</span></pre>
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Trucco esame</div>
+  Non serve calcolare i c<sub>i</sub> esatti. Basta contare quante volte ogni loop viene eseguito, sommare i contributi, e tenere solo il termine dominante. Tutti i coefficienti costanti spariscono nella notazione Θ.
+</div>
+</section>
+
+<!-- ─── 2. NOTAZIONE ASINTOTICA ────────────────── -->
+<section id="s2">
+<h2><span class="num">02</span>Notazione Asintotica</h2>
+
+<h3 id="s2-o">Le tre notazioni principali</h3>
+
+<div class="grid2">
+<div class="box box-def">
+  <div class="box-label">Big-O — Upper bound</div>
+  <div class="formula">f(n) = O(g(n))</div>
+  <p>significa che esistono costanti <em>c &gt; 0</em> e <em>n₀</em> tali che:</p>
+  <div class="formula">f(n) ≤ c · g(n) &nbsp; per ogni n ≥ n₀</div>
+  <p>g domina f "da sopra" — f <strong>cresce al massimo</strong> come g. È come dire f ≤ g asintoticamente.</p>
+</div>
+<div class="box box-def">
+  <div class="box-label">Ω (Omega) — Lower bound</div>
+  <div class="formula">f(n) = Ω(g(n))</div>
+  <p>significa che esistono costanti <em>c &gt; 0</em> e <em>n₀</em> tali che:</p>
+  <div class="formula">f(n) ≥ c · g(n) &nbsp; per ogni n ≥ n₀</div>
+  <p>f <strong>cresce almeno</strong> come g. È come dire f ≥ g asintoticamente.</p>
+</div>
+</div>
+
+<div class="box box-def" style="border-color: var(--gold)">
+  <div class="box-label" style="color:var(--gold)">Θ (Theta) — Tight bound — IL PIÙ IMPORTANTE</div>
+  <div class="formula">f(n) = Θ(g(n))</div>
+  <p>significa che esistono costanti <em>c₁, c₂ &gt; 0</em> e <em>n₀</em> tali che:</p>
+  <div class="formula">c₁ · g(n) ≤ f(n) ≤ c₂ · g(n) &nbsp; per ogni n ≥ n₀</div>
+  <p>f <strong>cresce esattamente</strong> come g. È come dire f = g asintoticamente. È il più preciso.</p>
+  <p style="margin-top:8px"><strong>Teorema fondamentale:</strong> <span class="math">f = Θ(g) &nbsp; ⟺ &nbsp; f = O(g) &nbsp; ∧ &nbsp; f = Ω(g)</span></p>
+</div>
+
+<h3 id="s2-props">Proprietà fondamentali</h3>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Proprietà</th><th>Enunciato</th><th>Note</th></tr>
+<tr><td><strong>Transitività</strong></td><td>f=O(g) e g=O(h) ⟹ f=O(h)</td><td>Vale anche per Ω e Θ</td></tr>
+<tr><td><strong>Riflessività</strong></td><td>f = Θ(f)</td><td>ogni f è Θ di se stessa</td></tr>
+<tr><td><strong>Simmetria Θ</strong></td><td>f=Θ(g) ⟺ g=Θ(f)</td><td>Θ è una relazione d'equivalenza</td></tr>
+<tr><td><strong>Θ⟹O</strong></td><td>f=Θ(g) ⟹ f=O(g)</td><td>il tight bound implica l'upper bound</td></tr>
+<tr><td><strong>Θ⟹Ω</strong></td><td>f=Θ(g) ⟹ f=Ω(g)</td><td>il tight bound implica il lower bound</td></tr>
+<tr><td><strong>Somma</strong></td><td>O(f) + O(g) = O(max(f,g))</td><td>vince il termine più grande</td></tr>
+<tr><td><strong>Prodotto costante</strong></td><td>O(c·f(n)) = O(f(n))</td><td>le costanti si ignorano</td></tr>
+</table>
+</div>
+
+<h3 id="s2-ord">Come semplificare T(n) in Θ</h3>
+
+<ol class="steps">
+  <li>Espandi T(n) per intero (somma di tutti i contributi dei loop)</li>
+  <li>Identifica il termine che cresce più velocemente (ignora gli altri)</li>
+  <li>Elimina i coefficienti moltiplicativi costanti</li>
+  <li>Scrivi Θ(termine dominante)</li>
+</ol>
+
+<div class="box box-ex">
+  <div class="box-label">Esempi classici da memorizzare</div>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th>T(n) =</th><th>Θ =</th><th>Perché</th></tr>
+  <tr><td>n² + 10n + 100</td><td class="mark">Θ(n²)</td><td>n² domina su n e 100</td></tr>
+  <tr><td>n + 10·log n</td><td class="mark">Θ(n)</td><td>n cresce più di log n</td></tr>
+  <tr><td>n·log n + n·√n</td><td class="mark">Θ(n·√n)</td><td>√n &gt; log n, quindi n·√n domina</td></tr>
+  <tr><td>2<sup>n/6</sup> + n<sup>7</sup></td><td class="mark">Θ(2<sup>n/6</sup>)</td><td>esponenziale domina su polinomiale</td></tr>
+  <tr><td>(10+n) / n²</td><td class="mark">Θ(1/n)</td><td>(10+n)/n² ≈ 1/n per n grande</td></tr>
+  </table>
+  </div>
+</div>
+
+<h3>Domande YES/NO — Come rispondere</h3>
+<p>L'esame fa spesso domande del tipo "<em>f(n) = O(g(n))? YES o NO?</em>". La strategia è calcolare il limite <span class="math">lim f(n)/g(n)</span> per n→∞:</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Se lim f/g =</th><th>Allora</th></tr>
+<tr><td>0</td><td>f = O(g) ✓ &nbsp; f = o(g) ✓ &nbsp; f ≠ Ω(g) &nbsp; f ≠ Θ(g)</td></tr>
+<tr><td>costante c &gt; 0</td><td>f = Θ(g) ✓ &nbsp; f = O(g) ✓ &nbsp; f = Ω(g) ✓</td></tr>
+<tr><td>∞</td><td>f = Ω(g) ✓ &nbsp; f ≠ O(g) &nbsp; f ≠ Θ(g)</td></tr>
+</table>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempi yes/no tipici d'esame</div>
+<pre><span class="cm">n² − 10n + 100 = O(n log n)?</span>  <span class="op">NO</span>  <span class="cm">← n² / (n log n) = n/log n → ∞</span>
+<span class="cm">f(n)=Θ(2ⁿ)  ⟹  f(n)=O(n²·2ⁿ)?</span>  <span class="st">YES</span>  <span class="cm">← Θ⟹O e n²·2ⁿ &gt; 2ⁿ</span>
+<span class="cm">f(n)=O(2ⁿ)  ⟹  f(n)=O(n²)?</span>  <span class="op">NO</span>  <span class="cm">← non sappiamo quanto è piccola f</span>
+<span class="cm">√n = O(log² n)?</span>  <span class="op">NO</span>  <span class="cm">← √n / log²n → ∞  (√n cresce più di log²n)</span>
+<span class="cm">n² + O(n) − 1 = O(n²)?</span>  <span class="st">YES</span>  <span class="cm">← O(n) ⊂ O(n²)</span>
+<span class="cm">n² + Ω(n) − 1 = O(n²)?</span>  <span class="op">NO</span>  <span class="cm">← Ω(n) potrebbe essere n³!</span></pre>
+</div>
+
+<h3 id="s2-ord">Ordine di dominanza — DA MEMORIZZARE</h3>
+
+<div class="box box-thm">
+  <div class="box-label">Gerarchia delle classi di complessità</div>
+  <div class="formula" style="font-size:14px; letter-spacing:.03em">
+    O(1) &nbsp;≪&nbsp; O(log n) &nbsp;≪&nbsp; O(√n) &nbsp;≪&nbsp; O(n) &nbsp;≪&nbsp; O(n log n) &nbsp;≪&nbsp; O(n<sup>1.5</sup>) &nbsp;≪&nbsp; O(n²) &nbsp;≪&nbsp; O(2<sup>n</sup>) &nbsp;≪&nbsp; O(3<sup>n</sup>)
+  </div>
+  <p style="margin-top:8px; font-size:13px; color: var(--text-dim)">Ogni classe domina (cresce più velocemente di) tutte quelle a sinistra. Conseguenza: nel Θ di una somma, vince sempre il termine più a destra in questa scala.</p>
+</div>
+</section>
+
+<!-- ─── 3. SORTING O(n²) ───────────────────────── -->
+<section id="s3">
+<h2><span class="num">03</span>Sorting O(n²)</h2>
+
+<h3 id="s3-ins">Insertion Sort</h3>
+<p><strong>Idea:</strong> mantieni la parte sinistra A[0..i-1] sempre ordinata. Ad ogni passo i, <em>inserisci</em> A[i] nella posizione giusta scorrendo a ritroso e facendo swap.</p>
+
+<pre><span class="fn">INSERTION-SORT</span>(A)
+<span class="kw">for</span> i = 1 <span class="kw">to</span> A.length − 1
+    j = i
+    <span class="kw">while</span> j &gt; 0 <span class="kw">and</span> A[j−1] &gt; A[j]
+        swap(A[j], A[j−1])
+        j = j − 1</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Caso</th><th>Input</th><th>Ciclo interno</th><th>T(n)</th></tr>
+<tr><td><span class="good">Migliore</span></td><td>già ordinato</td><td>while non esegue mai</td><td><span class="cx cx-n">Θ(n)</span></td></tr>
+<tr><td class="ok">Medio</td><td>casuale</td><td>~(j-1)/2 iterazioni</td><td><span class="cx cx-n2">Θ(n²)</span></td></tr>
+<tr><td><span class="bad">Peggiore</span></td><td>ordinato inversamente</td><td>j-1 iterazioni</td><td><span class="cx cx-n2">Θ(n²)</span></td></tr>
+</table></div>
+
+<p><strong>Invariante:</strong> prima di ogni iterazione i, A[0..i-1] è ordinato e contiene gli stessi elementi originali. <strong>In-place</strong> O(1) spazio. <strong>Stabile</strong>.</p>
+
+<h3 id="s3-sel">Selection Sort</h3>
+<p><strong>Idea:</strong> ad ogni passo i, trova il <em>minimo</em> di A[i..n-1] e portalo in A[i] con un <strong>unico swap</strong>.</p>
+
+<pre><span class="fn">SELECTION-SORT</span>(A)
+<span class="kw">for</span> i = 0 <span class="kw">to</span> A.length − 2
+    smallest = i
+    <span class="kw">for</span> j = i+1 <span class="kw">to</span> A.length − 1
+        <span class="kw">if</span> A[j] &lt; A[smallest]
+            smallest = j
+    swap(A[i], A[smallest])</pre>
+
+<p>Il ciclo interno esegue <strong>sempre</strong> (n−1−i) iterazioni, indipendentemente dall'input → T(n) = <span class="cx cx-n2">Θ(n²)</span> in tutti i casi. Vantaggio: <strong>al massimo n−1 swap totali</strong> (utile se lo swap è costoso). Non stabile.</p>
+
+<h3 id="s3-bub">Bubble Sort</h3>
+<p><strong>Idea:</strong> confronta coppie adiacenti, sposta i grandi verso destra. Ottimizzazione con flag: se non ci sono swap in un passaggio, l'array è già ordinato.</p>
+
+<pre><span class="fn">BUBBLE-SORT</span>(A)
+<span class="kw">for</span> i = 0 <span class="kw">to</span> A.length − 2
+    swapped = <span class="kw">false</span>
+    <span class="kw">for</span> j = 0 <span class="kw">to</span> A.length − 2 − i
+        <span class="kw">if</span> A[j] &gt; A[j+1]
+            swap(A[j], A[j+1])
+            swapped = <span class="kw">true</span>
+    <span class="kw">if</span> <span class="kw">not</span> swapped: <span class="kw">break</span>   <span class="cm">← uscita anticipata</span></pre>
+
+<p>Con la flag: <span class="cx cx-n">Θ(n)</span> se già ordinato, <span class="cx cx-n2">Θ(n²)</span> altrimenti. Stabile, in-place.</p>
+
+<div class="box box-tip">
+  <div class="box-label">Confronto riassuntivo O(n²)</div>
+  <div class="tbl-wrap"><table>
+  <tr><th>Algoritmo</th><th>Best</th><th>Average</th><th>Worst</th><th>Swap</th><th>Stabile</th></tr>
+  <tr><td>Insertion Sort</td><td><span class="cx cx-n">Θ(n)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td>fino a n²</td><td class="good">sì</td></tr>
+  <tr><td>Selection Sort</td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td>≤ n−1</td><td class="bad">no</td></tr>
+  <tr><td>Bubble Sort</td><td><span class="cx cx-n">Θ(n)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td>fino a n²</td><td class="good">sì</td></tr>
+  </table></div>
+</div>
+</section>
+
+<!-- ─── 4. DIVIDE & CONQUER ────────────────────── -->
+<section id="s4">
+<h2><span class="num">04</span>Divide &amp; Conquer</h2>
+
+<p>Schema generale: <strong>DIVIDE</strong> il problema in k sotto-problemi più piccoli → <strong>CONQUER</strong> risolvi ricorsivamente ogni sotto-problema → <strong>COMBINE</strong> unisci le soluzioni. La ricorrenza è:</p>
+<div class="formula">T(n) = T<sub>divide</sub> + k · T(n/k) + T<sub>combine</sub></div>
+
+<h3 id="s4-bs">Binary Search — O(log n)</h3>
+<p>Cerca un elemento in un array <strong>ordinato</strong> dimezzando lo spazio di ricerca ad ogni passo.</p>
+
+<pre><span class="fn">BINARY-SEARCH</span>(A, key)
+first = 0,  last = A.length − 1
+<span class="kw">while</span> first ≤ last
+    middle = (first + last + 1) / 2   <span class="cm">← divisione intera, arrot. superiore</span>
+    <span class="kw">if</span> A[middle] == key:  <span class="kw">return</span> <span class="kw">true</span>
+    <span class="kw">if</span> first == last:     <span class="kw">return</span> <span class="kw">false</span>
+    <span class="kw">if</span> A[middle] &gt; key:   last  = middle − 1
+    <span class="kw">else</span>:                 first = middle + 1
+<span class="kw">return</span> <span class="kw">false</span></pre>
+
+<p>Ricorrenza: <span class="math">T(n) = T(n/2) + O(1)</span> → <span class="cx cx-logn">O(log n)</span>. <strong>Prerequisito assoluto: array ordinato.</strong></p>
+
+<h3 id="s4-ms">MergeSort — Θ(n log n)</h3>
+<p>Divide a metà (O(1)), ordina ricorsivamente le due metà, le <strong>fonde</strong> con MERGE (Θ(n)).</p>
+
+<pre><span class="fn">MERGESORT</span>(A)
+<span class="kw">if</span> A.length ≤ 1: <span class="kw">return</span> A
+mid = A.length / 2
+L = MERGESORT(A[0..mid−1])
+R = MERGESORT(A[mid..n−1])
+<span class="kw">return</span> MERGE(L, R)
+
+<span class="fn">MERGE</span>(L, R)             <span class="cm">← Θ(n) dove n = |L| + |R|</span>
+result = [],  i = 0,  j = 0
+<span class="kw">while</span> i &lt; L.length <span class="kw">and</span> j &lt; R.length
+    <span class="kw">if</span> L[i] ≤ R[j]: append L[i]; i++
+    <span class="kw">else</span>:            append R[j]; j++
+<span class="kw">return</span> result + L[i:] + R[j:]</pre>
+
+<p>Ricorrenza: <span class="math">T(n) = 2T(n/2) + Θ(n)</span> → <span class="cx cx-nlogn">Θ(n log n)</span> in <strong>tutti</strong> i casi. <strong>Stabile</strong>, ma <strong>non in-place</strong> (usa O(n) spazio).</p>
+
+<h3 id="s4-qs">QuickSort — Θ(n log n) medio / Θ(n²) peggiore</h3>
+<p>Sceglie un <em>pivot</em>, <strong>partiziona</strong> l'array attorno ad esso (elementi ≤ pivot a sinistra, &gt; a destra), poi ordina ricorsivamente le due parti. <strong>In-place.</strong></p>
+
+<pre><span class="fn">PARTITION</span>(A, begin, end)       <span class="cm">← pivot = A[end], Θ(n)</span>
+q = begin,  v = A[end]
+<span class="kw">for</span> i = begin <span class="kw">to</span> end
+    <span class="kw">if</span> A[i] ≤ v
+        swap(A[i], A[q]);  q++
+<span class="kw">return</span> q − 1    <span class="cm">← posizione finale del pivot</span>
+
+<span class="fn">QUICKSORT</span>(A, begin, end)
+<span class="kw">if</span> begin &lt; end
+    q = PARTITION(A, begin, end)
+    QUICKSORT(A, begin, q−1)
+    QUICKSORT(A, q+1, end)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Caso</th><th>Quando</th><th>Ricorrenza</th><th>T(n)</th></tr>
+<tr><td><span class="good">Migliore</span></td><td>pivot sempre al centro</td><td>T(n) = 2T(n/2) + Θ(n)</td><td><span class="cx cx-nlogn">Θ(n log n)</span></td></tr>
+<tr><td class="ok">Medio</td><td>pivot casuale</td><td>analisi probabilistica</td><td><span class="cx cx-nlogn">Θ(n log n)</span></td></tr>
+<tr><td><span class="bad">Peggiore</span></td><td>array già ordinato (pivot=min/max)</td><td>T(n) = T(n−1) + Θ(n)</td><td><span class="cx cx-n2">Θ(n²)</span></td></tr>
+</table></div>
+
+<div class="box box-tip">
+  <div class="box-label">Quick Sort con pivot casuale</div>
+  Scambia A[random(begin,end)] con A[end] prima di chiamare PARTITION. Il caso peggiore diventa di probabilità 1/n! — praticamente impossibile. Complessità attesa: <span class="cx cx-nlogn">Θ(n log n)</span>.
+</div>
+
+<h3 id="s4-master">Teorema Master</h3>
+<p>Per ricorrenze della forma <span class="math">T(n) = a·T(n/b) + f(n)</span> con a≥1, b&gt;1:</p>
+
+<div class="box box-thm">
+  <div class="box-label">Teorema Master — 3 casi</div>
+  Sia <span class="math">c<sub>crit</sub> = log<sub>b</sub>(a)</span> = log base-b di a.
+  <ul style="margin-top:10px">
+    <li><strong>Caso 1:</strong> se f(n) = O(n<sup>c</sup>) con c &lt; c<sub>crit</sub> → <span class="mark">T(n) = Θ(n<sup>c<sub>crit</sub></sup>)</span></li>
+    <li><strong>Caso 2:</strong> se f(n) = Θ(n<sup>c<sub>crit</sub></sup>) → <span class="mark">T(n) = Θ(n<sup>c<sub>crit</sub></sup> log n)</span></li>
+    <li><strong>Caso 3:</strong> se f(n) = Ω(n<sup>c</sup>) con c &gt; c<sub>crit</sub> → <span class="mark">T(n) = Θ(f(n))</span></li>
+  </ul>
+  <div class="tbl-wrap" style="margin-top:12px"><table>
+  <tr><th>Algoritmo</th><th>Ricorrenza</th><th>c<sub>crit</sub></th><th>Caso</th><th>Risultato</th></tr>
+  <tr><td>MergeSort</td><td>2T(n/2) + Θ(n)</td><td>log₂2=1</td><td>2 (f=Θ(n¹))</td><td class="mark">Θ(n log n)</td></tr>
+  <tr><td>Binary Search</td><td>T(n/2) + O(1)</td><td>log₂1=0</td><td>1 (f=O(n⁰))</td><td class="mark">Θ(log n)</td></tr>
+  <tr><td>Karatsuba</td><td>3T(n/2) + O(n)</td><td>log₂3≈1.585</td><td>1</td><td class="mark">Θ(n<sup>1.585</sup>)</td></tr>
+  </table></div>
+</div>
+</section>
+
+<!-- ─── 5. HEAP ─────────────────────────────────── -->
+<section id="s5">
+<h2><span class="num">05</span>Binary Max-Heap &amp; HeapSort</h2>
+
+<h3 id="s5-struct">Struttura</h3>
+<p>Un <strong>Binary Max-Heap</strong> è un albero binario quasi-completo, memorizzato in un <strong>array</strong> (indice 0-based). La <strong>proprietà heap</strong>: ogni nodo è ≥ dei suoi figli. Conseguenza: <strong>A[0] è sempre il massimo</strong>.</p>
+
+<p>Navigazione in O(1):</p>
+<pre><span class="fn">PARENT</span>(i) = (i−1) / 2     <span class="cm">← divisione intera</span>
+<span class="fn">LEFT</span>(i)   = 2·i + 1
+<span class="fn">RIGHT</span>(i)  = 2·i + 2</pre>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio visivo — Heap [16, 14, 10, 8, 7, 9, 3]</div>
+<pre>                  <span class="nm">16</span>    <span class="cm">← A[0] = massimo</span>
+                /    \
+             <span class="nm">14</span>      <span class="nm">10</span>
+            /  \    /  \
+          <span class="nm">8</span>    <span class="nm">7</span>  <span class="nm">9</span>    <span class="nm">3</span>
+
+Array: [<span class="nm">16, 14, 10, 8, 7, 9, 3</span>]
+        0   1   2   3  4  5  6</pre>
+</div>
+
+<h3 id="s5-ops">Operazioni fondamentali</h3>
+
+<h4>MAX-HEAPIFY — O(log n) — ripristina la proprietà</h4>
+<p>Assume che i sottoalberi di i siano già heap validi, ma i potrebbe violare la proprietà. "Fa scendere" i verso il basso.</p>
+<pre><span class="fn">MAX-HEAPIFY</span>(A, i)
+largest = i
+l = LEFT(i),  r = RIGHT(i)
+<span class="kw">if</span> l &lt; heap_size <span class="kw">and</span> A[l] &gt; A[largest]:  largest = l
+<span class="kw">if</span> r &lt; heap_size <span class="kw">and</span> A[r] &gt; A[largest]:  largest = r
+<span class="kw">if</span> largest ≠ i
+    swap(A[i], A[largest])
+    MAX-HEAPIFY(A, largest)    <span class="cm">← ricorsione verso il basso</span></pre>
+
+<h4>BUILD-MAX-HEAP — O(n) — costruisce heap da array</h4>
+<p>Chiama MAX-HEAPIFY da metà array verso l'inizio (le foglie sono già heap banali).</p>
+<pre><span class="fn">BUILD-MAX-HEAP</span>(A)
+heap_size = A.length
+<span class="kw">for</span> i = A.length/2 − 1 <span class="kw">downto</span> 0
+    MAX-HEAPIFY(A, i)</pre>
+<div class="box box-tip">
+  <div class="box-label">Perché O(n) e non O(n log n)?</div>
+  Intuitivamente: i nodi più in basso fanno pochissimo lavoro (le foglie fanno 0 heapify), quelli più in alto fanno O(log n). La somma pesata dà O(n). Questo è un risultato non banale ma importante.
+</div>
+
+<h4>HEAP-EXTRACT-MAX — O(log n) — estrae il massimo</h4>
+<pre><span class="fn">HEAP-EXTRACT-MAX</span>(A)
+max = A[0]                     <span class="cm">← salva il massimo (radice)</span>
+A[0] = A[heap_size − 1]        <span class="cm">← porta l'ultimo elemento in cima</span>
+heap_size = heap_size − 1
+MAX-HEAPIFY(A, 0)              <span class="cm">← ripristina la proprietà heap</span>
+<span class="kw">return</span> max</pre>
+
+<h4>HEAP-INSERT — O(log n) — inserisce un elemento</h4>
+<pre><span class="fn">HEAP-INSERT</span>(A, key)
+heap_size = heap_size + 1
+A[heap_size − 1] = key                <span class="cm">← inserisci in fondo</span>
+i = heap_size − 1
+<span class="kw">while</span> i &gt; 0 <span class="kw">and</span> A[PARENT(i)] &lt; A[i]  <span class="cm">← "fai salire" verso radice</span>
+    swap(A[i], A[PARENT(i)])
+    i = PARENT(i)</pre>
+
+<h3 id="s5-hs">HeapSort — Θ(n log n) sempre</h3>
+<pre><span class="fn">HEAPSORT</span>(A)
+BUILD-MAX-HEAP(A)            <span class="cm">← fase 1: O(n)</span>
+<span class="kw">for</span> i = A.length−1 <span class="kw">downto</span> 1
+    swap(A[0], A[i])         <span class="cm">← porta il max in fondo</span>
+    heap_size = heap_size − 1
+    MAX-HEAPIFY(A, 0)        <span class="cm">← ripristina heap  O(log n) × n volte</span></pre>
+<p><strong>In-place</strong>, O(1) spazio extra. <strong>Non stabile</strong>. T(n) = <span class="cx cx-nlogn">Θ(n log n)</span> in tutti i casi.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Operazioni Heap — Riepilogo complessità</div>
+  <div class="tbl-wrap"><table>
+  <tr><th>Operazione</th><th>Complessità</th><th>Cosa fa</th></tr>
+  <tr><td>MAX-HEAPIFY</td><td><span class="cx cx-logn">O(log n)</span></td><td>ripristina proprietà da un nodo verso il basso</td></tr>
+  <tr><td>BUILD-MAX-HEAP</td><td><span class="cx cx-n">O(n)</span></td><td>costruisce heap da array arbitrario</td></tr>
+  <tr><td>HEAP-EXTRACT-MAX</td><td><span class="cx cx-logn">O(log n)</span></td><td>rimuove e restituisce il massimo</td></tr>
+  <tr><td>HEAP-INSERT</td><td><span class="cx cx-logn">O(log n)</span></td><td>inserisce un nuovo elemento</td></tr>
+  <tr><td>GET-MAX</td><td><span class="cx cx-1">O(1)</span></td><td>legge il massimo senza rimuoverlo (= A[0])</td></tr>
+  <tr><td>HEAPSORT</td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td>ordina con heap in-place</td></tr>
+  </table></div>
+</div>
+</section>
+
+<!-- ─── 6. BST ──────────────────────────────────── -->
+<section id="s6">
+<h2><span class="num">06</span>Binary Search Tree (BST)</h2>
+
+<p><strong>Proprietà BST:</strong> per ogni nodo x, tutti i nodi nel sottoalbero sinistro hanno chiave &lt; x.key, tutti quelli nel sottoalbero destro hanno chiave ≥ x.key (oppure &gt;, dipende dalla definizione — a USI di solito stretto su entrambi i lati per chiavi distinte).</p>
+
+<p>Struttura di un nodo: <code>x.key</code>, <code>x.left</code>, <code>x.right</code>, <code>x.parent</code> (può essere nil).</p>
+
+<h3>Operazioni base — O(h) dove h = altezza</h3>
+
+<h4>BST-SEARCH</h4>
+<pre><span class="fn">BST-SEARCH</span>(t, k)
+<span class="kw">if</span> t == nil <span class="kw">or</span> t.key == k:  <span class="kw">return</span> t
+<span class="kw">if</span> k &lt; t.key:  <span class="kw">return</span> BST-SEARCH(t.left,  k)
+<span class="kw">else</span>:          <span class="kw">return</span> BST-SEARCH(t.right, k)</pre>
+
+<h4>BST-INSERT</h4>
+<pre><span class="fn">BST-INSERT</span>(t, k)
+<span class="kw">if</span> t == nil:  <span class="kw">return</span> new node(k)
+<span class="kw">if</span> k &lt; t.key:  t.left  = BST-INSERT(t.left,  k)
+<span class="kw">else</span>:          t.right = BST-INSERT(t.right, k)
+<span class="kw">return</span> t</pre>
+
+<h4>BST-MIN e BST-MAX</h4>
+<pre><span class="fn">BST-MIN</span>(t)                  <span class="fn">BST-MAX</span>(t)
+<span class="kw">while</span> t.left ≠ nil          <span class="kw">while</span> t.right ≠ nil
+    t = t.left                  t = t.right
+<span class="kw">return</span> t                    <span class="kw">return</span> t</pre>
+
+<h4>In-order traversal (visita simmetrica) — produce output ORDINATO</h4>
+<pre><span class="fn">INORDER</span>(t)
+<span class="kw">if</span> t ≠ nil
+    INORDER(t.left)
+    print(t.key)       <span class="cm">← visita il nodo</span>
+    INORDER(t.right)</pre>
+
+<h4>BST-DELETE — il più complesso</h4>
+<p>Tre casi:</p>
+<ul>
+  <li><strong>Nodo foglia:</strong> rimuovi direttamente</li>
+  <li><strong>Un solo figlio:</strong> collega il figlio al parent</li>
+  <li><strong>Due figli:</strong> sostituisci con il <em>successore in-order</em> (= minimo del sottoalbero destro), poi elimina il successore</li>
+</ul>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità BST</div>
+  Tutte le operazioni sono O(h). Se il BST è <strong>bilanciato</strong>: h = O(log n) quindi O(log n). Se è <strong>degenere</strong> (es. inserisci 1,2,3,...,n in ordine): h = n−1 quindi O(n).
+</div>
+</section>
+
+<!-- ─── 7. LISTE ─────────────────────────────────── -->
+<section id="s7">
+<h2><span class="num">07</span>Liste Concatenate</h2>
+
+<h3>Singly Linked List</h3>
+<p>Ogni nodo ha <code>x.value</code> e <code>x.next</code> (nil se ultimo). La lista è referenziata dalla testa (head).</p>
+
+<pre><span class="cm">// Inserisci in testa — O(1)</span>
+<span class="fn">INSERT-HEAD</span>(L, x)
+    x.next = L;  <span class="kw">return</span> x
+
+<span class="cm">// Cerca elemento — O(n)</span>
+<span class="fn">SEARCH</span>(L, k)
+    curr = L
+    <span class="kw">while</span> curr ≠ nil
+        <span class="kw">if</span> curr.value == k: <span class="kw">return</span> curr
+        curr = curr.next
+    <span class="kw">return</span> nil
+
+<span class="cm">// Lunghezza — O(n)</span>
+<span class="fn">LENGTH</span>(L)
+    n = 0;  curr = L
+    <span class="kw">while</span> curr ≠ nil:  n++;  curr = curr.next
+    <span class="kw">return</span> n</pre>
+
+<h3>Doubly Linked List con Sentinella</h3>
+<p>La <strong>sentinella</strong> è un nodo speciale (nil) che funge da "dummy" — non contiene dati reali. Ogni nodo ha <code>x.value</code>, <code>x.next</code>, <code>x.prev</code>. La lista è referenziata dalla sentinella <code>s</code>: <code>s.next</code> è il primo nodo, <code>s.prev</code> è l'ultimo.</p>
+
+<div class="box box-tip">
+  <div class="box-label">Vantaggi della sentinella</div>
+  Elimina i casi speciali: lista vuota (s.next = s.prev = s), inserimento e cancellazione non richiedono mai di controllare se si è all'inizio o alla fine. Il codice diventa molto più pulito.
+</div>
+
+<pre><span class="cm">// Inserisci dopo nodo p — O(1)</span>
+<span class="fn">INSERT-AFTER</span>(p, x)
+    x.next = p.next;  x.prev = p
+    p.next.prev = x;  p.next = x
+
+<span class="cm">// Rimuovi nodo x — O(1) dato il nodo</span>
+<span class="fn">REMOVE</span>(x)
+    x.prev.next = x.next
+    x.next.prev = x.prev</pre>
+
+<h3>Split di una lista (midterm ricorrente)</h3>
+<pre><span class="cm">// Singly: trova il punto medio con due puntatori</span>
+<span class="fn">SPLIT-SINGLY</span>(L)
+    slow = L;  fast = L
+    <span class="kw">while</span> fast.next ≠ nil <span class="kw">and</span> fast.next.next ≠ nil
+        slow = slow.next
+        fast = fast.next.next
+    <span class="cm">// slow punta alla fine della prima metà</span>
+    R = slow.next
+    slow.next = nil
+    <span class="kw">return</span> (L, R)</pre>
+
+<p>Complessità: O(n). La tecnica del <strong>fast/slow pointer</strong> (puntatore veloce e lento) è fondamentale per problemi sulle liste.</p>
+</section>
+
+<hr class="part">
+
+<!-- ═══ PARTE II ══════════════════════════════════ -->
+<div class="part-label">— Parte II &nbsp;·&nbsp; Problem Solving &amp; Strategie d'Esame</div>
+
+<!-- ─── 8. ANALISI ─────────────────────────────── -->
+<section id="p1">
+<h2><span class="num">08</span>Come Analizzare un Algoritmo Dato</h2>
+
+<p>Il tipo di esercizio più frequente: ti danno uno pseudocodice e chiedono <em>"cosa fa?"</em> + <em>"qual è la complessità?"</em>. Ecco il metodo sistematico.</p>
+
+<h3>Step 1 — Traccia con un esempio piccolo</h3>
+<p>Prima di qualsiasi ragionamento teorico, esegui l'algoritmo mentalmente su un array di 4–5 elementi. Questo ti dà immediatamente un'intuizione di cosa fa.</p>
+
+<h3>Step 2 — Identifica la struttura dei loop</h3>
+<ol class="steps">
+  <li>Conta i <strong>loop annidati</strong>. Ogni livello di annidamento di solito moltiplica la complessità.</li>
+  <li>Per ogni loop, determina quante volte esegue in funzione di n (o altra variabile).</li>
+  <li>Fai la <strong>somma</strong> delle iterazioni totali (prodotto per loop annidati).</li>
+  <li>Semplifica con Θ, tenendo solo il termine dominante.</li>
+</ol>
+
+<div class="box box-ex">
+  <div class="box-label">Pattern tipici e la loro complessità</div>
+<pre><span class="cm">// Ciclo singolo semplice → Θ(n)</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:  <span class="cm">...</span>
+
+<span class="cm">// Due cicli annidati indipendenti → Θ(n²)</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:
+    <span class="kw">for</span> j = 1 <span class="kw">to</span> n:  <span class="cm">...</span>
+
+<span class="cm">// Due cicli annidati con j che parte da i → Θ(n²)   (somma = n(n-1)/2)</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:
+    <span class="kw">for</span> j = i+1 <span class="kw">to</span> n:  <span class="cm">...</span>
+
+<span class="cm">// Ciclo esterno n, ciclo interno dipende da i → analizza caso per caso</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:
+    <span class="kw">while</span> j &lt; i:  <span class="cm">...</span>         <span class="cm">→ Θ(n²) (somma 1+2+...+n)</span>
+
+<span class="cm">// Ciclo che dimezza → Θ(log n)</span>
+<span class="kw">while</span> n &gt; 1:  n = n / 2
+
+<span class="cm">// Ciclo esterno n, ciclo interno log n → Θ(n log n)</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:
+    j = n
+    <span class="kw">while</span> j &gt; 1:  j = j / 2
+
+<span class="cm">// Tre cicli annidati n×n×n → Θ(n³)</span>
+<span class="kw">for</span> i=1 <span class="kw">to</span> n:
+    <span class="kw">for</span> j=1 <span class="kw">to</span> n:
+        <span class="kw">for</span> k=1 <span class="kw">to</span> n:  <span class="cm">...</span></pre>
+</div>
+
+<h3>Step 3 — Spiega cosa fa (in italiano, non parafrasare il codice)</h3>
+
+<div class="box box-warn">
+  <div class="box-label">Errore comune da evitare</div>
+  Non scrivere "scorre l'array con i, poi con j controlla ogni elemento...". Questo è parafrasare il codice. Il professore vuole la <strong>semantica ad alto livello</strong>: "questo algoritmo conta le coppie di elementi che differiscono di esattamente 1" oppure "restituisce il k-esimo elemento distinto dell'array".
+</div>
+
+<h3>Esempio completo — m24 Exercise 300</h3>
+
+<pre><span class="fn">Algo-X</span>(A)
+1  n = A.length
+2  x = 0
+3  <span class="kw">for</span> i = 1 <span class="kw">to</span> n          <span class="cm">← n iterazioni</span>
+4      <span class="kw">for</span> j = 1 <span class="kw">to</span> n      <span class="cm">← n iterazioni</span>
+5          <span class="kw">for</span> k = 1 <span class="kw">to</span> n  <span class="cm">← n iterazioni</span>
+6              <span class="kw">if</span> A[k]−A[j]==1 <span class="kw">and</span> A[j]−A[i]==1
+7                  x = x + 1
+8  <span class="kw">return</span> x</pre>
+
+<p><strong>Semantica:</strong> conta il numero di triple ordinate (i, j, k) di indici tali che A[i], A[j], A[k] formano una sequenza di tre valori consecutivi (ogni valore è esattamente 1 più del precedente). In altre parole, conta le triple con A[i]+1 = A[j] e A[j]+1 = A[k].</p>
+
+<p><strong>Complessità:</strong> tre cicli annidati su n → <span class="cx cx-n2">Θ(n³)</span>.</p>
+</section>
+
+<!-- ─── 9. MIGLIORA ────────────────────────────── -->
+<section id="p2">
+<h2><span class="num">09</span>Come Migliorare un Algoritmo</h2>
+
+<p>La domanda classica: dato Algo-X lento, scrivi Better-Algo-X con complessità migliore. Questo è il cuore del corso. Ci sono <strong>5 tecniche principali</strong>.</p>
+
+<h3>Tecnica 1 — Ordina prima, poi usa binary search o two-pointer</h3>
+<p>Se hai cicli annidati per cercare elementi, puoi spesso:</p>
+<ol class="steps">
+  <li>Ordinare l'array in O(n log n)</li>
+  <li>Per ogni elemento, usare binary search O(log n) invece di scan lineare O(n)</li>
+  <li>Totale: O(n log n) invece di O(n²)</li>
+</ol>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — Algo-Y: conta coppie con A[i]+A[j]=s (f24 Ex.306)</div>
+<pre><span class="cm">// Lento: O(n²)</span>
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:
+    <span class="kw">for</span> j = i+1 <span class="kw">to</span> n:
+        <span class="kw">if</span> A[i] + A[j] == s:  x++
+
+<span class="cm">// Veloce: Sort + two-pointer = O(n log n)</span>
+Sort(A)
+left = 0,  right = n−1
+<span class="kw">while</span> left &lt; right
+    sum = A[left] + A[right]
+    <span class="kw">if</span>   sum == s:  x++;  left++;  right--
+    <span class="kw">elif</span> sum &lt;  s:  left++
+    <span class="kw">else</span>:           right--</pre>
+</div>
+
+<h3>Tecnica 2 — Usa una hash table / dizionario</h3>
+<p>Se la ricerca di un elemento in un insieme è il collo di bottiglia (O(n) con scan), sostituiscila con una hash table che fa insert e lookup in O(1) atteso.</p>
+
+<ol class="steps">
+  <li>Prima passata: inserisci tutti gli elementi nell'hash table in O(n)</li>
+  <li>Seconda passata: per ogni elemento, fai il lookup in O(1)</li>
+  <li>Totale: O(n) invece di O(n²)</li>
+</ol>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — conta le triple con A[k]−A[j]=A[j]−A[i]=1 (m24 Ex.300)</div>
+<pre><span class="cm">// Hash table conta le occorrenze di ogni valore</span>
+count = HashTable()
+<span class="kw">for</span> v <span class="kw">in</span> A:  count[v]++        <span class="cm">// O(n)</span>
+
+x = 0
+<span class="kw">for</span> j = 1 <span class="kw">to</span> n:                 <span class="cm">// O(n)</span>
+    <span class="cm">// quante volte c'è A[j]−1 (il valore precedente)?</span>
+    prev = count.get(A[j] − 1, 0)
+    <span class="cm">// quante volte c'è A[j]+1 (il valore successivo)?</span>
+    nxt  = count.get(A[j] + 1, 0)
+    x = x + prev * nxt           <span class="cm">// ogni (i,j,k) con valori giusti</span>
+<span class="kw">return</span> x                         <span class="cm">// O(n) totale!</span></pre>
+</div>
+
+<h3>Tecnica 3 — Sliding Window / Finestra Scorrevole</h3>
+<p>Utile per problemi su sottosequenze contigue. Invece di ricalcolare la somma/conteggio da zero per ogni finestra, tieni traccia del risultato corrente e aggiornalo incrementalmente.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Schema sliding window</div>
+<pre>left = 0,  stato = stato_iniziale
+<span class="kw">for</span> right = 0 <span class="kw">to</span> n−1
+    aggiungi A[right] allo stato       <span class="cm">← espandi finestra a destra</span>
+    <span class="kw">while</span> condizione_violata:
+        rimuovi A[left] dallo stato    <span class="cm">← restringe da sinistra</span>
+        left++
+    aggiorna il risultato con lo stato corrente</pre>
+</div>
+
+<h3>Tecnica 4 — Divide & Conquer / MergeSort-based</h3>
+<p>Problemi che hanno struttura ricorsiva possono spesso essere risolti con D&C. La chiave è riconoscere quando il problema si divide naturalmente in due metà.</p>
+
+<h3>Tecnica 5 — Preprocessing + struttura dati ausiliaria</h3>
+<p>Costruisci una struttura dati (prefix sums, sorted copy, heap, BST) in O(n) o O(n log n) che poi permette di rispondere a ogni query in O(1) o O(log n).</p>
+
+<div class="box box-ex">
+  <div class="box-label">Prefix sums — calcola somme di range in O(1)</div>
+<pre><span class="cm">// Preprocessing O(n): costruisce l'array delle somme prefisse</span>
+P[0] = 0
+<span class="kw">for</span> i = 1 <span class="kw">to</span> n:  P[i] = P[i−1] + A[i]
+
+<span class="cm">// Query O(1): somma di A[l..r]</span>
+SUM(l, r) = P[r] − P[l−1]</pre>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Guida rapida — Quale tecnica usare?</div>
+  <div class="tbl-wrap"><table>
+  <tr><th>Il problema ha...</th><th>Prova questa tecnica</th><th>Complessità target</th></tr>
+  <tr><td>Cicli annidati che cercano coppie</td><td>Sort + two-pointer o hash table</td><td>O(n log n) o O(n)</td></tr>
+  <tr><td>Ricerca ripetuta in un array</td><td>Sort + binary search</td><td>O(n log n)</td></tr>
+  <tr><td>Conta occorrenze, lookup veloce</td><td>Hash table</td><td>O(n)</td></tr>
+  <tr><td>Sottosequenze contigue</td><td>Sliding window, prefix sums</td><td>O(n)</td></tr>
+  <tr><td>Struttura ricorsiva naturale</td><td>Divide & Conquer</td><td>O(n log n)</td></tr>
+  <tr><td>Massimo/minimo ripetuto</td><td>Heap</td><td>O(n log n)</td></tr>
+  <tr><td>Range queries su BST</td><td>BST con augmentation</td><td>O(h)</td></tr>
+  </table></div>
+</div>
+</section>
+
+<!-- ─── 10. PATTERN CLASSICI ──────────────────── -->
+<section id="p3">
+<h2><span class="num">10</span>Pattern Classici dell'Esame</h2>
+
+<h3>Pattern A — "Spiega e migliora un algoritmo"</h3>
+<p>Struttura tipica: Algo-X fa qualcosa in O(n²) o O(n³). Scrivi Better-Algo-X con O(n log n) o O(n).</p>
+
+<p><strong>Checklist da seguire:</strong></p>
+<ol class="steps">
+  <li>Traccia con esempio piccolo → capisci la semantica</li>
+  <li>Conta le iterazioni → calcola T(n) esatto in Θ</li>
+  <li>Identifica il collo di bottiglia (il loop più costoso)</li>
+  <li>Scegli la tecnica di ottimizzazione appropriata</li>
+  <li>Riscrivi il codice e verifica che faccia la stessa cosa</li>
+  <li>Analizza la nuova complessità e confronta</li>
+</ol>
+
+<h3>Pattern B — "Implementa un'operazione su struttura dati"</h3>
+<p>Ti chiedono es. Max-Heap-Delete, BST-Partition, Split-Linked-List. Come procedere:</p>
+
+<ol class="steps">
+  <li>Ragiona sull'invariante della struttura dati (cosa deve essere vero prima e dopo)</li>
+  <li>Pensa ai casi edge: lista vuota, nodo foglia, un solo figlio...</li>
+  <li>Scrivi lo pseudocodice passo per passo</li>
+  <li>Verifica con un esempio concreto disegnato a mano</li>
+  <li>Analizza la complessità e giustificala</li>
+</ol>
+
+<h3>Pattern C — "Progetta un algoritmo da zero"</h3>
+<p>Ti danno un problema nuovo (es. "scrivi Mountain-Sort(A)"). Framework:</p>
+
+<ol class="steps">
+  <li>Comprendi esattamente l'input e l'output desiderato</li>
+  <li>Cerca una proprietà strutturale del problema (simmetria, ordinamento parziale, divisibilità...)</li>
+  <li>Scegli la strategia: greedy, D&C, sorting+scan, DP...</li>
+  <li>Dimostra (informalmente) la correttezza</li>
+  <li>Analizza la complessità</li>
+</ol>
+
+<h3>Pattern D — Esercizi su Liste Concatenate</h3>
+<p>Ricorrenti nei midterm recenti. Punti chiave:</p>
+<ul>
+  <li>Usa sempre la tecnica del <strong>doppio puntatore</strong> (slow/fast) per trovare il punto medio</li>
+  <li>Per manipolazioni in-place, fai attenzione all'ordine in cui aggiorni i puntatori</li>
+  <li>Prima aggiorna il nodo che perderesti (quello che non puoi più raggiungere)</li>
+  <li>Testa mentalmente con lista vuota, lista di 1 elemento, lista di 2 elementi</li>
+</ul>
+</section>
+
+<!-- ─── 11. TEMPLATE STRUTTURE ────────────────── -->
+<section id="p4">
+<h2><span class="num">11</span>Template da Memorizzare per l'Esame</h2>
+
+<h3>Max-Heap-Change-Value — O(log n)</h3>
+<p>Cambia H[i] a x e ripristina la proprietà heap.</p>
+<pre><span class="fn">MAX-HEAP-CHANGE-VALUE</span>(H, i, x)
+H[i] = x
+<span class="cm">// Caso 1: il nuovo valore è più grande → potrebbe violare verso l'alto</span>
+<span class="kw">while</span> i &gt; 0 <span class="kw">and</span> H[PARENT(i)] &lt; H[i]
+    swap(H[i], H[PARENT(i)])
+    i = PARENT(i)
+<span class="cm">// Caso 2: il nuovo valore è più piccolo → potrebbe violare verso il basso</span>
+MAX-HEAPIFY(H, i)</pre>
+
+<h3>Max-Heap-Delete — O(log n)</h3>
+<pre><span class="fn">MAX-HEAP-DELETE</span>(H, i)
+H[i] = H[H.heap-size]          <span class="cm">← sostituisci con l'ultimo</span>
+H.heap-size = H.heap-size − 1
+MAX-HEAP-CHANGE-VALUE(H, i, H[i])  <span class="cm">← ripristina (su o giù)</span></pre>
+
+<h3>BST-Lower-Bound — O(h)</h3>
+<p>Restituisce il nodo con il valore minimo ≥ x.</p>
+<pre><span class="fn">BST-LOWER-BOUND</span>(t, x)
+result = nil
+<span class="kw">while</span> t ≠ nil
+    <span class="kw">if</span> t.key &gt;= x
+        result = t          <span class="cm">← candidato: t.key ≥ x, potrebbe esserci di meglio a sx</span>
+        t = t.left
+    <span class="kw">else</span>
+        t = t.right         <span class="cm">← t.key &lt; x: tutto il sottoalbero sx è troppo piccolo</span>
+<span class="kw">return</span> result</pre>
+
+<h3>In-order BST come array — O(n)</h3>
+<pre><span class="fn">BST-TO-ARRAY</span>(t, arr, idx)
+<span class="kw">if</span> t == nil: <span class="kw">return</span> idx
+idx = BST-TO-ARRAY(t.left, arr, idx)
+arr[idx++] = t.key
+idx = BST-TO-ARRAY(t.right, arr, idx)
+<span class="kw">return</span> idx</pre>
+
+<h3>Merge Sort su lista concatenata — O(n log n)</h3>
+<pre><span class="fn">LIST-SORT</span>(L)
+<span class="kw">if</span> L == nil <span class="kw">or</span> L.next == nil: <span class="kw">return</span> L
+(L1, L2) = SPLIT-SINGLY(L)     <span class="cm">← divide a metà</span>
+L1 = LIST-SORT(L1)
+L2 = LIST-SORT(L2)
+<span class="kw">return</span> MERGE-LISTS(L1, L2)      <span class="cm">← fonde le due metà ordinate</span>
+
+<span class="fn">MERGE-LISTS</span>(L1, L2)
+<span class="kw">if</span> L1 == nil: <span class="kw">return</span> L2
+<span class="kw">if</span> L2 == nil: <span class="kw">return</span> L1
+<span class="kw">if</span> L1.value ≤ L2.value
+    L1.next = MERGE-LISTS(L1.next, L2);  <span class="kw">return</span> L1
+<span class="kw">else</span>
+    L2.next = MERGE-LISTS(L1, L2.next);  <span class="kw">return</span> L2</pre>
+</section>
+
+<!-- ─── 12. RECAP ──────────────────────────────── -->
+<section id="p5">
+<h2><span class="num">12</span>Tabella Finale — Tutto in una Pagina</h2>
+
+<div class="tbl-wrap"><table>
+<tr><th>Algoritmo</th><th>Best</th><th>Average</th><th>Worst</th><th>Spazio</th><th>Stabile</th><th>In-place</th></tr>
+<tr><td><strong>Insertion Sort</strong></td><td><span class="cx cx-n">Θ(n)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td class="cx cx-1">O(1)</td><td class="good">✓</td><td class="good">✓</td></tr>
+<tr><td><strong>Selection Sort</strong></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td class="cx cx-1">O(1)</td><td class="bad">✗</td><td class="good">✓</td></tr>
+<tr><td><strong>Bubble Sort</strong></td><td><span class="cx cx-n">Θ(n)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td class="cx cx-1">O(1)</td><td class="good">✓</td><td class="good">✓</td></tr>
+<tr><td><strong>MergeSort</strong></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td class="cx cx-n">O(n)</td><td class="good">✓</td><td class="bad">✗</td></tr>
+<tr><td><strong>QuickSort</strong></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-n2">Θ(n²)</span></td><td class="cx cx-logn">O(log n)</td><td class="bad">✗</td><td class="good">✓</td></tr>
+<tr><td><strong>QuickSort Random</strong></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-n2">Θ(n²)*</span></td><td class="cx cx-logn">O(log n)</td><td class="bad">✗</td><td class="good">✓</td></tr>
+<tr><td><strong>HeapSort</strong></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td><span class="cx cx-nlogn">Θ(n log n)</span></td><td class="cx cx-1">O(1)</td><td class="bad">✗</td><td class="good">✓</td></tr>
+<tr><td><strong>Binary Search</strong></td><td><span class="cx cx-1">O(1)</span></td><td><span class="cx cx-logn">O(log n)</span></td><td><span class="cx cx-logn">O(log n)</span></td><td class="cx cx-1">O(1)</td><td>—</td><td>—</td></tr>
+</table></div>
+
+<p style="color:var(--text-dim); font-size:12px; margin-top:4px">* per QuickSort Random il worst case è teoricamente Θ(n²) ma con probabilità 1/n! — praticamente impossibile.</p>
+
+<div class="box box-thm" style="margin-top:24px">
+  <div class="box-label">Ricorrenze fondamentali da sapere a memoria</div>
+  <div class="tbl-wrap"><table>
+  <tr><th>Ricorrenza</th><th>Soluzione</th><th>Esempio</th></tr>
+  <tr><td>T(n) = T(n−1) + O(1)</td><td class="mark">Θ(n)</td><td>Ricorsione lineare</td></tr>
+  <tr><td>T(n) = T(n−1) + O(n)</td><td class="mark">Θ(n²)</td><td>QuickSort worst case</td></tr>
+  <tr><td>T(n) = T(n/2) + O(1)</td><td class="mark">Θ(log n)</td><td>Binary Search</td></tr>
+  <tr><td>T(n) = T(n/2) + O(n)</td><td class="mark">Θ(n)</td><td>Selection (QuickSelect)</td></tr>
+  <tr><td>T(n) = 2T(n/2) + O(n)</td><td class="mark">Θ(n log n)</td><td>MergeSort</td></tr>
+  <tr><td>T(n) = 2T(n/2) + O(1)</td><td class="mark">Θ(n)</td><td>Visita albero completo</td></tr>
+  <tr><td>T(n) = 2T(n−1) + O(1)</td><td class="mark">Θ(2ⁿ)</td><td>Pingala lento, Fibonacci naïve</td></tr>
+  </table></div>
+</div>
+
+<div class="box box-warn" style="margin-top: 24px">
+  <div class="box-label">Errori tipici da non fare all'esame</div>
+  <ul>
+    <li>Confondere O con Θ: se sai il bound esatto, usa sempre Θ. O è solo "al massimo".</li>
+    <li>Dire "la complessità è O(n²)" quando è Θ(n²) — è meno preciso del necessario.</li>
+    <li>Non considerare il caso base nella ricorsione.</li>
+    <li>Dimenticare che Binary Search richiede array <strong>ordinato</strong>.</li>
+    <li>Confondere BUILD-MAX-HEAP O(n) con "n volte HEAP-INSERT" O(n log n) — non sono equivalenti.</li>
+    <li>In QuickSort, il caso peggiore è array <em>già ordinato</em> (non inverso!) con pivot = A[end].</li>
+    <li>Non verificare i casi edge (lista vuota, array di 1 elemento, duplicati) nelle implementazioni.</li>
+  </ul>
+</div>
+
+<div class="box box-tip" style="margin-top: 16px">
+  <div class="box-label">Consiglio finale — Come gestiré il tempo all'esame</div>
+  <ul>
+    <li>Leggi tutti gli esercizi prima di iniziare. Inizia da quello che conosci meglio.</li>
+    <li>Traccia sempre con un esempio piccolo (3–5 elementi) — risparmia tempo, evita errori.</li>
+    <li>Per la complessità: scrivi prima la formula T(n) per intero, poi semplifica. Mostra il ragionamento.</li>
+    <li>Se non trovi la soluzione ottimale, scrivi quella subottimale con la sua complessità — vale comunque punti parziali.</li>
+    <li>Alle domande "spiega cosa fa": <strong>una frase chiara e precisa vale più di tre righe vaghe.</strong></li>
+  </ul>
+</div>
+
+</section>
+
+</main>
+
+<script>
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+<script src="./mobile.js"></script>
+</body>
+</html>

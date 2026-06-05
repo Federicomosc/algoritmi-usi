@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teoria della Complessità — P, NP, NP-Completezza</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32;
+  --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--gold); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--gold); }
+.nav-link.active { color: var(--gold); border-left-color: var(--gold); background: rgba(232,197,71,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #1a1a26 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(78,201,168,.12) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--teal); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--gold); color: var(--gold); background: rgba(232,197,71,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.tag.r { border-color: var(--red); color: var(--red); background: rgba(224,108,117,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--teal); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--gold); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--teal); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(78,201,168,.12); border-radius: 3px; padding: 0 2px; }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(232,197,71,.07); border-color: var(--gold); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(78,201,168,.1); border-color: var(--teal); border-left-width: 4px; }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-breve .box-label { color: var(--teal); }
+.box-def .box-label { color: var(--blue); }
+.box-thm .box-label { color: var(--gold); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--gold); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--teal); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-poly { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-super { background: rgba(224,108,117,.15); color: var(--red); }
+.cx-n { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-n2 { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-nlogn { background: rgba(78,201,168,.15); color: var(--teal); }
+hr.part { border: none; border-top: 1px solid var(--teal); opacity: .3; margin: 64px 0 48px; }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.diagram { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--text-dim); }
+
+/* ── INTERATTIVO ─────────────────────────────────── */
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--teal); font-size: 15px; }
+.slider-row { display: flex; align-items: center; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+.slider-row label { font-size: 13px; color: var(--text-dim); min-width: 80px; }
+.slider-row input[type=range] { flex: 1; min-width: 160px; accent-color: var(--teal); }
+.slider-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--teal); font-weight: 600; min-width: 48px; }
+.combo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 16px; }
+.combo-card { background: var(--bg4); border-radius: 8px; padding: 14px; text-align: center; border: 1px solid var(--border); transition: border-color .2s; }
+.combo-card.poly { border-color: var(--green); }
+.combo-card.super { border-color: var(--red); }
+.combo-card .lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; }
+.combo-card .val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; margin: 6px 0; color: var(--text-bright); }
+.combo-card .cls { font-size: 11px; font-weight: 600; }
+.combo-card.poly .cls { color: var(--green); }
+.combo-card.super .cls { color: var(--red); }
+select.inp, textarea.inp { width: 100%; background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; margin: 8px 0; }
+textarea.inp { min-height: 70px; resize: vertical; }
+.btn-action { padding: 10px 24px; border-radius: 8px; border: none; background: var(--teal); color: var(--bg); font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 8px; }
+.btn-action:hover { filter: brightness(1.1); }
+.result-box { margin-top: 16px; padding: 16px; border-radius: 8px; font-size: 14px; }
+.result-box.sat { background: rgba(152,195,121,.12); border: 1px solid var(--green); }
+.result-box.unsat { background: rgba(224,108,117,.12); border: 1px solid var(--red); }
+.result-box.info { background: rgba(97,175,239,.1); border: 1px solid var(--blue); }
+.graph-canvas { width: 100%; height: 220px; background: var(--bg4); border-radius: 8px; margin-top: 12px; }
+.classify-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg4); border-radius: 8px; margin: 8px 0; border: 1px solid var(--border); flex-wrap: wrap; }
+.classify-item.correct { border-color: var(--green); }
+.classify-item.wrong { border-color: var(--red); }
+.classify-item span { flex: 1; font-size: 14px; min-width: 180px; }
+.classify-item select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; }
+.sat-table { width: 100%; font-size: 12px; margin-top: 12px; }
+.sat-table th, .sat-table td { padding: 6px 10px; text-align: center; border: 1px solid var(--border); }
+.sat-table tr.satisfying { background: rgba(152,195,121,.15); }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--teal); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.nota { border-bottom: 1px dashed var(--teal); cursor: help; position: relative; color: var(--teal); font-weight: 600; }
+.nota::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); width: max-content; max-width: 340px; padding: 10px 14px; background: var(--tooltip-bg); border: 1px solid var(--teal); border-radius: 8px; font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.5; white-space: normal; text-align: left; opacity: 0; visibility: hidden; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,.25); pointer-events: none; }
+.nota:hover::after, .nota:focus::after { opacity: 1; visibility: visible; }
+.dfs-log { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 10px; line-height: 1.7; }
+.graph-canvas { height: 280px; }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema" aria-label="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 01 — Complessità</div>
+    <div class="sub">PDF 02 · Teoria della complessità</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Fondamenti</div>
+    <a class="nav-link" href="#s1">1. Tempo polinomiale</a>
+    <a class="nav-link sub" href="#s1-ex">Polinomiale vs super-polinomiale</a>
+    <a class="nav-link" href="#s2">2. Problemi e istanze</a>
+    <a class="nav-link sub" href="#s2-dec">Problemi decisionali</a>
+    <a class="nav-link" href="#s3">3. Classe P</a>
+    <a class="nav-link" href="#s4">4. Verifica polinomiale</a>
+    <a class="nav-link" href="#s5">5. Classe NP</a>
+    <a class="nav-link sub" href="#s5-pnp">P = NP?</a>
+    <div class="nav-label">Esempi</div>
+    <a class="nav-link" href="#s6">6. SAT</a>
+    <a class="nav-link" href="#s7">7. Vertex Cover</a>
+    <div class="nav-label">Riduzioni</div>
+    <a class="nav-link" href="#s8">8. Riduzioni polinomiali</a>
+    <a class="nav-link" href="#s9">9. 2-CNF-SAT ∈ P</a>
+    <a class="nav-link" href="#s10">10. NP-completeness</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#ix1">Contatore combinatorio</a>
+    <a class="nav-link" href="#ix2">Verificatore 2-CNF</a>
+    <a class="nav-link" href="#ix3">SAT a 3 variabili</a>
+    <a class="nav-link" href="#ix4">Classifica i problemi</a>
+    <div class="nav-label">Esercizi</div>
+    <a class="nav-link" href="#ex1">Esercizi guidati</a>
+    <a class="nav-link" href="#ex2">Soluzioni</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Teoria della Complessità</span><br>Classi P, NP e NP-Completezza</h1>
+  <p>Appunti didattici completi basati sulle slide di Antonio Carzaniga (USI, 20 maggio 2026). Copertura: classi di complessità, riduzioni polinomiali, SAT, Vertex Cover, 2-CNF-SAT.</p>
+  <div class="hero-tags">
+    <span class="tag t">Classe P</span>
+    <span class="tag t">Classe NP</span>
+    <span class="tag g">Riduzioni</span>
+    <span class="tag r">NP-Complete</span>
+    <span class="tag b">SAT</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — la mappa del capitolo</div>
+  <ul>
+    <li><strong>P</strong> — problemi che <em>sappiamo risolvere</em> velocemente (tempo polinomiale)</li>
+    <li><strong>NP</strong> — problemi la cui risposta «sì» è <em>facile da controllare</em> se qualcuno ti dà una prova (certificato)</li>
+    <li><strong>NP-completo</strong> — i problemi «più difficili» di NP: se ne risolvessi uno in P, risolveresti tutto NP → P = NP</li>
+    <li><strong>Riduzione</strong> — trasformare un problema in un altro: se A si riduce a B e B è facile, allora A è facile; se A è difficile, allora B è almeno altrettanto difficile</li>
+  </ul>
+</div>
+
+<!-- ═══ 1. POLYNOMIAL TIME ═══ -->
+<section id="s1">
+<h2><span class="num">01</span>Tempo polinomiale</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione</div>
+  Un algoritmo è <strong>polynomial-time</strong> se il suo tempo di esecuzione worst-case T(n), su un input di dimensione <em>n bit</em>, è <span class="math">O(n<sup>k</sup>)</span> per qualche costante k.
+</div>
+
+<p>Intuitivamente: polinomiale = "gestibile" per input grandi. Super-polinomiale = "impraticabile" per input moderatamente grandi.</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Algoritmo</th><th>Worst-case</th><th>Polinomiale?</th></tr>
+<tr><td>Find (sequenziale)</td><td><span class="cx cx-n">O(n)</span></td><td class="good">✓ k=1</td></tr>
+<tr><td>Binary Search</td><td><span class="cx cx-n">O(log n)</span></td><td class="good">✓ k=0</td></tr>
+<tr><td>Tree-Minimum</td><td><span class="cx cx-n">O(n)</span></td><td class="good">✓</td></tr>
+<tr><td>RB-Insert</td><td><span class="cx cx-n">O(log n)</span></td><td class="good">✓</td></tr>
+<tr><td>Insertion Sort</td><td><span class="cx cx-n2">O(n²)</span></td><td class="good">✓ k=2</td></tr>
+<tr><td>Heapsort</td><td><span class="cx cx-nlogn">O(n log n)</span></td><td class="good">✓ k=2</td></tr>
+<tr><td>Edit Distance</td><td><span class="cx cx-n2">O(n²)</span></td><td class="good">✓ k=2</td></tr>
+<tr><td>Enumerare tutti i sottoinsiemi</td><td><span class="cx cx-super">Θ(2ⁿ)</span></td><td class="bad">✗</td></tr>
+</table>
+</div>
+
+<h3 id="s1-ex">Polinomiale vs super-polinomiale</h3>
+
+<div class="box box-thm">
+  <div class="box-label">Regola pratica del corso</div>
+  <p><span class="cx cx-poly">polinomiale ≡ buono</span> &nbsp;&nbsp; <span class="cx cx-super">super-polinomiale ≡ cattivo</span></p>
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Struttura combinatoria</th><th>Numero</th><th>Classe</th></tr>
+<tr><td>Tutte le coppie di n oggetti</td><td>Θ(n²)</td><td class="good">polinomiale</td></tr>
+<tr><td>Tutte le terne</td><td>Θ(n³)</td><td class="good">polinomiale</td></tr>
+<tr><td>Tutte le k-uple (k fisso)</td><td>Θ(n<sup>k</sup>)</td><td class="good">polinomiale</td></tr>
+<tr><td>Tutti i sottoinsiemi</td><td>Θ(2ⁿ)</td><td class="bad">super-polinomiale</td></tr>
+<tr><td>Tutte le permutazioni</td><td>Θ(n!)</td><td class="bad">super-polinomiale</td></tr>
+<tr><td>Tutti gli alberi su n vertici (Cayley)</td><td>Θ(n<sup>n−2</sup>)</td><td class="bad">super-polinomiale</td></tr>
+<tr><td>Tutti i tour completi (TSP brute force)</td><td>Θ(n!)</td><td class="bad">super-polinomiale</td></tr>
+<tr><td>Tutti i tagli (cut) di un grafo</td><td>Θ(2ⁿ)</td><td class="bad">super-polinomiale</td></tr>
+<tr><td>Tutti gli archi di un grafo</td><td>Θ(n²)</td><td class="good">polinomiale</td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Attenzione</div>
+  O(n<sup>100</sup>) è tecnicamente polinomiale ma impraticabile. O(1.00001ⁿ) è super-polinomiale ma potrebbe essere gestibile per n piccolo. La distinzione polinomiale/super-polinomiale è una <em>approssimazione teorica</em>, non una legge fisica.
+</div>
+</section>
+
+<!-- ═══ 2. PROBLEMI ═══ -->
+<section id="s2">
+<h2><span class="num">02</span>Problemi, istanze e soluzioni</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — Problema</div>
+  Un <strong>problema Q</strong> è una relazione binaria tra un insieme I di <em>istanze</em> e un insieme S di <em>soluzioni</em>.
+  <div class="formula">Q ⊆ I × S</div>
+</div>
+
+<p>Un <strong>problema concreto</strong> ha I = S = {0,1}* (tutte le stringhe binarie). Ogni istanza e soluzione reale viene <em>codificata</em> come stringa binaria con una codifica "sensata" (che non gonfia eccessivamente la dimensione).</p>
+
+<h3 id="s2-dec">Problemi decisionali</h3>
+
+<div class="box box-def">
+  <div class="box-label">Definizione</div>
+  Un <strong>problema decisionale</strong> ha S = {0, 1}. L'output è solo "sì" o "no".
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — Test di primalità (decisionale)</div>
+  <p>Input: un intero n (codificato in binario). Output: 1 se n è primo, 0 altrimenti.</p>
+  <pre>1 → 0 &nbsp; (non primo)
+10 → 1 &nbsp; (primo)
+11 → 1 &nbsp; (primo)
+100 → 0
+101 → 1
+...</pre>
+</div>
+
+<h3>Decisione vs ottimizzazione</h3>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — Cammino minimo</div>
+  <p><strong>Versione ottimizzazione:</strong></p>
+  <ul>
+    <li>Input: grafo G, vertice sorgente a, vertice destinazione z</li>
+    <li>Output: sequenza di vertici a, c, …, z (il cammino più corto)</li>
+  </ul>
+  <p><strong>Versione decisionale:</strong></p>
+  <ul>
+    <li>Input: grafo G, sorgente a, destinazione z, <em>lunghezza massima</em> L = 10</li>
+    <li>Output: 1 se esiste un cammino da a a z di lunghezza ≤ 10, 0 altrimenti</li>
+  </ul>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Perché ci concentriamo sui problemi decisionali</div>
+  <ul>
+    <li>Un problema di <strong>ottimizzazione è almeno difficile</strong> quanto la sua versione decisionale: se risolvi l'ottimizzazione, rispondi subito alla decisione.</li>
+    <li>Non è <em>molto</em> più difficile: dalla versione decisionale si può spesso ricostruire la soluzione ottima con ricerca binaria (es. trovare la lunghezza minima chiedendo "esiste cammino di lunghezza ≤ L?" per diversi L).</li>
+  </ul>
+</div>
+</section>
+
+<!-- ═══ 3. CLASSE P ═══ -->
+<section id="s3">
+<h2><span class="num">03</span>La classe di complessità P</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione</div>
+  Un problema decisionale Q è <strong>polynomial-time solvable</strong> se esiste un algoritmo A che lo risolve in tempo polinomiale nel worst-case.
+  <div class="formula" style="margin-top:12px"><span class="nota" data-tip="P = problemi decisionali risolvibili in tempo polinomiale O(n^k). «Polynomial time» = buono, gestibile.">P</span> = { Q decisionale : ∃ algoritmo A, A risolve Q in O(n<sup>k</sup>) }</div>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempi di problemi in P</div>
+  <ul>
+    <li><strong>Cammino minimo (versione decisionale)</strong> — Dijkstra in O(n²) o O((V+E) log V)</li>
+    <li><strong>Test di primalità</strong> — risultato di Agrawal, Kayal, Saxena (AKS, 2002): O(log<sup>12</sup> n). Kayal e Saxena erano studenti di laurea triennale all'IIT Kanpur!</li>
+    <li><strong>Parsing di un programma Java</strong> — algoritmi di parsing in tempo lineare o quasi-lineare</li>
+    <li><strong>2-CNF-SAT</strong> — vedremo che è in P tramite riduzione a reachability</li>
+  </ul>
+</div>
+</section>
+
+<!-- ═══ 4. VERIFICA ═══ -->
+<section id="s4">
+<h2><span class="num">04</span>Verifica polinomiale</h2>
+
+<p>Per molti problemi difficili, <strong>trovare</strong> una soluzione è costoso, ma <strong>verificare</strong> una soluzione candidata è facile.</p>
+
+<div class="box box-breve">
+  <div class="box-label">Analogia — sudoku</div>
+  <strong>Risolvere</strong> un sudoku difficile può richiedere ore di tentativi. Ma se qualcuno ti consegna la griglia compilata, <strong>verificare</strong> che sia corretta (righe, colonne, box) richiede pochi secondi. NP modella proprio questa asimmetria: trovare vs controllare.
+</div>
+
+<div class="diagram">
+problema + istanza x  ──?──►  sì/no
+
+<span class="cm">Se abbiamo un "certificato" y (prova della risposta "sì"):</span>
+
+istanza x  +  certificato y  ──►  algoritmo di verifica A  ──►  valido / invalido
+                                    <span class="hl">in tempo polinomiale</span>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — Vertex Cover (decisionale)</div>
+  <p><strong>Input:</strong> grafo G = (V,E), intero K</p>
+  <p><strong>Output:</strong> 1 se esiste un insieme S ⊆ V con |S| ≤ K tale che ogni arco (u,v) ∈ E ha u ∈ S o v ∈ S</p>
+  <p><strong>Certificato:</strong> l'insieme S stesso (lista di ≤ K vertici)</p>
+  <p><strong>Verifica:</strong> controlla che |S| ≤ K e che ogni arco sia coperto → O(|E|·|S|) = polinomiale</p>
+</div>
+
+<p>Non sappiamo se esista un algoritmo polinomiale per <em>trovare</em> S, ma se qualcuno ci dà S, possiamo verificarlo velocemente.</p>
+</section>
+
+<!-- ═══ 5. CLASSE NP ═══ -->
+<section id="s5">
+<h2><span class="num">05</span>La classe di complessità NP</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — Polynomial-time verifiable</div>
+  Un problema decisionale Q è <strong>polynomial-time verifiable</strong> se:
+  <ol>
+    <li>Esiste un algoritmo di verifica A che gira in tempo polinomiale</li>
+    <li>Per ogni istanza x con risposta "sì" (Q(x) = 1), esiste un <strong>certificato</strong> y di dimensione polinomiale |y| = O(|x|<sup>c</sup>)</li>
+    <li>Tale che A(x, y) = 1 (il certificato è accettato)</li>
+  </ol>
+  <div class="formula" style="margin-top:12px"><span class="nota" data-tip="NP = «Nondeterministic Polynomial». Problemi la cui risposta SÌ è verificabile in tempo polinomiale con un certificato. NON significa «non polinomiale».">NP</span> = { Q decisionale : Q è polynomial-time verifiable }</div>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">NP ≠ "Non-Polynomial"!</div>
+  <p><strong>NP</strong> sta per <strong>"Nondeterministic Polynomial"</strong> (tempo polinomiale su una macchina non deterministica). È la classe dei problemi la cui risposta "sì" è verificabile in tempo polinomiale.</p>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Relazione fondamentale</div>
+  <div class="formula">P ⊆ NP</div>
+  <p>Se posso <em>risolvere</em> un problema in tempo polinomiale, posso anche <em>verificarlo</em>: il certificato è la traccia dell'esecuzione (o la soluzione trovata dall'algoritmo), e la verifica consiste nel rilanciare l'algoritmo.</p>
+</div>
+
+<h3 id="s5-pnp">La grande domanda aperta: P = NP?</h3>
+
+<div class="box box-thm" style="border-color: var(--red)">
+  <div class="box-label" style="color:var(--red)">Problema del millennio</div>
+  <div class="formula">P = NP ?</div>
+  <p>Se polynomial-time verifiable ⟹ polynomial-time solvable, allora P = NP.</p>
+  <p>Altrimenti esistono problemi verificabili in tempo polinomiale ma <em>non risolvibili</em> in tempo polinomiale → P ⊊ NP.</p>
+  <p>La maggior parte dei teorici crede che <strong>P ≠ NP</strong>: trovare una soluzione sarebbe intrinsecamente più difficile che verificarla. Ma <em>nessuno ha dimostrato</em> né P = NP né P ≠ NP.</p>
+</div>
+</section>
+
+<!-- ═══ 6. SAT ═══ -->
+<section id="s6">
+<h2><span class="num">06</span>SAT — Satisfiability</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — SAT</div>
+  <p><strong>Input:</strong> una formula booleana su n variabili x₁, x₂, …, xₙ (con connettivi ∧, ∨, ¬)</p>
+  <p><strong>Output:</strong> 1 se esiste un'assegnazione di verità che soddisfa la formula, 0 altrimenti</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempi</div>
+  <p><strong>Formula 1:</strong> ¬x ∧ (¬y ∨ ¬z) ∧ ¬z ∧ (x ∨ y)</p>
+  <p>Assegnazione: x=0, y=1, z=0 → tutte le clausole vere → <span class="good">SATISFIABLE → output 1</span></p>
+  <p><strong>Formula 2:</strong> (x ∨ y ∨ z) ∧ (x ∨ ¬y) ∧ (y ∨ ¬z) ∧ (z ∨ ¬x) ∧ (¬x ∨ ¬y ∨ ¬z)</p>
+  <p>Nessuna assegnazione soddisfa tutte le clausole → <span class="bad">UNSATISFIABLE → output 0</span></p>
+</div>
+
+<div class="grid2">
+  <div class="box box-ex">
+    <div class="box-label">SAT ∈ NP?</div>
+    <p><span class="good">SÌ.</span> Certificato: un'assegnazione (n bit). Verifica: valuta la formula in O(n) per ogni clausola → tempo polinomiale.</p>
+  </div>
+  <div class="box box-warn">
+    <div class="box-label">SAT ∈ P?</div>
+    <p><span class="bad">Non lo sappiamo.</span> Brute force su 2ⁿ assegnazioni è esponenziale. Nessun algoritmo polinomiale noto (e se P≠NP, non ne esiste).</p>
+  </div>
+</div>
+</section>
+
+<!-- ═══ 7. VERTEX COVER ═══ -->
+<section id="s7">
+<h2><span class="num">07</span>Vertex Cover (VC)</h2>
+
+<div class="box box-def">
+  <div class="box-label">Definizione</div>
+  <p><strong>Input:</strong> grafo G = (V, E), intero K</p>
+  <p><strong>Output:</strong> 1 se esiste S ⊆ V con |S| ≤ K tale che ∀ (u,v) ∈ E: u ∈ S ∨ v ∈ S</p>
+</div>
+
+<p>Un <em>vertex cover</em> è un insieme di vertici che "tocca" ogni arco del grafo. La versione decisionale chiede se ne esiste uno di dimensione ≤ K.</p>
+
+<div class="grid2">
+  <div class="box box-ex">
+    <div class="box-label">VC ∈ NP?</div>
+    <p><span class="good">SÌ.</span> Certificato: l'insieme S (≤ K vertici, codifica polinomiale). Verifica: per ogni arco, controlla se un estremo è in S.</p>
+  </div>
+  <div class="box box-warn">
+    <div class="box-label">VC ∈ P?</div>
+    <p><span class="bad">Non lo sappiamo.</span> Brute force: prova tutti i sottoinsiemi di ≤ K vertici → O(n<sup>K</sup>) o O(2ⁿ). Se K è grande, esponenziale.</p>
+  </div>
+</div>
+</section>
+
+<!-- ═══ 8. RIDUZIONI ═══ -->
+<section id="s8">
+<h2><span class="num">08</span>Riduzioni polinomiali</h2>
+
+<p>Vogliamo dimostrare che un problema Q′ è <em>almeno difficile quanto</em> un problema Q. Lo facciamo con una <strong>riduzione polinomiale</strong>.</p>
+
+<div class="box box-breve">
+  <div class="box-label">Analogia — traduttore automatico</div>
+  La riduzione A è come un <strong>traduttore veloce</strong>: trasforma ogni domanda in italiano (istanza di Q) in una domanda equivalente in francese (istanza di Q′). Se sai rispondere in francese velocemente, allora sai rispondere anche in italiano (componi traduzione + risposta). Se l'italiano è intrinsecamente difficile, anche il francese non può essere «troppo facile».
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — Riduzione polinomiale Q → Q′</div>
+  Esiste un algoritmo A in tempo polinomiale che:
+  <ol>
+    <li>Trasforma ogni istanza q di Q in un'istanza q′ di Q′</li>
+    <li>Tale che: <strong>Q(q) = 1 ⟺ Q′(q′) = 1</strong> (stessa risposta sì/no)</li>
+  </ol>
+  Scriviamo: <span class="math">Q ≤<sub>p</sub> Q′</span> ("Q si riduce polinomialmente a Q′")
+</div>
+
+<div class="diagram">
+<span class="cm">Schema di riduzione:</span>
+
+istanza q di Q  ──A (poly-time)──►  istanza q′ di Q′  ──?──►  soluzione
+
+<span class="cm">Se Q′ è risolvibile in tempo polinomiale (Q′ ∈ P):</span>
+
+istanza q di Q  ──A──►  q′  ──A<sub>Q′</sub>──►  soluzione
+
+<span class="hl">Composizione: A + A<sub>Q′</sub> risolve Q in tempo polinomiale → Q ∈ P</span>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Teorema — Riduzione e difficoltà</div>
+  <ul>
+    <li>Se Q ≤<sub>p</sub> Q′ e Q′ ∈ P, allora <strong>Q ∈ P</strong></li>
+    <li>Equivalently: se Q ∉ P (si crede), allora <strong>Q′ ∉ P</strong></li>
+    <li>La riduzione trasferisce la difficoltà da Q a Q′</li>
+  </ul>
+</div>
+</section>
+
+<!-- ═══ 9. 2-CNF-SAT ═══ -->
+<section id="s9">
+<h2><span class="num">09</span>2-CNF-SAT ∈ P — Riduzione a reachability</h2>
+
+<p>2-CNF-SAT è una restrizione di SAT dove ogni clausola ha <strong>esattamente 2 letterali</strong>. Sorprendentemente, è in P (a differenza di SAT generale).</p>
+
+<div class="box box-def">
+  <div class="box-label">Definizione — 2-CNF-SAT</div>
+  <p>Input: formula f = C₁ ∧ C₂ ∧ … ∧ Cₖ in CNF, ogni Cᵢ = (a ∨ b) con letterali (variabile o negazione)</p>
+  <p>Output: 1 se f è soddisfacibile</p>
+  <p>Esempio: (x₁ ∨ ¬x₃) ∧ (¬x₂ ∨ x₃) ∧ (¬x₁ ∨ ¬x₃) ∧ (x₁ ∨ x₂)</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Perché 2-CNF è facile ma SAT no?</div>
+  Con 2 letterali per clausola, le implicazioni formano un <strong>grafo</strong> e il test «è soddisfacibile?» diventa «esiste un ciclo impossibile xᵢ ⇝ ¬xᵢ ⇝ xᵢ?» — risolvibile con DFS in tempo polinomiale. SAT generale non ha questa struttura semplice.
+</div>
+
+<h3>Passo 1 — Forma implicativa</h3>
+<p>Ogni clausola (a ∨ b) è equivalente a due implicazioni:</p>
+<div class="formula">(a ∨ b) ≡ (¬a ⇒ b) ≡ (¬b ⇒ a)</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio di conversione</div>
+  <p>(x₁ ∨ ¬x₃) ∧ (¬x₂ ∨ x₃) diventa:</p>
+  <div class="formula">(¬x₁ ⇒ ¬x₃) ∧ (x₃ ⇒ x₁) ∧ (x₂ ⇒ x₃) ∧ (¬x₃ ⇒ ¬x₂)</div>
+</div>
+
+<h3>Passo 2 — Grafo delle implicazioni</h3>
+<p>Costruiamo un grafo diretto G con 2n nodi: per ogni variabile xᵢ, nodi xᵢ e ¬xᵢ. Per ogni implicazione (a ⇒ b), aggiungiamo arco a → b.</p>
+
+<h3>Passo 3 — Criterio di insoddisfacibilità</h3>
+
+<div class="box box-thm">
+  <div class="box-label">Teorema</div>
+  La formula 2-CNF è <strong>NON soddisfacibile</strong> se e solo se esiste una variabile xᵢ tale che nel grafo esiste un cammino <strong>xᵢ ⇝ ¬xᵢ</strong> e un cammino <strong>¬xᵢ ⇝ xᵢ</strong>.
+  <p style="margin-top:8px">Intuizione: se xᵢ implica ¬xᵢ e ¬xᵢ implica xᵢ, allora xᵢ e ¬xᵢ devono avere lo stesso valore — impossibile.</p>
+</div>
+
+<h3>Passo 4 — Algoritmo</h3>
+<ol class="steps">
+  <li>Converti la formula 2-CNF in forma implicativa</li>
+  <li>Costruisci il grafo G (O(n + k) archi, k = numero clausole)</li>
+  <li>Per ogni variabile xᵢ, esegui DFS/BFS da xᵢ: se raggiungi ¬xᵢ, e DFS da ¬xᵢ raggiunge xᵢ → UNSAT</li>
+  <li>Se nessuna variabile viola il criterio → SAT</li>
+</ol>
+
+<div class="box box-ex">
+  <div class="box-label">Complessità</div>
+  <p>Costruzione grafo: O(n + k). Per ogni variabile (n volte), DFS: O(n + k). Totale: <span class="cx cx-poly">O(n·(n+k)) = O(n²)</span> → polinomiale. Quindi <strong>2-CNF-SAT ∈ P</strong>.</p>
+</div>
+
+<div class="diagram">
+<span class="cm">Riduzione formale:</span>
+
+istanza 2-CNF-SAT  ──poly-time──►  istanza "reachability in grafo"  ──DFS──►  soluzione
+
+<span class="hl">2-CNF-SAT ≤<sub>p</sub> Reachability, e Reachability ∈ P → 2-CNF-SAT ∈ P</span>
+</div>
+</section>
+
+<!-- ═══ 10. NP-COMPLETE ═══ -->
+<section id="s10">
+<h2><span class="num">10</span>NP-completeness e NP-hardness</h2>
+
+<div class="box box-breve">
+  <div class="box-label">NP-hard vs NP-complete — differenza pratica</div>
+  <ul>
+    <li><strong>NP-hard</strong> — «almeno difficile quanto tutto NP» (può non essere in NP: es. problemi di ottimizzazione)</li>
+    <li><strong>NP-complete</strong> — NP-hard <em>e</em> in NP: è verificabile in tempo polinomiale <em>e</em> è tra i più difficili</li>
+  </ul>
+  SAT e Vertex Cover sono NP-complete. Se trovassi un algoritmo polinomiale per uno di loro, avresti risolto il problema del millennio P = NP.
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Definizioni formali</div>
+  <ul>
+    <li><strong>NP-hard:</strong> Q′ è NP-hard se <em>ogni</em> problema Q ∈ NP è polynomial-time riducibile a Q′ (Q ≤<sub>p</sub> Q′ per tutti Q ∈ NP)</li>
+    <li><strong><span class="nota" data-tip="NP-complete = in NP E NP-hard. Il problema più difficile della classe: se uno è in P, allora P=NP.">NP-complete</span>:</strong> Q′ è NP-complete se Q′ ∈ NP <em>e</em> Q′ è NP-hard</li>
+  </ul>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Proprietà chiave</div>
+  <ul>
+    <li>Se Q′ è NP-hard e Q′ ≤<sub>p</sub> Q′′, allora <strong>Q′′ è NP-hard</strong> (per transitività)</li>
+    <li>Se Q′ è NP-hard e Q′ ∈ P, allora <strong>P = NP</strong> (quasi tutti credono che questo non accada)</li>
+    <li>Se un problema è NP-complete, non dovresti sentirti in colpa per non trovare un algoritmo efficiente!</li>
+  </ul>
+</div>
+
+<h3>Il primo problema NP-completo: SAT</h3>
+
+<div class="diagram">
+<span class="cm">Teorema di Cook-Levin (1971):</span>
+
+Qualsiasi Q ∈ NP  ──poly-time reduction──►  SAT
+
+<span class="hl">SAT è NP-hard. Poiché SAT ∈ NP → SAT è NP-complete.</span>
+
+<span class="cm">Catena di riduzioni successive:</span>
+
+SAT  ──≤<sub>p</sub>──►  3-SAT  ──≤<sub>p</sub>──►  Vertex Cover  ──≤<sub>p</sub>──►  ...
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio — Vertex Cover è NP-complete</div>
+  <ol>
+    <li>VC ∈ NP (certificato = insieme S, verifica polinomiale) ✓</li>
+    <li>SAT ≤<sub>p</sub> VC (riduzione nota, non la vediamo in dettaglio) ✓</li>
+    <li>SAT è NP-hard ✓</li>
+    <li>Per transitività: VC è NP-hard. Con VC ∈ NP → <strong>VC è NP-complete</strong></li>
+  </ol>
+</div>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Problema</th><th>In P?</th><th>In NP?</th><th>NP-complete?</th></tr>
+<tr><td>Cammino minimo (decisionale)</td><td class="good">Sì</td><td class="good">Sì</td><td>No</td></tr>
+<tr><td>Primalità</td><td class="good">Sì (AKS)</td><td class="good">Sì</td><td>No</td></tr>
+<tr><td>2-CNF-SAT</td><td class="good">Sì</td><td class="good">Sì</td><td>No</td></tr>
+<tr><td>SAT</td><td class="bad">?</td><td class="good">Sì</td><td class="good">Sì</td></tr>
+<tr><td>Vertex Cover</td><td class="bad">?</td><td class="good">Sì</td><td class="good">Sì</td></tr>
+<tr><td>TSP (decisionale)</td><td class="bad">?</td><td class="good">Sì</td><td class="good">Sì</td></tr>
+</table>
+</div>
+</section>
+
+<hr class="part">
+<div class="part-label">— Laboratorio interattivo —</div>
+
+<section id="ix1">
+<h2><span class="num">⚡</span>Contatore combinatorio — Polinomiale vs super-polinomiale</h2>
+<p>Muovi lo slider per vedere quante strutture combinatorie esistono su <em>n</em> oggetti, e se la crescita è polinomiale o super-polinomiale.</p>
+
+<div class="interactive-panel">
+  <div class="slider-row">
+    <label for="comboN">n =</label>
+    <input type="range" id="comboN" min="2" max="25" value="10">
+    <span class="slider-val" id="comboNVal">10</span>
+  </div>
+  <div class="combo-grid" id="comboGrid"></div>
+</div>
+</section>
+
+<section id="ix2">
+<h2><span class="num">⚡</span>Risolutore visivo 2-CNF-SAT — Grafo + DFS</h2>
+<p>Come nelle slide: la formula viene convertita in forma implicativa e disegnata come grafo diretto (nodi xᵢ e ¬xᵢ). Se <strong>DFS</strong> trova xᵢ ⇝ ¬xᵢ <em>e</em> ¬xᵢ ⇝ xᵢ, i nodi in conflitto si colorano di <span style="color:var(--red)">rosso</span> → formula UNSAT.</p>
+
+<div class="interactive-panel">
+  <select class="inp" id="cnfPreset">
+    <option value="(x ∨ y) ∧ (¬x ∨ z)">(x ∨ y) ∧ (¬x ∨ z) — SAT</option>
+    <option value="(x ∨ y) ∧ (¬x ∨ ¬y) ∧ (x ∨ ¬y) ∧ (¬x ∨ y)">(x∨y)∧(¬x∨¬y)∧(x∨¬y)∧(¬x∨y) — UNSAT</option>
+    <option value="(x ∨ ¬z) ∧ (¬x ∨ z)">(x ∨ ¬z) ∧ (¬x ∨ z) — SAT</option>
+    <option value="(x ∨ y) ∧ (¬x ∨ y) ∧ (¬y ∨ z) ∧ (¬z ∨ ¬x)">Esercizio slide — SAT</option>
+    <option value="custom">Formula personalizzata...</option>
+  </select>
+  <textarea class="inp" id="cnfCustom" style="display:none" placeholder="(x ∨ y) ∧ (¬x ∨ z)"></textarea>
+  <button class="btn-action" id="cnfCheck">Verifica soddisfacibilità</button>
+  <div id="cnfResult"></div>
+  <canvas class="graph-canvas" id="cnfGraph" width="800" height="280"></canvas>
+</div>
+</section>
+
+<section id="ix3">
+<h2><span class="num">⚡</span>SAT interattivo — Forza bruta su 3 variabili</h2>
+<p>Seleziona una formula e visualizza tutte le 2³ = 8 assegnazioni. Le righe verdi sono quelle che soddisfano la formula.</p>
+
+<div class="interactive-panel">
+  <select class="inp" id="satFormula">
+    <option value="¬x∧(¬y∨¬z)∧¬z∧(x∨y)">¬x ∧ (¬y ∨ ¬z) ∧ ¬z ∧ (x ∨ y) — SAT (slide)</option>
+    <option value="(x∨y∨z)∧(x∨¬y)∧(y∨¬z)∧(z∨¬x)∧(¬x∨¬y∨¬z)">Formula slide — UNSAT</option>
+    <option value="(x∨y)∧(¬x∨z)">(x ∨ y) ∧ (¬x ∨ z)</option>
+    <option value="(x∨¬y)∧(¬x∨y)">(x ∨ ¬y) ∧ (¬x ∨ y)</option>
+  </select>
+  <button class="btn-action" id="satCheck">Valuta tutte le assegnazioni</button>
+  <div id="satResult"></div>
+</div>
+</section>
+
+<section id="ix4">
+<h2><span class="num">⚡</span>Classifica i problemi — P, NP o NP-complete?</h2>
+<p>Per ogni problema scegli la classificazione corretta. Feedback immediato.</p>
+
+<div class="interactive-panel" id="classifyPanel"></div>
+<div class="quiz-score" id="classifyScore" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--teal);margin-top:16px;padding:12px;background:var(--bg4);border-radius:8px;text-align:center">Completa tutte le classificazioni.</div>
+<button class="btn-reset" id="classifyReset">Ricomincia</button>
+</section>
+
+<hr class="part">
+<div class="part-label">— Esercizi —</div>
+
+<section id="ex1">
+<h2><span class="num">E1</span>Esercizi guidati</h2>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 1 — Polinomiale o super-polinomiale?</div>
+  <p>Classifica ciascun algoritmo:</p>
+  <ol>
+    <li>Generare tutte le permutazioni di n elementi e controllare una proprietà per ciascuna</li>
+    <li>Ordinare n numeri con MergeSort</li>
+    <li>Provare tutti i sottoinsiemi di un insieme di n elementi</li>
+    <li>Calcolare la distanza di edit tra due stringhe di lunghezza n (DP standard)</li>
+  </ol>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 2 — Certificato e verifica</div>
+  <p>Per il problema <strong>Hamiltonian Cycle (decisionale)</strong> — "esiste un ciclo che visita ogni vertice esattamente una volta?" — descrivi:</p>
+  <ol>
+    <li>Il certificato per una risposta "sì"</li>
+    <li>L'algoritmo di verifica</li>
+    <li>Perché HAM-CYCLE ∈ NP</li>
+  </ol>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 3 — Riduzione semplice</div>
+  <p>Sappiamo che il problema <strong>Independent Set (IS)</strong> — "esiste un insieme di almeno K vertici a due a due non adiacenti?" — è NP-complete. Il problema <strong>Clique</strong> — "esiste una clique di almeno K vertici?" — è NP-complete?</p>
+  <p>Suggerimento: pensa al <em>complemento</em> del grafo.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 4 — 2-CNF-SAT</div>
+  <p>La formula (x ∨ y) ∧ (¬x ∨ y) ∧ (¬y ∨ z) ∧ (¬z ∨ ¬x) è soddisfacibile? Costruisci il grafo delle implicazioni e applica il criterio.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 5 — P vs NP</div>
+  <p>Rispondi VERO o FALSO con spiegazione:</p>
+  <ol>
+    <li>Se P = NP, allora ogni problema in NP ha un algoritmo O(n<sup>100</sup>)</li>
+    <li>Se un problema è NP-hard, allora è necessariamente NP-complete</li>
+    <li>Se Q₁ ≤<sub>p</sub> Q₂ e Q₂ ≤<sub>p</sub> Q₁, allora Q₁ e Q₂ hanno la stessa difficoltà</li>
+    <li>Se troviamo un algoritmo polinomiale per SAT, allora P = NP</li>
+  </ol>
+</div>
+</section>
+
+<section id="ex2">
+<h2><span class="num">E2</span>Soluzioni dettagliate</h2>
+
+<details open>
+<summary>Esercizio 1 — Soluzione</summary>
+<div class="sol-body">
+  <ol>
+    <li><span class="cx cx-super">Super-polinomiale</span> — n! permutazioni</li>
+    <li><span class="cx cx-poly">Polinomiale</span> — O(n log n) ⊆ O(n²)</li>
+    <li><span class="cx cx-super">Super-polinomiale</span> — 2ⁿ sottoinsiemi</li>
+    <li><span class="cx cx-poly">Polinomiale</span> — O(n²) con programmazione dinamica</li>
+  </ol>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 2 — Soluzione</summary>
+<div class="sol-body">
+  <ol>
+    <li><strong>Certificato:</strong> una sequenza di vertici v₁, v₂, …, vₙ che forma un ciclo hamiltoniano (ogni vertice appare una volta, archi consecutivi esistono, vₙ collegato a v₁)</li>
+    <li><strong>Verifica:</strong> (a) controlla che ci siano n vertici distinti, (b) per ogni coppia consecutiva (vᵢ, vᵢ₊₁) verifica che l'arco esista, (c) verifica arco (vₙ, v₁). Tutto in O(n + |E|) = polinomiale</li>
+    <li><strong>NP:</strong> esiste certificato di dimensione O(n log n) bit e verifica in tempo polinomiale</li>
+  </ol>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 3 — Soluzione</summary>
+<div class="sol-body">
+  <p><strong>Sì, Clique è NP-complete.</strong></p>
+  <p>Riduzione IS ≤<sub>p</sub> Clique: dato G = (V,E) e K, costruisci il grafo complemento G' = (V, E') dove (u,v) ∈ E' sse (u,v) ∉ E.</p>
+  <p>Un insieme S è independent set in G ⟺ S è clique in G'. Infatti: in G nessuna coppia in S è adiacente ⟺ in G' ogni coppia in S è adiacente.</p>
+  <p>La costruzione di G' richiede O(n²) → riduzione polinomiale. IS è NP-complete → Clique è NP-hard. Clique ∈ NP (certificato = insieme di vertici) → <strong>Clique è NP-complete</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 4 — Soluzione</summary>
+<div class="sol-body">
+  <p><strong>Implicazioni (archi del grafo):</strong></p>
+  <ul>
+    <li>(x∨y) → ¬x→y, ¬y→x</li>
+    <li>(¬x∨y) → x→y, ¬y→¬x</li>
+    <li>(¬y∨z) → y→z, ¬z→¬y</li>
+    <li>(¬z∨¬x) → z→¬x, x→¬z</li>
+  </ul>
+  <p><strong>Verifica x ⇝ ¬x:</strong> x → y → z → ¬x. <span class="good">Cammino trovato.</span></p>
+  <p><strong>Verifica ¬x ⇝ x:</strong> da ¬x si raggiunge solo y (¬x→y), poi z (y→z), poi ¬x (z→¬x). Non si raggiunge mai x. <span class="bad">Nessun cammino ¬x ⇝ x.</span></p>
+  <p>Il criterio di insoddisfacibilità richiede <em>entrambi</em> i cammini per la stessa variabile. Qui manca ¬x ⇝ x, quindi il criterio <strong>non scatta</strong>.</p>
+  <p><strong>Assegnazione soddisfacente:</strong> x=0, y=1, z=1</p>
+  <ul>
+    <li>(x∨y) = (0∨1) = 1 ✓</li>
+    <li>(¬x∨y) = (1∨1) = 1 ✓</li>
+    <li>(¬y∨z) = (0∨1) = 1 ✓</li>
+    <li>(¬z∨¬x) = (0∨1) = 1 ✓</li>
+  </ul>
+  <p><strong>Conclusione: la formula è SATISFIABLE.</strong></p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 5 — Soluzione</summary>
+<div class="sol-body">
+  <ol>
+    <li><strong>VERO.</strong> P = NP significa che ogni problema NP è risolvibile in tempo O(n<sup>k</sup>) per qualche k. In particolare O(n<sup>100</sup>) per k=100.</li>
+    <li><strong>FALSO.</strong> NP-hard non richiede che il problema sia in NP. Un problema può essere NP-hard senza essere verificabile in tempo polinomiale (es. problemi di ottimizzazione o problemi con output non binario, se definiti fuori dal framework decisionale standard).</li>
+    <li><strong>VERO (con cautela).</strong> Riduzioni bidirezionali implicano stessa classe di difficoltà. Se Q₁ ≤<sub>p</sub> Q₂ e Q₂ ≤<sub>p</sub> Q₁, allora Q₁ e Q₂ sono "equivalenti" per riduzioni polinomiali.</li>
+    <li><strong>VERO.</strong> SAT è NP-complete. Se SAT ∈ P, allora ogni problema in NP si riduce a un problema in P, quindi è in P. Quindi P = NP.</li>
+  </ol>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+/* ── TEMA ───────────────────────────────────────── */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  const preset = document.getElementById('cnfPreset').value;
+  const formula = preset === 'custom' ? document.getElementById('cnfCustom').value : preset;
+  if (document.getElementById('cnfCheck')) document.getElementById('cnfCheck').click();
+});
+
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+/* ── CONTATORE COMBINATORIO ─────────────────────── */
+const comboDefs = [
+  { name: 'Coppie', fn: n => n*(n-1)/2, poly: true },
+  { name: 'Terne', fn: n => n*(n-1)*(n-2)/6, poly: true },
+  { name: 'k-uple (k=4)', fn: n => { let r=1; for(let i=0;i<4;i++) r*=(n-i); return r/24; }, poly: true },
+  { name: 'Sottoinsiemi', fn: n => Math.pow(2,n), poly: false },
+  { name: 'Permutazioni', fn: n => { let r=1; for(let i=2;i<=n;i++) r*=i; return r; }, poly: false },
+  { name: 'Archi grafo', fn: n => n*(n-1)/2, poly: true }
+];
+
+function fmtBig(v) {
+  if (v >= 1e12) return v.toExponential(2);
+  if (v >= 1e6) return (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return (v/1e3).toFixed(1) + 'K';
+  return Math.round(v).toLocaleString();
+}
+
+function updateCombo() {
+  const n = +document.getElementById('comboN').value;
+  document.getElementById('comboNVal').textContent = n;
+  document.getElementById('comboGrid').innerHTML = comboDefs.map(c => {
+    const v = c.fn(n);
+    return `<div class="combo-card ${c.poly?'poly':'super'}">
+      <div class="lbl">${c.name}</div>
+      <div class="val">${fmtBig(v)}</div>
+      <div class="cls">${c.poly ? '✓ Polinomiale' : '✗ Super-polinomiale'}</div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('comboN').addEventListener('input', updateCombo);
+updateCombo();
+
+/* ── PARSER 2-CNF ─────────────────────────────────── */
+function parseLiterals(formula) {
+  const clauses = [];
+  const parts = formula.replace(/\s+/g,'').split('∧');
+  for (const part of parts) {
+    const m = part.match(/^\((.+)\)$/);
+    if (!m) continue;
+    const lits = m[1].split('∨').map(l => {
+      const neg = l.startsWith('¬');
+      const v = neg ? l.slice(1) : l;
+      return { var: v, neg };
+    });
+    if (lits.length === 2) clauses.push(lits);
+  }
+  return clauses;
+}
+
+function litName(l) { return (l.neg ? '¬' : '') + l.var; }
+function litNode(l) { return (l.neg ? '¬' : '') + l.var; }
+
+function check2CNF(formula) {
+  const clauses = parseLiterals(formula);
+  if (!clauses.length) return { error: 'Formula non valida. Usa formato: (x ∨ y) ∧ (¬x ∨ z)' };
+
+  const edges = [];
+  const nodes = new Set();
+  for (const [a, b] of clauses) {
+    nodes.add(litNode(a)); nodes.add(litNode(b));
+    edges.push({ from: litNode({var:a.var, neg:!a.neg}), to: litNode(b) });
+    edges.push({ from: litNode({var:b.var, neg:!b.neg}), to: litNode(a) });
+  }
+
+  const adj = {};
+  [...nodes].forEach(n => adj[n] = []);
+  edges.forEach(e => { if (adj[e.from]) adj[e.from].push(e.to); });
+
+  function findPath(start, target) {
+    const parent = {}, visited = new Set(), q = [start];
+    parent[start] = null;
+    visited.add(start);
+    while (q.length) {
+      const u = q.shift();
+      if (u === target) {
+        const path = [];
+        let cur = target;
+        while (cur !== null) { path.unshift(cur); cur = parent[cur]; }
+        return path;
+      }
+      (adj[u] || []).forEach(v => {
+        if (!visited.has(v)) {
+          visited.add(v);
+          parent[v] = u;
+          q.push(v);
+        }
+      });
+    }
+    return null;
+  }
+
+  function reachable(start, target) { return !!findPath(start, target); }
+
+  const vars = [...new Set([...nodes].map(n => n.replace('¬','')))];
+  const conflicts = [], conflictPaths = [];
+  for (const v of vars) {
+    const p1 = findPath(v, '¬'+v), p2 = findPath('¬'+v, v);
+    if (p1 && p2) {
+      conflicts.push(v);
+      conflictPaths.push({ var: v, fwd: p1, bwd: p2 });
+    }
+  }
+
+  const highlightEdges = new Set();
+  conflictPaths.forEach(({ fwd, bwd }) => {
+    for (let i = 0; i < fwd.length - 1; i++) highlightEdges.add(fwd[i]+'→'+fwd[i+1]);
+    for (let i = 0; i < bwd.length - 1; i++) highlightEdges.add(bwd[i]+'→'+bwd[i+1]);
+  });
+
+  return { clauses, edges, nodes: [...nodes], vars, conflicts, conflictPaths, highlightEdges, sat: conflicts.length === 0 };
+}
+
+function drawCNFGraph(data) {
+  const canvas = document.getElementById('cnfGraph');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  if (!data.nodes) return;
+
+  const nodes = data.nodes;
+  const n = nodes.length;
+  const cx = W/2, cy = H/2, r = Math.min(W,H)*0.35;
+  const pos = {};
+  nodes.forEach((nd, i) => {
+    const angle = (2 * Math.PI * i / n) - Math.PI/2;
+    pos[nd] = { x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) };
+  });
+
+  const conflictNodes = new Set();
+  (data.conflicts || []).forEach(v => { conflictNodes.add(v); conflictNodes.add('¬'+v); });
+
+  data.edges.forEach(e => {
+    if (!pos[e.from] || !pos[e.to]) return;
+    const key = e.from + '→' + e.to;
+    const isConflictEdge = data.highlightEdges && data.highlightEdges.has(key);
+    ctx.strokeStyle = isConflictEdge ? '#e06c75' : '#3a3a4e';
+    ctx.lineWidth = isConflictEdge ? 2.5 : 1;
+    ctx.beginPath();
+    ctx.moveTo(pos[e.from].x, pos[e.from].y);
+    ctx.lineTo(pos[e.to].x, pos[e.to].y);
+    ctx.stroke();
+    const dx = pos[e.to].x - pos[e.from].x;
+    const dy = pos[e.to].y - pos[e.from].y;
+    const len = Math.sqrt(dx*dx+dy*dy) || 1;
+    ctx.fillStyle = isConflictEdge ? '#e06c75' : '#4ec9a8';
+    ctx.beginPath();
+    ctx.moveTo(pos[e.to].x - dx/len*10, pos[e.to].y - dy/len*10);
+    ctx.lineTo(pos[e.to].x - dx/len*10 - dy/len*5, pos[e.to].y - dy/len*10 + dx/len*5);
+    ctx.lineTo(pos[e.to].x - dx/len*10 + dy/len*5, pos[e.to].y - dy/len*10 - dx/len*5);
+    ctx.fill();
+  });
+
+  nodes.forEach(nd => {
+    const p = pos[nd];
+    const inConflict = conflictNodes.has(nd);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 22, 0, 2*Math.PI);
+    if (inConflict) {
+      ctx.fillStyle = 'rgba(224,108,117,.35)';
+      ctx.strokeStyle = '#e06c75';
+      ctx.lineWidth = 3;
+    } else {
+      ctx.fillStyle = nd.startsWith('¬') ? '#2a2a3a' : '#1c3a2e';
+      ctx.strokeStyle = '#4ec9a8';
+      ctx.lineWidth = 2;
+    }
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = inConflict ? '#e06c75' : '#f0ece0';
+    ctx.font = 'bold 12px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(nd, p.x, p.y);
+  });
+}
+
+document.getElementById('cnfPreset').addEventListener('change', function() {
+  document.getElementById('cnfCustom').style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
+document.getElementById('cnfCheck').addEventListener('click', () => {
+  const preset = document.getElementById('cnfPreset').value;
+  const formula = preset === 'custom' ? document.getElementById('cnfCustom').value : preset;
+  const data = check2CNF(formula);
+  const el = document.getElementById('cnfResult');
+  if (data.error) { el.innerHTML = `<div class="result-box unsat">${data.error}</div>`; return; }
+
+  if (data.sat) {
+    el.innerHTML = `<div class="result-box sat"><strong>SATISFIABLE</strong> — DFS: nessuna variabile con cammino bidirezionale xᵢ ⇝ ¬xᵢ e ¬xᵢ ⇝ xᵢ.<br><span style="font-size:12px;color:var(--text-dim)">${data.clauses.length} clausole → ${data.edges.length} archi implicativi. Nodi verdi = OK.</span></div>`;
+  } else {
+    let dfsHtml = '<div class="dfs-log"><strong>Tracce DFS (conflitti):</strong><br>';
+    data.conflictPaths.forEach(cp => {
+      dfsHtml += `• <code>${cp.var}</code>: ${cp.fwd.join(' → ')} e ${cp.bwd.join(' → ')}<br>`;
+    });
+    dfsHtml += '</div>';
+    el.innerHTML = `<div class="result-box unsat"><strong>UNSATISFIABLE</strong> — Nodi in <span style="color:var(--red)">rosso</span>: <code>${data.conflicts.join(', ')}</code><br>DFS ha trovato xᵢ ⇝ ¬xᵢ <em>e</em> ¬xᵢ ⇝ xᵢ. Archi rossi = cammini di conflitto.</div>${dfsHtml}`;
+  }
+  drawCNFGraph(data);
+});
+
+/* ── SAT 3 VARIABILI ────────────────────────────── */
+function evalLit(lit, asgn) {
+  const neg = lit.startsWith('¬');
+  const v = neg ? lit.slice(1) : lit;
+  const val = asgn[v];
+  return neg ? !val : val;
+}
+
+function evalClause(clause, asgn) {
+  return clause.split('∨').some(l => evalLit(l.trim(), asgn));
+}
+
+function evalFormula(formula, asgn) {
+  return formula.split('∧').every(c => {
+    const m = c.match(/^\((.+)\)$/);
+    return m ? evalClause(m[1], asgn) : evalClause(c, asgn);
+  });
+}
+
+document.getElementById('satCheck').addEventListener('click', () => {
+  const formula = document.getElementById('satFormula').value;
+  const vars = ['x','y','z'];
+  let html = '<table class="sat-table"><tr><th>x</th><th>y</th><th>z</th><th>Risultato</th></tr>';
+  let anySat = false;
+  for (let mask = 0; mask < 8; mask++) {
+    const asgn = { x: !!(mask&4), y: !!(mask&2), z: !!(mask&1) };
+    const ok = evalFormula(formula, asgn);
+    if (ok) anySat = true;
+    html += `<tr class="${ok?'satisfying':''}"><td>${asgn.x?1:0}</td><td>${asgn.y?1:0}</td><td>${asgn.z?1:0}</td><td>${ok?'✓ SAT':'✗'}</td></tr>`;
+  }
+  html += '</table>';
+  const verdict = anySat
+    ? '<div class="result-box sat"><strong>La formula è SATISFIABLE</strong> — almeno un\'assegnazione (righe verdi) la soddisfa.</div>'
+    : '<div class="result-box unsat"><strong>La formula è UNSATISFIABLE</strong> — nessuna delle 8 assegnazioni funziona.</div>';
+  document.getElementById('satResult').innerHTML = verdict + html;
+});
+
+/* ── CLASSIFICA PROBLEMI ────────────────────────── */
+const classifyData = [
+  { name: 'Cammino minimo (decisionale)', answer: 'P' },
+  { name: 'Test di primalità', answer: 'P' },
+  { name: '2-CNF-SAT', answer: 'P' },
+  { name: 'SAT (soddisfacibilità booleana)', answer: 'NP-complete' },
+  { name: 'Vertex Cover (decisionale)', answer: 'NP-complete' },
+  { name: 'Ordinamento con MergeSort', answer: 'P' },
+  { name: 'TSP (decisionale)', answer: 'NP-complete' },
+  { name: 'Clique (decisionale)', answer: 'NP-complete' }
+];
+
+function renderClassify() {
+  document.getElementById('classifyPanel').innerHTML = classifyData.map((item, i) => `
+    <div class="classify-item" id="ci${i}">
+      <span>${item.name}</span>
+      <select id="cs${i}" onchange="checkClassify(${i})">
+        <option value="">— scegli —</option>
+        <option value="P">P (risolvibile in tempo polinomiale)</option>
+        <option value="NP">NP (solo verificabile, non noto in P)</option>
+        <option value="NP-complete">NP-complete</option>
+      </select>
+      <span id="cf${i}" style="font-size:12px;min-width:120px"></span>
+    </div>`).join('');
+  document.getElementById('classifyScore').textContent = 'Completa tutte le classificazioni.';
+}
+
+let classifyDone = 0, classifyOk = 0;
+
+function checkClassify(i) {
+  const sel = document.getElementById('cs' + i);
+  const item = document.getElementById('ci' + i);
+  const fb = document.getElementById('cf' + i);
+  if (!sel.value || item.classList.contains('correct') || item.classList.contains('wrong')) {
+    if (item.classList.contains('correct') || item.classList.contains('wrong')) return;
+  }
+  if (item.dataset.done) return;
+  const ok = sel.value === classifyData[i].answer;
+  item.classList.add(ok ? 'correct' : 'wrong');
+  item.dataset.done = '1';
+  sel.disabled = true;
+  fb.innerHTML = ok ? '<span class="good">✓</span>' : `<span class="bad">✗ È ${classifyData[i].answer}</span>`;
+  classifyDone++; if (ok) classifyOk++;
+  document.getElementById('classifyScore').textContent =
+    `Punteggio: ${classifyOk} / ${classifyDone}` + (classifyDone < classifyData.length ? ` — ancora ${classifyData.length - classifyDone}` : ' — Completato!');
+}
+
+document.getElementById('classifyReset').addEventListener('click', () => {
+  classifyDone = 0; classifyOk = 0;
+  renderClassify();
+});
+renderClassify();
+
+// auto-run 2-CNF on load
+document.getElementById('cnfCheck').click();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algoritmi & Strutture Dati — Indice Appunti USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379;
+  --sidebar-w: 280px;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+
+#sidebar {
+  position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+  background: var(--bg2); border-right: 1px solid var(--border);
+  overflow-y: auto; z-index: 100; padding-bottom: 40px;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--gold); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 12px; }
+.nav-link {
+  display: block; padding: 6px 20px 6px 28px; color: var(--text-dim); text-decoration: none;
+  font-size: 13px; border-left: 2px solid transparent; transition: all .15s;
+}
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--gold); }
+.nav-link .num { font-family: 'JetBrains Mono', monospace; font-size: 10px; opacity: .6; margin-right: 6px; }
+
+#main { margin-left: var(--sidebar-w); max-width: 1000px; padding: 48px 56px 80px; }
+
+.hero {
+  background: linear-gradient(135deg, #1a1a26 0%, #12121c 100%);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 40px 44px; margin-bottom: 40px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; top: -80px; right: -80px; width: 260px; height: 260px;
+  border-radius: 50%; background: radial-gradient(circle, rgba(232,197,71,.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero h1 { font-family: 'Lora', serif; font-size: 30px; font-weight: 700; color: var(--text-bright); line-height: 1.25; }
+.hero h1 span { color: var(--gold); }
+.hero p { color: var(--text-dim); margin-top: 12px; font-size: 14px; max-width: 620px; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.stat {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 18px; min-width: 100px;
+}
+.stat .val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; color: var(--gold); }
+.stat .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+.search-wrap { margin-bottom: 40px; }
+.search-wrap input {
+  width: 100%; padding: 14px 18px 14px 44px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text-bright);
+  font-family: 'Inter', sans-serif; font-size: 15px; outline: none; transition: border-color .15s;
+}
+.search-wrap input:focus { border-color: var(--gold); }
+.search-wrap input::placeholder { color: var(--text-dim); }
+.search-icon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); font-size: 16px; pointer-events: none;
+}
+.search-wrap { position: relative; }
+#searchHint { font-size: 12px; color: var(--text-dim); margin-top: 8px; min-height: 18px; }
+
+.folder-section { margin-bottom: 48px; scroll-margin-top: 24px; }
+.folder-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.folder-num {
+  width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.folder-header h2 { font-family: 'Lora', serif; font-size: 20px; font-weight: 700; color: var(--text-bright); }
+.folder-header .count { font-size: 12px; color: var(--text-dim); margin-left: auto; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+
+.card {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px 20px; transition: all .18s; position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--card-accent, var(--gold)); opacity: .7; transition: opacity .18s;
+}
+.card:hover {
+  border-color: var(--card-accent, var(--gold));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+}
+.card:hover::before { opacity: 1; }
+.card-pdf { opacity: .85; }
+.card-pdf:hover { opacity: 1; }
+.card-pdf .card-tag { background: rgba(224,108,117,.12); color: var(--red); border-color: var(--red); }
+.card-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+.card-title { font-weight: 600; color: var(--text-bright); font-size: 14px; line-height: 1.4; margin-bottom: 8px; }
+.card-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.card-tag {
+  display: inline-block; margin-top: 10px; padding: 2px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: .04em; border: 1px solid;
+  border-color: var(--card-accent, var(--gold)); color: var(--card-accent, var(--gold));
+  background: rgba(232,197,71,.06);
+}
+.card-arrow { position: absolute; top: 18px; right: 16px; color: var(--text-dim); font-size: 14px; transition: transform .18s; }
+.card:hover .card-arrow { transform: translateX(3px); color: var(--card-accent, var(--gold)); }
+
+.legacy-section { margin-top: 56px; padding-top: 32px; border-top: 1px dashed var(--border); }
+.legacy-section h2 { font-family: 'Lora', serif; font-size: 16px; color: var(--text-dim); margin-bottom: 14px; }
+
+.theme-toggle {
+  position: fixed; top: 14px; right: 14px; z-index: 200;
+  width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg3); color: var(--gold); font-size: 18px; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s;
+}
+.theme-toggle:hover { transform: scale(1.08); }
+
+.hidden { display: none !important; }
+.no-results { text-align: center; padding: 40px; color: var(--text-dim); font-size: 14px; }
+
+@media (max-width: 768px) {
+  #main { margin-left: 0; padding: 24px 20px 60px; }
+  .hero { padding: 28px 24px; }
+  .hero h1 { font-size: 24px; }
+  .cards { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="stylesheet" href="./mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Algoritmi USI</div>
+    <div class="sub">Indice appunti · Carzaniga</div>
+  </div>
+  <a class="nav-link" href="guida-studio.html" style="color:var(--teal);border-left-color:var(--teal)"><span class="num">★</span>Guida allo studio</a>
+  <div class="nav-label">Cartelle</div>
+  <a class="nav-link" href="#f01"><span class="num">01</span>Complessità</a>
+  <a class="nav-link" href="#f02"><span class="num">02</span>Strutture dati</a>
+  <a class="nav-link" href="#f03"><span class="num">03</span>Ordinamento</a>
+  <a class="nav-link" href="#f04"><span class="num">04</span>Alberi</a>
+  <a class="nav-link" href="#f05"><span class="num">05</span>Grafi</a>
+  <a class="nav-link" href="#f06"><span class="num">06</span>Tecniche algoritmiche</a>
+  <a class="nav-link" href="#f07"><span class="num">07</span>Esami</a>
+  <a class="nav-link" href="final/index.html"><span class="num">★</span>Final 2021–2025</a>
+  <div class="nav-label">Altro</div>
+  <a class="nav-link" href="#legacy">Appunti legacy</a>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Algoritmi & Strutture Dati</span><br>Appunti interattivi</h1>
+  <p>Tutti gli appunti del corso USI (Prof. Antonio Carzaniga) in un unico posto: teoria, esempi passo-passo, simulatori, quiz ed esercizi. Clicca una scheda per aprire il capitolo.</p>
+  <p style="margin-top:14px"><a href="guida-studio.html" style="display:inline-block;padding:8px 16px;background:rgba(78,201,168,.12);border:1px solid var(--teal);border-radius:8px;color:var(--teal);font-size:13px;font-weight:600;text-decoration:none">★ Non sai da dove iniziare? Leggi la guida allo studio →</a></p>
+  <div class="hero-meta">
+    <div class="stat"><div class="val">14</div><div class="lbl">Appunti HTML</div></div>
+    <div class="stat"><div class="val">7</div><div class="lbl">Cartelle tematiche</div></div>
+    <div class="stat"><div class="val">8+6</div><div class="lbl">Quiz + esercizi</div></div>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <span class="search-icon">⌕</span>
+  <input type="search" id="searchInput" placeholder="Cerca per titolo o argomento (es. Dijkstra, knapsack, BST…)">
+  <div id="searchHint"></div>
+</div>
+
+<div id="catalog">
+
+<!-- 01 -->
+<section class="folder-section" id="f01" data-folder="01 complessita analisi teoria notazione asintotica big-o">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(232,197,71,.15);color:var(--gold)">01</div>
+    <h2>Complessità</h2>
+    <span class="count">2 appunti</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#e8c547" href="01 - Complessita/01 - Analisi della complessita.html" data-keywords="ram model notazione asintotica big-o theta omega">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Analisi della complessità</div>
+      <div class="card-desc">Modello RAM, notazione asintotica Θ/O/Ω, analisi di algoritmi semplici.</div>
+      <span class="card-tag">Complessità</span>
+    </a>
+    <a class="card" style="--card-accent:#e8c547" href="01 - Complessita/02 - Teoria della complessita.html" data-keywords="p np np-completo riduzione classe">
+      <span class="card-arrow">→</span>
+      <div class="card-num">02 · PDF 02</div>
+      <div class="card-title">Teoria della complessità</div>
+      <div class="card-desc">Classi P e NP, NP-completitudine, riduzioni polinomiali.</div>
+      <span class="card-tag">Complessità</span>
+    </a>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="folder-section" id="f02" data-folder="02 strutture dati hash stack queue lista">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(198,120,221,.15);color:var(--purple)">02</div>
+    <h2>Strutture dati</h2>
+    <span class="count">1 appunto</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#c678dd" href="02 - Strutture dati/01 - Strutture elementari e hash tables.html" data-keywords="array lista stack queue hash table chaining open addressing">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Strutture elementari e hash tables</div>
+      <div class="card-desc">Array, liste, pile, code, tabelle hash con chaining e open addressing.</div>
+      <span class="card-tag">Strutture dati</span>
+    </a>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="folder-section" id="f03" data-folder="03 ordinamento sort merge quick heap insertion divide conquer">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(229,149,58,.15);color:var(--orange)">03</div>
+    <h2>Ordinamento</h2>
+    <span class="count">3 appunti</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#e5953a" href="03 - Ordinamento/01 - Insertion sort.html" data-keywords="insertion sort ordinamento semplice">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Insertion sort</div>
+      <div class="card-desc">Ordinamento per inserimento, analisi O(n²), caso migliore O(n).</div>
+      <span class="card-tag">Ordinamento</span>
+    </a>
+    <a class="card" style="--card-accent:#e5953a" href="03 - Ordinamento/02 - Divide and conquer.html" data-keywords="divide conquer merge sort master theorem">
+      <span class="card-arrow">→</span>
+      <div class="card-num">02 · PDF 02</div>
+      <div class="card-title">Divide and conquer</div>
+      <div class="card-desc">Paradigma divide et impera, MergeSort, teorema master.</div>
+      <span class="card-tag">Ordinamento</span>
+    </a>
+    <a class="card" style="--card-accent:#e5953a" href="03 - Ordinamento/03 - Quick sort e heap sort.html" data-keywords="quicksort heapsort heap priority queue">
+      <span class="card-arrow">→</span>
+      <div class="card-num">03 · PDF 03</div>
+      <div class="card-title">Quick sort e heap sort</div>
+      <div class="card-desc">QuickSort con partition, HeapSort, struttura heap.</div>
+      <span class="card-tag">Ordinamento</span>
+    </a>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="folder-section" id="f04" data-folder="04 alberi bst red-black b-tree bilanciamento">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(152,195,121,.15);color:var(--green)">04</div>
+    <h2>Alberi</h2>
+    <span class="count">3 appunti</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#98c379" href="04 - Alberi/01 - Binary search trees.html" data-keywords="bst binary search tree inorder predecessor successor">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Binary search trees</div>
+      <div class="card-desc">BST, traversamenti, insert/delete, predecessor e successor.</div>
+      <span class="card-tag">Alberi</span>
+    </a>
+    <a class="card" style="--card-accent:#98c379" href="04 - Alberi/02 - Red-black trees.html" data-keywords="red-black rb-tree rotazione bilanciamento">
+      <span class="card-arrow">→</span>
+      <div class="card-num">02 · PDF 02</div>
+      <div class="card-title">Red-black trees</div>
+      <div class="card-desc">Alberi rosso-neri, invarianti, rotazioni, insert/delete bilanciati.</div>
+      <span class="card-tag">Alberi</span>
+    </a>
+    <a class="card" style="--card-accent:#98c379" href="04 - Alberi/03 - B-trees.html" data-keywords="b-tree b-albero disco database">
+      <span class="card-arrow">→</span>
+      <div class="card-num">03 · PDF 03</div>
+      <div class="card-title">B-trees</div>
+      <div class="card-desc">B-alberi per storage, split/merge, altezza logaritmica.</div>
+      <span class="card-tag">Alberi</span>
+    </a>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="folder-section" id="f05" data-folder="05 grafi bfs dfs mst dijkstra kruskal prim">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(97,175,239,.15);color:var(--blue)">05</div>
+    <h2>Grafi</h2>
+    <span class="count">3 appunti</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#61afef" href="05 - Grafi/01 - Rappresentazione e algoritmi base.html" data-keywords="grafo lista matrice bfs dfs topological sort">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Rappresentazione e algoritmi base</div>
+      <div class="card-desc">Lista vs matrice di adiacenza, BFS, DFS, ordinamento topologico.</div>
+      <span class="card-tag">Grafi</span>
+    </a>
+    <a class="card" style="--card-accent:#61afef" href="05 - Grafi/02 - Minimal spanning trees.html" data-keywords="mst kruskal prim union-find spanning tree">
+      <span class="card-arrow">→</span>
+      <div class="card-num">02 · PDF 02</div>
+      <div class="card-title">Minimal spanning trees</div>
+      <div class="card-desc">MST, GENERIC-MST, Kruskal, Prim, Union-Find.</div>
+      <span class="card-tag">Grafi</span>
+    </a>
+    <a class="card" style="--card-accent:#61afef" href="05 - Grafi/03 - Dijkstra.html" data-keywords="dijkstra sssp cammino minimo shortest path">
+      <span class="card-arrow">→</span>
+      <div class="card-num">03 · PDF 03</div>
+      <div class="card-title">Dijkstra</div>
+      <div class="card-desc">Single-source shortest paths, relax, heap, pesi non negativi.</div>
+      <span class="card-tag">Grafi</span>
+    </a>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="folder-section" id="f06" data-folder="06 greedy programmazione dinamica dp knapsack lis huffman">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(229,149,58,.15);color:var(--orange)">06</div>
+    <h2>Tecniche algoritmiche</h2>
+    <span class="count">2 appunti</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#e5953a" href="06 - Tecniche algoritmiche/01 - Greedy algorithms.html" data-keywords="greedy vorace activity selection huffman knapsack frazionario">
+      <span class="card-arrow">→</span>
+      <div class="card-num">01 · PDF 01</div>
+      <div class="card-title">Greedy algorithms</div>
+      <div class="card-desc">Strategia vorace, activity selection, Huffman, knapsack frazionario.</div>
+      <span class="card-tag">Greedy</span>
+    </a>
+    <a class="card" style="--card-accent:#e5953a" href="06 - Tecniche algoritmiche/02 - Programmazione dinamica.html" data-keywords="dynamic programming dp lis edit distance knapsack 0-1 memoization">
+      <span class="card-arrow">→</span>
+      <div class="card-num">02 · PDF 02</div>
+      <div class="card-title">Programmazione dinamica</div>
+      <div class="card-desc">DP, LIS, edit distance, knapsack 0-1, weighted activity selection.</div>
+      <span class="card-tag">DP</span>
+    </a>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="folder-section" id="f07" data-folder="07 esami midterm final esame pdf">
+  <div class="folder-header">
+    <div class="folder-num" style="background:rgba(224,108,117,.15);color:var(--red)">07</div>
+    <h2>Esami</h2>
+    <span class="count">Midterm + Final</span>
+  </div>
+  <div class="cards">
+    <a class="card" style="--card-accent:#e06c75" href="final/index.html" data-keywords="final esame 2021 2022 2023 2024 2025 algo-x bst bfs dp heap">
+      <span class="card-arrow">→</span>
+      <div class="card-num">Final · HTML</div>
+      <div class="card-title">Esami finali 2021–2025</div>
+      <div class="card-desc">28 esercizi raggruppati per tipo di domanda, con ragionamento passo-passo e soluzioni.</div>
+      <span class="card-tag">Final · 8 categorie</span>
+    </a>
+    <a class="card card-pdf" style="--card-accent:#e06c75" href="07 - Esami/01 - Midterm.pdf" target="_blank" rel="noopener" data-keywords="midterm esame parziale pdf">
+      <span class="card-arrow">↗</span>
+      <div class="card-num">01 · PDF</div>
+      <div class="card-title">Midterm</div>
+      <div class="card-desc">Esame parziale del corso — si apre in una nuova scheda (PDF).</div>
+      <span class="card-tag">PDF · Esame</span>
+    </a>
+    <a class="card card-pdf" style="--card-accent:var(--text-dim)" href="exercises-2.pdf" target="_blank" rel="noopener" data-keywords="exercises esercizi carzaniga soluzioni">
+      <span class="card-arrow">↗</span>
+      <div class="card-num">PDF completo</div>
+      <div class="card-title">exercises-2.pdf</div>
+      <div class="card-desc">Raccolta completa esercizi e esami (ed. 3.14, marzo 2026) con alcune soluzioni.</div>
+      <span class="card-tag">PDF · Sorgente</span>
+    </a>
+  </div>
+</section>
+
+</div>
+
+<div id="noResults" class="no-results hidden">Nessun risultato. Prova con altre parole chiave.</div>
+
+<section class="legacy-section" id="legacy">
+  <h2>Appunti legacy</h2>
+  <div class="cards">
+    <a class="card" style="--card-accent:var(--text-dim)" href="appunti_algoritmi.html" data-keywords="legacy midterm vecchi appunti">
+      <span class="card-arrow">→</span>
+      <div class="card-num">Vecchio file</div>
+      <div class="card-title">appunti_algoritmi.html</div>
+      <div class="card-desc">Versione precedente degli appunti midterm, sostituita dalle cartelle 01–07.</div>
+      <span class="card-tag">Legacy</span>
+    </a>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* Tema */
+const themeBtn = document.getElementById('themeToggle');
+const saved = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', saved);
+themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+});
+
+/* Ricerca */
+const searchInput = document.getElementById('searchInput');
+const searchHint = document.getElementById('searchHint');
+const noResults = document.getElementById('noResults');
+const sections = document.querySelectorAll('.folder-section');
+const allCards = document.querySelectorAll('.card');
+
+function filterCards() {
+  const q = searchInput.value.trim().toLowerCase();
+  let visibleCards = 0;
+
+  sections.forEach(section => {
+    const cards = section.querySelectorAll('.card');
+    let sectionVisible = 0;
+    cards.forEach(card => {
+      const text = (
+        card.querySelector('.card-title').textContent + ' ' +
+        card.querySelector('.card-desc').textContent + ' ' +
+        (card.dataset.keywords || '') + ' ' +
+        (section.dataset.folder || '')
+      ).toLowerCase();
+      const match = !q || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) sectionVisible++;
+    });
+    section.classList.toggle('hidden', sectionVisible === 0);
+    visibleCards += sectionVisible;
+  });
+
+  const legacy = document.querySelector('.legacy-section');
+  if (legacy) {
+    const legacyCards = legacy.querySelectorAll('.card');
+    let legacyVisible = 0;
+    legacyCards.forEach(card => {
+      const text = (card.textContent + ' ' + (card.dataset.keywords || '')).toLowerCase();
+      const match = !q || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) legacyVisible++;
+    });
+    legacy.classList.toggle('hidden', legacyVisible === 0);
+    visibleCards += legacyVisible;
+  }
+
+  noResults.classList.toggle('hidden', visibleCards > 0 || !q);
+  searchHint.textContent = q
+    ? (visibleCards ? `${visibleCards} risultat${visibleCards === 1 ? 'o' : 'i'} per «${searchInput.value.trim()}»` : '')
+    : `${allCards.length} appunti disponibili`;
+}
+
+searchInput.addEventListener('input', filterCards);
+filterCards();
+</script>
+<script src="./mobile.js"></script>
+</body>
+</html>

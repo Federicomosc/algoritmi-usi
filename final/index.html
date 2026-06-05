@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Esami Finali 2021–2025 — Algoritmi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--border:#2e2e3e;--text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;--gold:#e8c547;--red:#e06c75;--sidebar-w:260px}
+html[data-theme="light"]{--bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--border:#d4cfc4;--text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:24px 20px;overflow-y:auto}
+#sidebar a{display:block;color:var(--text-dim);text-decoration:none;font-size:13px;padding:6px 0}
+#sidebar a:hover{color:var(--gold)}
+#main{margin-left:var(--sidebar-w);max-width:960px;padding:48px 56px 80px}
+.hero{background:linear-gradient(135deg,#1a1410,#12121c);border:1px solid var(--border);border-radius:12px;padding:40px;margin-bottom:40px}
+.hero h1{font-family:'Lora',serif;font-size:28px;color:var(--text-bright)}
+.hero h1 span{color:var(--red)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px;max-width:640px}
+.box-tip{background:rgba(224,108,117,.08);border:1px solid var(--red);border-radius:8px;padding:16px 20px;margin-bottom:32px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.cat-card{display:block;text-decoration:none;color:inherit;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:22px;position:relative;transition:all .18s;border-left:3px solid var(--ca)}
+.cat-card:hover{transform:translateY(-2px);border-color:var(--ca);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.cat-title{font-weight:700;color:var(--text-bright);font-size:15px;margin-bottom:6px}
+.cat-sub{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:12px}
+.cat-n{font-size:11px;color:var(--ca);font-weight:600}
+.cat-arrow{position:absolute;top:20px;right:16px;color:var(--text-dim)}
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--red);font-size:18px;cursor:pointer}
+@media(max-width:768px){#main{margin-left:0;padding:24px}}
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle">☀</button>
+<nav id="sidebar">
+  <strong style="color:var(--red);font-size:12px;letter-spacing:.08em">FINAL 2021–2025</strong>
+  <p style="font-size:11px;color:var(--text-dim);margin:8px 0 16px">Per tipo di domanda</p>
+  <a href="../index.html">← Indice corso</a>
+  <a href="../guida-studio.html">Guida allo studio</a>
+  <a href="01 - Analisi e miglioramento algoritmi/index.html">Analisi e miglioramento algoritmi</a><a href="02 - BST e alberi binari/index.html">BST e alberi binari</a><a href="03 - Grafi BFS e connettivita/index.html">Grafi, BFS e connettività</a><a href="04 - Programmazione dinamica/index.html">Programmazione dinamica</a><a href="05 - Heap/index.html">Heap</a><a href="06 - Array ordinati e two pointers/index.html">Array ordinati e two pointers</a><a href="07 - Stringhe e sequenze/index.html">Stringhe, sequenze e DNA</a><a href="08 - Problemi decisionali P e NP/index.html">Problemi decisionali (P e NP)</a>
+</nav>
+<main id="main">
+<div class="hero">
+  <h1><span>Esami Finali</span><br>2021 – 2025</h1>
+  <p>Tutti gli esercizi dei finali degli ultimi 5 anni, raggruppati per <strong>tipo di domanda</strong>. Ogni scheda spiega il ragionamento per risolvere l'esercizio, con testo originale e soluzione dal PDF Carzaniga.</p>
+</div>
+<div class="box-tip">
+  <strong>Come studiare:</strong> identifica il pattern (Algo-X, BST range, BFS, DP, P/NP…), leggi «Come ragionare», poi prova senza guardare la soluzione. Fonte: <code>exercises-2.pdf</code> ed. 3.14 (marzo 2026).
+</div>
+<div class="grid">
+<a class="cat-card" style="--ca:#c678dd" href="01 - Analisi e miglioramento algoritmi/index.html">
+  <div class="cat-title">Analisi e miglioramento algoritmi</div>
+  <div class="cat-sub">Domanda tipo: «cosa fa Algo-X?» + scrivi Better-Algo-X più efficiente</div>
+  <div class="cat-n">8 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#98c379" href="02 - BST e alberi binari/index.html">
+  <div class="cat-title">BST e alberi binari</div>
+  <div class="cat-sub">Conteggio in range, rotazioni, campo size</div>
+  <div class="cat-n">3 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#61afef" href="03 - Grafi BFS e connettivita/index.html">
+  <div class="cat-title">Grafi, BFS e connettività</div>
+  <div class="cat-sub">Componenti, raggio, reachability</div>
+  <div class="cat-n">5 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#e5953a" href="04 - Programmazione dinamica/index.html">
+  <div class="cat-title">Programmazione dinamica</div>
+  <div class="cat-sub">Giochi, coppie, sottosequenze speculari</div>
+  <div class="cat-n">4 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#e8c547" href="05 - Heap/index.html">
+  <div class="cat-title">Heap</div>
+  <div class="cat-sub">Delete, extract, heapify</div>
+  <div class="cat-n">1 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#4ec9a8" href="06 - Array ordinati e two pointers/index.html">
+  <div class="cat-title">Array ordinati e two pointers</div>
+  <div class="cat-sub">Riordinare in O(n), ricostruzione</div>
+  <div class="cat-n">1 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#61afef" href="07 - Stringhe e sequenze/index.html">
+  <div class="cat-title">Stringhe, sequenze e DNA</div>
+  <div class="cat-sub">Bilanciamento nucleotidi</div>
+  <div class="cat-n">1 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a>
+<a class="cat-card" style="--ca:#e06c75" href="08 - Problemi decisionali P e NP/index.html">
+  <div class="cat-title">Problemi decisionali (P e NP)</div>
+  <div class="cat-sub">Certificati, verificatori, algoritmi polinomiali</div>
+  <div class="cat-n">1 esercizi · Final 2021–2025</div>
+  <span class="cat-arrow">→</span>
+</a></div>
+</main>
+<script>
+const tb=document.getElementById('themeToggle');
+const s=localStorage.getItem('algo-theme')||'dark';
+document.documentElement.setAttribute('data-theme',s);
+tb.textContent=s==='light'?'🌙':'☀';
+tb.onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('algo-theme',n);tb.textContent=n==='light'?'🌙':'☀';};
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

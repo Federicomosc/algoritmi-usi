@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Sort &amp; Heap Sort — Appunti USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --accent: #e5953a; --chart-grid: #2e2e3e; --chart-text: #7a7890; --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32; --accent: #a85a18;
+  --chart-grid: #d4cfc4; --chart-text: #6a6878; --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--accent); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--accent); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(229,149,58,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #1a1610 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(229,149,58,.14) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--accent); color: var(--accent); background: rgba(229,149,58,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--accent); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(229,149,58,.12); border-radius: 3px; padding: 0 2px; }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(229,149,58,.07); border-color: var(--accent); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(229,149,58,.1); border-color: var(--accent); border-left-width: 4px; }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-breve .box-label { color: var(--accent); }
+.box-def .box-label { color: var(--blue); }
+.box-thm .box-label { color: var(--accent); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--accent); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-1 { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-n { background: rgba(97,175,239,.15); color: var(--blue); }
+.cx-n2 { background: rgba(229,149,58,.15); color: var(--accent); }
+hr.part { border: none; border-top: 1px solid var(--accent); opacity: .3; margin: 64px 0 48px; }
+.ex-diff { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.ex-diff.facile { background: rgba(152,195,121,.15); color: var(--green); }
+.ex-diff.medio { background: rgba(97,175,239,.15); color: var(--blue); }
+.ex-diff.avanzato { background: rgba(224,108,117,.15); color: var(--red); }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.nota { border-bottom: 1px dashed var(--accent); cursor: help; position: relative; color: var(--accent); font-weight: 600; }
+.nota::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); width: max-content; max-width: 320px; padding: 10px 14px; background: var(--tooltip-bg); border: 1px solid var(--accent); border-radius: 8px; font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.5; white-space: normal; opacity: 0; visibility: hidden; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,.3); pointer-events: none; }
+.nota:hover::after, .nota:focus::after { opacity: 1; visibility: visible; }
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--accent); font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.btn-row button, .btn-row input[type=text] { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; }
+.btn-row button { cursor: pointer; font-weight: 600; }
+.btn-row button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-row button:hover { filter: brightness(1.1); }
+.ds-visual { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; align-items: flex-end; }
+.cell { min-width: 48px; height: 48px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; background: var(--bg4); transition: all .2s; position: relative; }
+.cell.top { border-color: var(--orange); background: rgba(229,149,58,.15); }
+.cell.head { border-color: var(--teal); background: rgba(78,201,168,.12); }
+.cell.tail { border-color: var(--blue); background: rgba(97,175,239,.12); }
+.cell-label { position: absolute; top: -18px; font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+.quiz-q { background: var(--bg4); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); }
+.quiz-q.answered-correct { border-color: var(--green); background: rgba(152,195,121,.08); }
+.quiz-q.answered-wrong { border-color: var(--red); background: rgba(224,108,117,.08); }
+.quiz-q p { margin-bottom: 10px; font-size: 14px; }
+.quiz-btns { display: flex; gap: 8px; margin-top: 8px; }
+.quiz-btns button { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.quiz-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btns button:disabled { opacity: .5; cursor: default; }
+.quiz-feedback { font-size: 12px; margin-top: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-score { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--teal); margin-top: 16px; padding: 12px; background: var(--bg4); border-radius: 8px; text-align: center; }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset:hover { background: rgba(78,201,168,.1); }
+.log-area { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg4); padding: 12px; border-radius: 6px; max-height: 120px; overflow-y: auto; margin-top: 12px; }
+.svg-anim-panel { margin: 24px 0; }
+.svg-anim-panel svg { width: 100%; max-width: 640px; display: block; margin: 0 auto; border-radius: 10px; background: var(--bg4); border: 1px solid var(--border); }
+.svg-caption { text-align: center; font-size: 14px; color: var(--text); margin: 14px 0 10px; min-height: 3.2em; line-height: 1.55; }
+.svg-caption strong { color: var(--accent); }
+.svg-step-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-right: 8px; }
+.svg-progress { height: 4px; background: var(--border); border-radius: 2px; margin: 12px 0; overflow: hidden; }
+.svg-progress-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width .35s ease; }
+@keyframes svg-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+.svg-pulse { animation: svg-pulse 1s ease infinite; }
+.region-al { fill: rgba(97,175,239,.25); stroke: var(--blue); }
+.region-av { fill: rgba(229,149,58,.25); stroke: var(--accent); }
+.region-ar { fill: rgba(152,195,121,.2); stroke: var(--green); }
+.region-un { fill: var(--bg4); stroke: var(--border); }
+.heap-node { fill: var(--bg4); stroke: var(--accent); stroke-width: 2; }
+.heap-node.hl { fill: rgba(229,149,58,.25); stroke-width: 2.5; }
+.heap-edge { stroke: var(--border); stroke-width: 1.5; fill: none; }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 03 — Ordinamento</div>
+    <div class="sub">PDF 03 · Quick Sort &amp; Heap Sort</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Teoria</div>
+    <a class="nav-link" href="#s1">1. Panoramica algoritmi</a>
+    <a class="nav-link" href="#s2">2. Partizione</a>
+    <a class="nav-link sub" href="#anim-partition">Anim. partition</a>
+    <a class="nav-link" href="#s3">3. Quick Sort</a>
+    <a class="nav-link" href="#s4">4. Complessità Quick</a>
+    <a class="nav-link" href="#s5">5. Binary Heap</a>
+    <a class="nav-link sub" href="#anim-heap">Vis. albero heap</a>
+    <a class="nav-link" href="#s6">6. Max-Heapify</a>
+    <a class="nav-link" href="#s7">7. Build-Max-Heap</a>
+    <a class="nav-link" href="#s8">8. Heap Sort</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#ix1">Simulatore partition</a>
+    <a class="nav-link" href="#ix2">Simulatore heap</a>
+    <a class="nav-link" href="#ix3">Quiz</a>
+    <div class="nav-label">Esercizi</div>
+    <a class="nav-link" href="#ex1">Esercizi guidati</a>
+    <a class="nav-link" href="#ex2">Soluzioni</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Quick Sort</span><br>&amp; Heap Sort</h1>
+  <p>Appunti didattici completi — Antonio Carzaniga (USI, 11 marzo 2026). Partizione in-place, divide-and-conquer, binary heap e ordinamento garantito Θ(n log n).</p>
+  <div class="hero-tags">
+    <span class="tag g">Partition</span>
+    <span class="tag g">Divide &amp; Conquer</span>
+    <span class="tag t">Max-Heap</span>
+    <span class="tag b">In-place</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — cosa impari qui</div>
+  <strong>Quick Sort</strong> ordina dividendo l'array in tre regioni rispetto a un <em>pivot</em> (elementi minori, uguali, maggiori), poi ricorsione sui lati. È veloce in media ma può degenerare a Θ(n²). <strong>Heap Sort</strong> usa un <em>max-heap</em> (albero binario quasi completo in un array) per estrarre ripetutamente il massimo: complessità <span class="cx cx-n">Θ(n log n)</span> nel worst case, tutto in-place.
+</div>
+
+<section id="s1">
+<h2><span class="num">01</span>Panoramica — algoritmi di ordinamento</h2>
+
+<p>Un <strong>algoritmo di ordinamento</strong> riorganizza un array <code>A[begin..end]</code> in ordine non decrescente. Le slide confrontano cinque algoritmi fondamentali visti nel corso.</p>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Algoritmo</th><th>Best</th><th>Average</th><th>Worst</th><th>In-place?</th><th>Note</th></tr>
+<tr><td><strong>Insertion Sort</strong></td><td class="mark"><span class="cx cx-n">Θ(n)</span></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="good">Sì</td><td>Eccellente su array quasi ordinati o piccoli</td></tr>
+<tr><td><strong>Selection Sort</strong></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="good">Sì</td><td>Sempre Θ(n²) — pochi scambi, molti confronti</td></tr>
+<tr><td><strong>Merge Sort</strong></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="bad">No</td><td>Stabile, richiede memoria ausiliaria Θ(n)</td></tr>
+<tr><td><strong>Quick Sort</strong></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td class="good">Sì</td><td>Partition + ricorsione; worst case se pivot sbilanciato</td></tr>
+<tr><td><strong>Heap Sort</strong></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td class="good">Sì</td><td>Worst case garantito; non stabile</td></tr>
+</table>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Come leggere la tabella</div>
+  <strong>In-place</strong> = usa solo O(1) memoria extra oltre all'array (eventuali variabili per indici e ricorsione). Quick Sort e Heap Sort sono in-place; Merge Sort no perché il passo <em>combine</em> fonde in un array ausiliario. Quick Sort è il più veloce in pratica (cache-friendly), ma Heap Sort è l'alternativa in-place con worst case Θ(n log n).
+</div>
+
+<div class="box box-tip">
+  <div class="box-label">Divide and Conquer — schema comune</div>
+  <ol class="steps">
+    <li><strong>Divide</strong> — spezza il problema in sottoproblemi più piccoli</li>
+    <li><strong>Conquer</strong> — risolve ricorsivamente i sottoproblemi</li>
+    <li><strong>Combine</strong> — unisce le soluzioni parziali</li>
+  </ol>
+  Merge Sort e Quick Sort seguono questo schema; la differenza cruciale è nel passo Combine (vedi sezione 3).
+</div>
+</section>
+
+<section id="s2">
+<h2><span class="num">02</span>Partizione — idea e invariante</h2>
+
+<p>La <strong>partizione</strong> è il cuore di Quick Sort. Dato un sottoarray <code>A[begin..end]</code> e pivot <code>v = A[end]</code>, riorganizza l'array in <strong>due regioni</strong>:</p>
+
+<div class="grid2">
+  <div class="box box-def">
+    <div class="box-label">Due regioni (slide)</div>
+    <ul>
+      <li><strong>A<sub>L</sub></strong> — elementi <code>≤ v</code> (inclusi i duplicati del pivot)</li>
+      <li><strong>A<sub>R</sub></strong> — elementi <code>&gt; v</code></li>
+    </ul>
+  </div>
+  <div class="box box-def">
+    <div class="box-label">Valore restituito</div>
+    <p style="margin:0"><code>Partition</code> restituisce l'indice <code>q</code> del pivot nella sua posizione finale. Quick Sort ricorre su <code>[begin..q−1]</code> e <code>[q+1..end]</code> — il pivot non viene riprocessato.</p>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Esempio concreto</div>
+  Array <code>[5, 2, 8, 2, 9, 1, 5]</code>, <code>v = A[end] = 5</code> → dopo partition <code>[5, 2, 2, 1, 5, 8, 9]</code>, <code>q = 4</code>. A sinistra di <code>q</code> tutti ≤ 5; a destra tutti &gt; 5.
+</div>
+
+<h3>Partizione in-place — versione slide</h3>
+<p>Un solo indice <code>q</code> delimita A<sub>L</sub>; un ciclo <code>for</code> scorre <code>i</code> da <code>begin</code> a <code>end</code>. Se <code>A[i] ≤ v</code>, scambia con <code>A[q]</code> e avanza <code>q</code>. Quando <code>i = end</code>, il pivot viene scambiato nella posizione corretta.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Invariante del loop (slide)</div>
+  <p>All'inizio di ogni iterazione con indice <code>i</code>:</p>
+  <div class="formula">begin ≤ k &lt; q ⇒ A[k] ≤ v &nbsp;&nbsp;|&nbsp;&nbsp; q ≤ k &lt; i ⇒ A[k] &gt; v</div>
+  <p>Gli elementi in <code>[i..end]</code> non sono ancora stati classificati.</p>
+</div>
+
+<pre><span class="fn">Partition</span>(A, begin, end)
+    q = begin
+    v = A[end]
+    <span class="kw">for</span> i = begin <span class="kw">to</span> end
+        <span class="kw">if</span> A[i] ≤ v
+            scambia A[i] con A[q]
+            q = q + 1
+    <span class="kw">return</span> q − 1</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Perché funziona senza swap finale?</div>
+  Quando <code>i = end</code>, abbiamo <code>A[end] = v</code>. La condizione <code>A[i] ≤ v</code> è vera, quindi il pivot viene scambiato con <code>A[q]</code> nell'ultima iterazione e finisce in posizione <code>q−1</code>.
+</div>
+
+<div class="interactive-panel svg-anim-panel" id="anim-partition">
+  <h4>Mini-animazione SVG — Partizione (slide)</h4>
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">Segui <code>Partition</code> su <code>[5, 2, 8, 2, 9, 1, 5]</code>, <code>v = 5</code>. Blu = A<sub>L</sub> (≤ v), verde = A<sub>R</sub> (&gt; v), arancione = pivot / scambio in corso.</p>
+  <svg id="partSvg" viewBox="0 0 620 240" role="img" aria-label="Animazione partition quick sort"></svg>
+  <div class="svg-progress"><div class="svg-progress-bar" id="partSvgProg" style="width:0%"></div></div>
+  <p class="svg-caption" id="partSvgCaption"></p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="partSvgPlay">▶ Play</button>
+    <button id="partSvgPrev">◀ Indietro</button>
+    <button id="partSvgNext">Avanti ▶</button>
+    <button id="partSvgReset">↺ Ricomincia</button>
+  </div>
+</div>
+</section>
+
+<section id="s3">
+<h2><span class="num">03</span>Quick Sort — ricorsione e combine</h2>
+
+<pre><span class="fn">Quick-Sort</span>(A, begin, end)
+    <span class="kw">if</span> begin &lt; end
+        q = Partition(A, begin, end)
+        Quick-Sort(A, begin, q − 1)
+        Quick-Sort(A, q + 1, end)</pre>
+
+<div class="grid2">
+  <div class="box box-tip">
+    <div class="box-label">Quick Sort — Combine</div>
+    <p style="margin:0"><strong>Combine = niente!</strong> La partition riorganizza l'array <em>in-place</em>: quando le due chiamate ricorsive terminano, l'intero sottoarray è già ordinato. Nessun merge ausiliario.</p>
+  </div>
+  <div class="box box-tip">
+    <div class="box-label">Merge Sort — Combine</div>
+    <p style="margin:0"><strong>Combine = Merge(A, p, q, r)</strong> — fonde due metà già ordinate in un array temporaneo. Costo Θ(n) per livello, memoria extra Θ(n).</p>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Albero di ricorsione</div>
+  Ogni chiamata a <code>Partition</code> produce un pivot in posizione definitiva. Le chiamate ricorsive lavorano su porzioni sempre più piccole. Se ogni partition è <em>bilanciata</em> (circa metà elementi per lato), l'albero ha altezza Θ(log n) → complessità totale Θ(n log n).
+</div>
+</section>
+
+<section id="s4">
+<h2><span class="num">04</span>Complessità di Quick Sort</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Procedura</th><th>Complessità</th><th>Quando</th></tr>
+<tr><td><code>Partition(A, begin, end)</code></td><td class="mark"><span class="cx cx-n">Θ(n)</span></td><td>Scansiona una volta tutti gli elementi del sottoarray</td></tr>
+<tr><td><code>Quick-Sort</code> — best case</td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td>Partition bilanciata: q ≈ metà del sottoarray ad ogni livello</td></tr>
+<tr><td><code>Quick-Sort</code> — worst case</td><td class="mark"><span class="cx cx-n2">Θ(n²)</span></td><td>Partition sbilanciata: q = begin−1 o q = end ad ogni livello</td></tr>
+<tr><td><code>Quick-Sort</code> — average</td><td class="mark"><span class="cx cx-n">Θ(n log n)</span></td><td>Pivot scelto in modo ragionevole (random, median-of-three)</td></tr>
+</table>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Worst case — partition sempre sbilanciata</div>
+  Se il pivot è sempre il minimo o il massimo (es. array già ordinato con pivot = ultimo elemento), una partizione risolve un solo elemento e lascia un sottoarray di n−1 elementi. Si ottengono n livelli di ricorsione, ciascuno con partition Θ(n) → <span class="cx cx-n2">Θ(n²)</span> totale.
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Ricorrenza (partition bilanciata)</div>
+  <div class="formula">T(n) = 2T(n/2) + Θ(n) ⟹ T(n) = Θ(n log n)</div>
+  <p>Per il caso peggiore: T(n) = T(n−1) + Θ(n) ⟹ T(n) = Θ(n²).</p>
+</div>
+</section>
+
+<hr class="part">
+<div class="part-label">— Binary Heap &amp; Heap Sort —</div>
+
+<section id="s5">
+<h2><span class="num">05</span>Binary Heap — rappresentazione ad array</h2>
+
+<p>Un <strong>binary heap</strong> è un albero binario <em>quasi completo</em> memorizzato in un array <code>A</code> con attributo <code>A.heap-size</code> (quanti elementi dell'heap sono attivi).</p>
+
+<div class="box box-def">
+  <div class="box-label">Formule indici (array 1-based)</div>
+  <ul>
+    <li><code>Parent(i) = ⌊i/2⌋</code></li>
+    <li><code>Left(i) = 2i</code></li>
+    <li><code>Right(i) = 2i + 1</code></li>
+  </ul>
+</div>
+
+<div class="box box-thm">
+  <div class="box-label">Proprietà max-heap</div>
+  Per ogni nodo <code>i &gt; 1</code>: <div class="formula">A[Parent(i)] ≥ A[i]</div>
+  Il massimo è sempre in <code>A[1]</code> (radice).
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Interfaccia heap (slide) — operazioni principali</div>
+  <ul>
+    <li><code>Max-Heapify(A, i)</code> — ripristina max-heap sul sottoalbero in <code>i</code> · <span class="cx cx-n">Θ(log n)</span></li>
+    <li><code>Build-Max-Heap(A)</code> — costruisce heap da array arbitrario · <span class="cx cx-n">O(n)</span></li>
+    <li><code>Heap-Insert(A, x)</code> — inserisce <code>x</code> e «risale» con swap verso la radice · <span class="cx cx-n">Θ(log n)</span></li>
+    <li><code>Heap-Extract-Max(A)</code> — rimuove il massimo (radice), mette l'ultimo elemento in radice e heapify · <span class="cx cx-n">Θ(log n)</span></li>
+  </ul>
+  <p style="margin:8px 0 0"><strong>Min-heap:</strong> stessa struttura, proprietà <code>A[Parent(i)] ≤ A[i]</code> — il minimo è in <code>A[1]</code>. <strong>Priority queue:</strong> un heap implementa una coda con priorità: inserimento e estrazione del massimo (o minimo) in tempo logaritmico.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Esempio</div>
+  Array <code>[16, 14, 10, 8, 7, 9, 3, 2, 4, 1]</code> con heap-size 10. Radice 16 ≥ figli 14 e 10; ogni sottoalbero rispetta la proprietà max-heap.
+</div>
+
+<div class="interactive-panel svg-anim-panel" id="anim-heap">
+  <h4>Visualizzazione albero max-heap</h4>
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">Premi <strong>Avanti</strong> per seguire la costruzione di un max-heap e l'estrazione del massimo (Heap Sort).</p>
+  <svg id="heapSvg" viewBox="0 0 620 320" role="img" aria-label="Visualizzazione albero heap"></svg>
+  <div class="svg-progress"><div class="svg-progress-bar" id="heapSvgProg" style="width:0%"></div></div>
+  <p class="svg-caption" id="heapSvgCaption"></p>
+  <div class="btn-row" style="justify-content:center">
+    <button class="primary" id="heapSvgPlay">▶ Play</button>
+    <button id="heapSvgPrev">◀ Indietro</button>
+    <button id="heapSvgNext">Avanti ▶</button>
+    <button id="heapSvgReset">↺ Ricomincia</button>
+  </div>
+</div>
+</section>
+
+<section id="s6">
+<h2><span class="num">06</span>Max-Heapify</h2>
+
+<p><code>Max-Heapify(A, i)</code> ripristina la proprietà max-heap quando il sottoalbero radicato in <code>i</code> potrebbe violarla (tipicamente dopo uno scambio).</p>
+
+<pre><span class="fn">Max-Heapify</span>(A, i)
+    l = Left(i)
+    r = Right(i)
+    <span class="kw">if</span> l ≤ A.heap-size <span class="kw">and</span> A[l] &gt; A[i]
+        largest = l
+    <span class="kw">else</span> largest = i
+    <span class="kw">if</span> r ≤ A.heap-size <span class="kw">and</span> A[r] &gt; A[largest]
+        largest = r
+    <span class="kw">if</span> largest ≠ i
+        scambia A[i] con A[largest]
+        Max-Heapify(A, largest)</pre>
+
+<p><strong>Complessità:</strong> <span class="cx cx-n">Θ(log n)</span> — percorre al più un cammino dalla radice a una foglia (altezza dell'albero).</p>
+</section>
+
+<section id="s7">
+<h2><span class="num">07</span>Build-Max-Heap</h2>
+
+<pre><span class="fn">Build-Max-Heap</span>(A)
+    A.heap-size = A.length
+    <span class="kw">for</span> i = ⌊A.length/2⌋ <span class="kw">down to</span> 1
+        Max-Heapify(A, i)</pre>
+
+<div class="box box-tip">
+  <div class="box-label">Perché partire da ⌊n/2⌋?</div>
+  I nodi da <code>⌊n/2⌋+1</code> a <code>n</code> sono foglie — già heap banali. Si heapifica dal basso verso l'alto. Complessità totale: <span class="cx cx-n">O(n)</span> (non O(n log n)!), per analisi ammortizzata sulle altezze dei nodi.
+</div>
+</section>
+
+<section id="s8">
+<h2><span class="num">08</span>Heap Sort</h2>
+
+<pre><span class="fn">Heap-Sort</span>(A)
+    Build-Max-Heap(A)
+    <span class="kw">for</span> i = A.length <span class="kw">down to</span> 2
+        scambia A[1] con A[i]
+        A.heap-size = A.heap-size − 1
+        Max-Heapify(A, 1)</pre>
+
+<div class="box box-thm">
+  <div class="box-label">Complessità Heap Sort</div>
+  <ul>
+    <li><code>Build-Max-Heap</code>: <span class="cx cx-n">O(n)</span></li>
+    <li>Loop n−1 volte: scambio O(1) + <code>Max-Heapify</code> <span class="cx cx-n">Θ(log n)</span></li>
+    <li><strong>Totale worst case:</strong> <span class="cx cx-n">Θ(n log n)</span>, <strong>in-place</strong> (solo l'array + heap-size)</li>
+  </ul>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">Idea in una frase</div>
+  Estrai ripetutamente il massimo (radice) e mettilo in fondo all'array; riduci <code>heap-size</code> e ripristina l'heap sul resto. Alla fine l'array è ordinato in ordine crescente.
+</div>
+</section>
+
+<section id="ix1">
+<h2><span class="num">⚡</span>Simulatore Partition</h2>
+<div class="interactive-panel">
+  <h4>Partition step-by-step</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Array: <code id="partArrLabel"></code> — pivot = ultimo elemento.</p>
+  <div class="ds-visual" id="partVisual"></div>
+  <div class="btn-row">
+    <button class="primary" id="partStep">Passo ▶</button>
+    <button id="partRun">Esegui tutto</button>
+    <button id="partReset">↺ Reset</button>
+  </div>
+  <div class="log-area" id="partLog">Premi Passo per iniziare.</div>
+</div>
+</section>
+
+<section id="ix2">
+<h2><span class="num">⚡</span>Simulatore Max-Heapify</h2>
+<div class="interactive-panel">
+  <h4>Heapify sul nodo evidenziato</h4>
+  <div class="ds-visual" id="heapVisual"></div>
+  <div class="btn-row">
+    <button class="primary" id="heapStep">Heapify ▶</button>
+    <button id="heapBuild">Build-Max-Heap</button>
+    <button id="heapReset">↺ Reset</button>
+  </div>
+  <div class="log-area" id="heapLog">Array iniziale: [4, 10, 3, 5, 1, 2, 9]</div>
+</div>
+</section>
+
+<section id="ix3">
+<h2><span class="num">⚡</span>Quiz — Quick Sort &amp; Heap Sort</h2>
+<div class="interactive-panel" id="quizPanel"></div>
+<div class="quiz-score" id="quizScore">Rispondi alle domande.</div>
+<button class="btn-reset" id="quizReset">Ricomincia quiz</button>
+</section>
+
+<hr class="part">
+<div class="part-label">— Esercizi —</div>
+
+<section id="ex1">
+<h2><span class="num">E1</span>Esercizi guidati</h2>
+<p>Difficoltà progressiva: <span class="ex-diff facile">facile</span> → <span class="ex-diff medio">medio</span> → <span class="ex-diff avanzato">avanzato</span>.</p>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 1 — Partition a mano <span class="ex-diff facile">facile</span></div>
+  <p>Esegui <code>Partition</code> su <code>A = [3, 7, 2, 7, 1, 7]</code> con pivot <code>v = A[end] = 7</code>. Mostra lo stato di A dopo ogni scambio e il valore restituito <code>q</code>.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 2 — Indici heap <span class="ex-diff facile">facile</span></div>
+  <p>Per un heap 1-based di lunghezza 10, calcola <code>Parent(5)</code>, <code>Left(3)</code>, <code>Right(3)</code>. Qual è il nodo foglia più a sinistra?</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 3 — Quick Sort worst case <span class="ex-diff medio">medio</span></div>
+  <p>Spiega perché Quick Sort con pivot = ultimo elemento su array già ordinato <code>[1,2,…,n]</code> ha complessità Θ(n²). Disegna l'albero di ricorsione per n=4.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 4 — Confronto Merge vs Quick <span class="ex-diff medio">medio</span></div>
+  <p>Confronta Merge Sort e Quick Sort su: worst-case time, spazio extra, stabilità, passo Combine. Quando preferiresti Heap Sort?</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 5 — Max-Heapify traccia <span class="ex-diff medio">medio</span></div>
+  <p>Array <code>[4, 1, 3, 2, 16, 9, 10, 14, 8, 7]</code>, heap-size 10. Esegui <code>Max-Heapify(A, 1)</code> passo passo (scambi e chiamate ricorsive).</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 6 — Build-Max-Heap <span class="ex-diff medio">medio</span></div>
+  <p>Su <code>[4, 1, 3, 2, 16, 9, 10]</code> esegui <code>Build-Max-Heap</code>: indica l'ordine dei nodi heapificati e l'array finale.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 7 — Heap Sort traccia <span class="ex-diff avanzato">avanzato</span></div>
+  <p>Ordina <code>[4, 1, 3, 2]</code> con Heap Sort. Mostra l'array dopo Build-Max-Heap e dopo ogni iterazione del loop principale.</p>
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio 8 — Ricorrenze <span class="ex-diff avanzato">avanzato</span></div>
+  <p>Deriva T(n) = 2T(n/2) + cn per Quick Sort bilanciato. Perché Build-Max-Heap è O(n) e non O(n log n)?</p>
+</div>
+</section>
+
+<section id="ex2">
+<h2><span class="num">E2</span>Soluzioni dettagliate</h2>
+
+<details>
+<summary>Esercizio 1 — Partition</summary>
+<div class="sol-body">
+  <p>Pivot v=7. <code>q</code> parte da 0. Ogni <code>A[i] ≤ 7</code> fa swap con <code>A[q]</code> e <code>q++</code>: dopo i=4 abbiamo <code>q=5</code>, array invariato (ogni swap è con se stesso finché non arriviamo al pivot).</p>
+  <p><code>i=5</code>: swap A[5]↔A[5] → <code>q=6</code>. <strong>return q−1 = 5</strong>. Tutti gli elementi sono ≤ 7, nessun A<sub>R</sub>; il pivot resta in A[5].</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 2 — Indici heap</summary>
+<div class="sol-body">
+  <p><code>Parent(5) = ⌊5/2⌋ = 2</code>. <code>Left(3) = 6</code>, <code>Right(3) = 7</code>.</p>
+  <p>Foglie: nodi ⌊10/2⌋+1 = 6 … 10. Foglia più a sinistra: nodo <strong>6</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 3 — Worst case Quick Sort</summary>
+<div class="sol-body">
+  <p>Array ordinato crescente, pivot = ultimo = massimo → tutti gli elementi &lt; pivot → q = end, sottoarray sinistro ha n−1 elementi, destro vuoto. Ricorsione solo a sinistra, profondità n.</p>
+  <p>n=4: partition costa 4+3+2+1 = 10 = Θ(n²). Albero: catena lineare di 4 nodi.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 4 — Merge vs Quick vs Heap</summary>
+<div class="sol-body">
+  <p><strong>Merge:</strong> Θ(n log n) sempre, Θ(n) spazio, stabile, combine = merge.</p>
+  <p><strong>Quick:</strong> Θ(n log n) avg, Θ(n²) worst, in-place, combine = nulla, instabile.</p>
+  <p><strong>Heap Sort</strong> quando serve worst Θ(n log n) in-place senza rischio quadratico (embedded, real-time).</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 5 — Max-Heapify(A,1)</summary>
+<div class="sol-body">
+  <p>Confronto figli di 1: Left=2 (1), Right=3 (3) — largest=3. Swap A[1]↔A[3] → [3,1,4,…]. Ricorsione su nodo 3: figli 6 (9), 7 (10) — swap con 10 → [3,1,10,2,16,9,4,14,8,7]. Stop.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 6 — Build-Max-Heap</summary>
+<div class="sol-body">
+  <p>⌊7/2⌋=3. Heapify i=3,2,1. Dopo i=3: [4,1,3,2,16,9,10]. Dopo i=2: ok. Dopo i=1: swap e discendi → <strong>[16, 4, 10, 2, 1, 9, 3]</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 7 — Heap Sort [4,1,3,2]</summary>
+<div class="sol-body">
+  <p>Build-Max-Heap → [4, 2, 3, 1]. i=4: swap → [1, 2, 3, 4], heap-size=3, heapify → [3, 2, 1, 4]. i=3: swap → [1, 2, 3, 4], heap-size=2, heapify → [2, 1, 3, 4]. i=2: swap → [1, 2, 3, 4]. Ordinato.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 8 — Ricorrenze</summary>
+<div class="sol-body">
+  <p>Master theorem: a=2, b=2, f(n)=cn → T(n)=Θ(n log n).</p>
+  <p>Build-Max-Heap: somma su nodi di altezza h di O(2^h · (log n − h)) = O(n) — molti nodi bassi, pochi alti.</p>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => navObs.observe(s));
+
+let partSvgAnim, heapSvgAnim;
+const themeBtn = document.getElementById('themeToggle');
+const saved = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', saved);
+themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  setTimeout(() => { partSvgAnim?.redraw(); heapSvgAnim?.redraw(); renderHeapSim(); }, 30);
+});
+
+function svgColors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    bg4: s.getPropertyValue('--bg4').trim(),
+    border: s.getPropertyValue('--border').trim(),
+    text: s.getPropertyValue('--text-bright').trim(),
+    dim: s.getPropertyValue('--text-dim').trim(),
+    teal: s.getPropertyValue('--teal').trim(),
+    orange: s.getPropertyValue('--orange').trim(),
+    accent: s.getPropertyValue('--accent').trim(),
+    red: s.getPropertyValue('--red').trim(),
+    green: s.getPropertyValue('--green').trim(),
+    blue: s.getPropertyValue('--blue').trim()
+  };
+}
+
+function makeSvgAnim(config) {
+  let step = 0, timer = null;
+  const { steps, render, ids } = config;
+  const el = {
+    svg: document.getElementById(ids.svg),
+    cap: document.getElementById(ids.cap),
+    prog: document.getElementById(ids.prog),
+    play: document.getElementById(ids.play),
+    prev: document.getElementById(ids.prev),
+    next: document.getElementById(ids.next),
+    reset: document.getElementById(ids.reset)
+  };
+  function draw() {
+    const c = svgColors();
+    el.svg.innerHTML = render(steps[step], step, steps.length, c);
+    el.cap.innerHTML = `<span class="svg-step-badge">${step + 1}/${steps.length}</span>${steps[step].caption}`;
+    el.prog.style.width = ((step + 1) / steps.length * 100) + '%';
+    el.play.textContent = timer ? '⏸ Pausa' : '▶ Play';
+  }
+  function go(n) { step = Math.max(0, Math.min(steps.length - 1, n)); draw(); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } el.play.textContent = '▶ Play'; }
+  el.next.onclick = () => { stop(); go(step + 1); };
+  el.prev.onclick = () => { stop(); go(step - 1); };
+  el.reset.onclick = () => { stop(); go(0); };
+  el.play.onclick = () => {
+    if (timer) { stop(); return; }
+    el.play.textContent = '⏸ Pausa';
+    timer = setInterval(() => { if (step >= steps.length - 1) { stop(); return; } go(step + 1); }, 2200);
+  };
+  draw();
+  return { redraw: draw, stop };
+}
+
+/* Partition SVG — versione slide (q, for i) */
+const PART_INIT = [5, 2, 8, 2, 9, 1, 5];
+const partAnimSteps = [
+  { arr: [5,2,8,2,9,1,5], q: 0, scan: 0, ret: null, hl: {0:'scan'}, caption: '<strong>Inizio:</strong> <code>q = begin = 0</code>, <code>v = A[end] = 5</code>. Invariante: A<sub>L</sub> | A<sub>R</sub> | ?' },
+  { arr: [5,2,8,2,9,1,5], q: 1, scan: 1, ret: null, regions: {0:'al'}, caption: '<strong>i=0:</strong> A[0]=5 ≤ v → swap A[0]↔A[0], <code>q = 1</code>.' },
+  { arr: [5,2,8,2,9,1,5], q: 2, scan: 2, ret: null, regions: {0:'al',1:'al'}, caption: '<strong>i=1:</strong> A[1]=2 ≤ v → <code>q = 2</code>. A<sub>L</sub> = {5, 2}.' },
+  { arr: [5,2,8,2,9,1,5], q: 2, scan: 3, ret: null, regions: {0:'al',1:'al'}, hl: {2:'scan'}, caption: '<strong>i=2:</strong> A[2]=8 &gt; v → nessuno scambio, <code>q</code> resta 2.' },
+  { arr: [5,2,2,8,9,1,5], q: 3, scan: 4, ret: null, regions: {0:'al',1:'al',2:'al'}, hl: {3:'swap'}, caption: '<strong>i=3:</strong> A[3]=2 ≤ v → swap A[3]↔A[2], <code>q = 3</code>.' },
+  { arr: [5,2,2,8,9,1,5], q: 3, scan: 5, ret: null, regions: {0:'al',1:'al',2:'al'}, caption: '<strong>i=4:</strong> A[4]=9 &gt; v → skip.' },
+  { arr: [5,2,2,1,9,8,5], q: 4, scan: 6, ret: null, regions: {0:'al',1:'al',2:'al',3:'al'}, hl: {5:'swap'}, caption: '<strong>i=5:</strong> A[5]=1 ≤ v → swap con A[q], <code>q = 4</code>.' },
+  { arr: [5,2,2,1,5,8,9], q: 5, scan: 7, ret: 4, regions: {0:'al',1:'al',2:'al',3:'al',4:'pivot'}, hl: {6:'swap'}, caption: '<strong>i=6:</strong> pivot 5 ≤ v → swap in posizione finale. <code>return q−1 = 4</code>.' },
+  { arr: [5,2,2,1,5,8,9], q: 5, scan: 7, ret: 4, regions: {0:'al',1:'al',2:'al',3:'al',4:'pivot',5:'ar',6:'ar'}, caption: '<strong>Fatto:</strong> Quick-Sort ricorre su [0..3] e [5..6]. Il pivot in A[4] non viene riordinato.' }
+];
+
+function renderPartSvg(st, idx, total, c) {
+  const cellW = 58, gap = 8, startX = 40, y = 80;
+  const arr = st.arr;
+  let svg = `<text x="310" y="28" text-anchor="middle" fill="${c.dim}" font-size="12" font-family="Inter,sans-serif">Partition — pivot v = 5</text>`;
+  for (let k = 0; k < arr.length; k++) {
+    const x = startX + k * (cellW + gap);
+    let fill = c.bg4, stroke = c.border;
+    if (st.regions && st.regions[k] === 'al') { fill = 'rgba(97,175,239,.22)'; stroke = c.blue; }
+    else if (st.regions && st.regions[k] === 'ar') { fill = 'rgba(152,195,121,.2)'; stroke = c.green; }
+    else if (st.regions && st.regions[k] === 'pivot') { fill = 'rgba(229,149,58,.3)'; stroke = c.accent; }
+    if (st.hl && st.hl[k] === 'scan') stroke = c.teal;
+    if (st.hl && st.hl[k] === 'swap') stroke = c.red;
+    const sw = (st.hl && st.hl[k]) ? 2.5 : 1.5;
+    svg += `<rect x="${x}" y="${y}" width="${cellW}" height="50" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+    svg += `<text x="${x + cellW/2}" y="${y + 32}" text-anchor="middle" fill="${c.text}" font-size="16" font-weight="600" font-family="JetBrains Mono,monospace">${arr[k]}</text>`;
+    svg += `<text x="${x + cellW/2}" y="${y + 68}" text-anchor="middle" fill="${c.dim}" font-size="10" font-family="JetBrains Mono,monospace">[${k}]</text>`;
+  }
+  if (st.q !== undefined) svg += `<text x="120" y="175" fill="${c.blue}" font-size="11" font-family="JetBrains Mono,monospace">q = ${st.q}</text>`;
+  if (st.scan !== undefined) svg += `<text x="260" y="175" fill="${c.teal}" font-size="11" font-family="JetBrains Mono,monospace">i = ${Math.min(st.scan, arr.length - 1)}</text>`;
+  if (st.ret !== null && st.ret !== undefined) svg += `<text x="420" y="175" fill="${c.accent}" font-size="11" font-weight="700" font-family="JetBrains Mono,monospace">return ${st.ret}</text>`;
+  svg += `<text x="310" y="210" text-anchor="middle" fill="${c.dim}" font-size="11" font-family="Inter,sans-serif">Blu A_L (≤v) · Arancione pivot · Verde A_R (&gt;v)</text>`;
+  return svg;
+}
+
+partSvgAnim = makeSvgAnim({
+  steps: partAnimSteps, render: renderPartSvg,
+  ids: { svg: 'partSvg', cap: 'partSvgCaption', prog: 'partSvgProg', play: 'partSvgPlay', prev: 'partSvgPrev', next: 'partSvgNext', reset: 'partSvgReset' }
+});
+
+/* Heap tree SVG */
+const heapAnimSteps = [
+  { arr: [4,1,3,2,16,9,10], hl: [], caption: '<strong>Array iniziale</strong> — non ancora un max-heap.' },
+  { arr: [4,1,3,2,16,9,10], hl: [3], caption: '<strong>Build-Max-Heap:</strong> heapify nodo foglia i=3.' },
+  { arr: [4,1,3,2,16,9,10], hl: [2], caption: '<strong>Heapify i=2</strong> — già ok.' },
+  { arr: [16,1,10,2,4,9,3], hl: [1], caption: '<strong>Heapify i=1:</strong> swap 4↔16, poi discendi. Max-heap completo.' },
+  { arr: [16,1,10,2,4,9,3], hl: [1,6], caption: '<strong>Heap-Sort i=7:</strong> swap A[1]↔A[7], heap-size--.' },
+  { arr: [3,1,10,2,4,9,16], hl: [1], caption: '<strong>Max-Heapify(1)</strong> — ripristina heap su [1..6].' },
+  { arr: [10,4,3,2,1,9,16], hl: [1], caption: '<strong>Continua:</strong> estrai massimi in fondo → array ordinato.' }
+];
+
+function heapTreePos(i, n, w, h) {
+  const depth = Math.floor(Math.log2(i));
+  const levelStart = Math.pow(2, depth);
+  const posInLevel = i - levelStart;
+  const nodesInLevel = Math.pow(2, depth);
+  const x = w * (posInLevel + 0.5) / nodesInLevel;
+  const y = 40 + depth * (h / (Math.ceil(Math.log2(n + 1)) + 1));
+  return { x, y };
+}
+
+function renderHeapSvg(st, idx, total, c) {
+  const arr = st.arr;
+  const n = arr.length;
+  const w = 620, h = 280;
+  let svg = `<text x="310" y="22" text-anchor="middle" fill="${c.dim}" font-size="12" font-family="Inter,sans-serif">Max-Heap (array 1-based)</text>`;
+  for (let i = 1; i <= n; i++) {
+    const p = heapTreePos(i, n, w, h);
+    const l = 2 * i, r = 2 * i + 1;
+    if (l <= n) {
+      const lp = heapTreePos(l, n, w, h);
+      svg += `<line x1="${p.x}" y1="${p.y + 18}" x2="${lp.x}" y2="${lp.y - 18}" class="heap-edge" stroke="${c.border}"/>`;
+    }
+    if (r <= n) {
+      const rp = heapTreePos(r, n, w, h);
+      svg += `<line x1="${p.x}" y1="${p.y + 18}" x2="${rp.x}" y2="${rp.y - 18}" class="heap-edge" stroke="${c.border}"/>`;
+    }
+  }
+  for (let i = 1; i <= n; i++) {
+    const p = heapTreePos(i, n, w, h);
+    const hl = st.hl.includes(i);
+    svg += `<circle cx="${p.x}" cy="${p.y}" r="22" fill="${hl ? 'rgba(229,149,58,.3)' : c.bg4}" stroke="${hl ? c.accent : c.border}" stroke-width="${hl ? 2.5 : 1.5}"/>`;
+    svg += `<text x="${p.x}" y="${p.y + 6}" text-anchor="middle" fill="${c.text}" font-size="14" font-weight="600" font-family="JetBrains Mono,monospace">${arr[i-1]}</text>`;
+    svg += `<text x="${p.x}" y="${p.y + 38}" text-anchor="middle" fill="${c.dim}" font-size="9" font-family="JetBrains Mono,monospace">[${i}]</text>`;
+  }
+  svg += `<text x="310" y="305" text-anchor="middle" fill="${c.dim}" font-size="10" font-family="JetBrains Mono,monospace">A = [${arr.join(', ')}]</text>`;
+  return svg;
+}
+
+heapSvgAnim = makeSvgAnim({
+  steps: heapAnimSteps, render: renderHeapSvg,
+  ids: { svg: 'heapSvg', cap: 'heapSvgCaption', prog: 'heapSvgProg', play: 'heapSvgPlay', prev: 'heapSvgPrev', next: 'heapSvgNext', reset: 'heapSvgReset' }
+});
+
+/* Partition simulator — versione slide */
+const PART_SIM_INIT = [5, 2, 8, 2, 9, 1, 5];
+let partSim = { arr: [...PART_SIM_INIT], begin: 0, end: 6, q: 0, scan: 0, phase: 'init', done: false, ret: null };
+
+function renderPartSim() {
+  const el = document.getElementById('partVisual');
+  const { arr, q, scan, end, done, ret } = partSim;
+  document.getElementById('partArrLabel').textContent = '[' + arr.join(', ') + ']';
+  el.innerHTML = arr.map((v, k) => {
+    let cls = 'cell';
+    if (k < q && !done) cls += ' head';
+    if (k >= q && k < scan && !done) cls += ' tail';
+    if (done && k === ret) cls += ' top';
+    if (k === scan && !done && scan <= end) cls += ' top';
+    return `<div class="${cls}">${v}${k === scan && !done ? '<span class="cell-label">i</span>' : ''}${done && k === ret ? '<span class="cell-label">q</span>' : ''}</div>`;
+  }).join('');
+}
+
+function partSimStep() {
+  if (partSim.done) return;
+  const { arr, end } = partSim;
+  const v = arr[end];
+  if (partSim.phase === 'init') {
+    partSim.q = partSim.begin;
+    partSim.scan = partSim.begin;
+    partSim.phase = 'loop';
+    document.getElementById('partLog').textContent = `q=${partSim.q}, v=${v}. Inizio for i=begin..end.`;
+  } else if (partSim.scan <= end) {
+    const i = partSim.scan;
+    if (arr[i] <= v) {
+      [arr[partSim.q], arr[i]] = [arr[i], arr[partSim.q]];
+      document.getElementById('partLog').textContent = `i=${i}, A[i]=${arr[partSim.q]} ≤ v → swap A[i]↔A[q], q=${partSim.q + 1}`;
+      partSim.q++;
+    } else {
+      document.getElementById('partLog').textContent = `i=${i}, A[i]=${arr[i]} > v → skip`;
+    }
+    partSim.scan++;
+    if (partSim.scan > end) {
+      partSim.ret = partSim.q - 1;
+      partSim.done = true;
+      document.getElementById('partLog').textContent = `return q−1 = ${partSim.ret}. Array: [${arr.join(', ')}]`;
+    }
+  }
+  renderPartSim();
+}
+
+function partSimRun() {
+  while (!partSim.done) partSimStep();
+}
+
+function partSimReset() {
+  partSim = { arr: [...PART_SIM_INIT], begin: 0, end: 6, q: 0, scan: 0, phase: 'init', done: false, ret: null };
+  document.getElementById('partLog').textContent = 'Reset. Premi Passo.';
+  renderPartSim();
+}
+
+document.getElementById('partStep').onclick = partSimStep;
+document.getElementById('partRun').onclick = partSimRun;
+document.getElementById('partReset').onclick = partSimReset;
+partSimReset();
+
+/* Heap simulator */
+let heapArr = [4, 10, 3, 5, 1, 2, 9];
+const HEAP_INIT = [4, 10, 3, 5, 1, 2, 9];
+
+function left(i) { return 2 * i; }
+function right(i) { return 2 * i + 1; }
+function parent(i) { return Math.floor(i / 2); }
+
+function maxHeapify(arr, i, heapSize, logEl) {
+  let largest = i;
+  const l = left(i), r = right(i);
+  if (l <= heapSize && arr[l - 1] > arr[largest - 1]) largest = l;
+  if (r <= heapSize && arr[r - 1] > arr[largest - 1]) largest = r;
+  if (largest !== i) {
+    [arr[i - 1], arr[largest - 1]] = [arr[largest - 1], arr[i - 1]];
+    logEl.textContent = `Swap A[${i}]↔A[${largest}], heapify(${largest})`;
+    maxHeapify(arr, largest, heapSize, logEl);
+  } else logEl.textContent = `Nodo ${i} ok.`;
+}
+
+function renderHeapSim() {
+  document.getElementById('heapVisual').innerHTML = heapArr.map((v, k) =>
+    `<div class="cell${k === 0 ? ' top' : ''}">${v}<span class="cell-label">${k + 1}</span></div>`
+  ).join('');
+}
+
+document.getElementById('heapStep').onclick = () => {
+  const log = document.getElementById('heapLog');
+  maxHeapify(heapArr, 1, heapArr.length, log);
+  renderHeapSim();
+};
+document.getElementById('heapBuild').onclick = () => {
+  const log = document.getElementById('heapLog');
+  for (let i = Math.floor(heapArr.length / 2); i >= 1; i--) maxHeapify(heapArr, i, heapArr.length, log);
+  log.textContent = 'Build-Max-Heap completato: [' + heapArr.join(', ') + ']';
+  renderHeapSim();
+};
+document.getElementById('heapReset').onclick = () => {
+  heapArr = [...HEAP_INIT];
+  document.getElementById('heapLog').textContent = 'Reset: [' + heapArr.join(', ') + ']';
+  renderHeapSim();
+};
+renderHeapSim();
+
+/* Quiz */
+const quizData = [
+  { q: 'Partition su n elementi ha complessità Θ(n)?', a: true, why: 'Una singola scansione lineare del sottoarray.' },
+  { q: 'Quick Sort ha worst case Θ(n²) quando la partition è sempre sbilanciata?', a: true, why: 'Un solo elemento risolto per chiamata → n livelli × Θ(n) per partition.' },
+  { q: 'Quick Sort richiede un passo Combine con array ausiliario?', a: false, why: 'Combine = niente; partition in-place.' },
+  { q: 'Merge Sort è in-place?', a: false, why: 'Merge usa Θ(n) memoria ausiliaria.' },
+  { q: 'In un max-heap: A[Parent(i)] ≥ A[i] per i > 1?', a: true, why: 'Definizione di max-heap.' },
+  { q: 'Max-Heapify ha complessità Θ(log n)?', a: true, why: 'Altezza albero binario O(log n).' },
+  { q: 'Heap Sort ha worst case Θ(n log n) ed è in-place?', a: true, why: 'Build O(n) + n extract O(log n) ciascuno.' },
+  { q: 'Parent(5) in heap 1-based è 3?', a: false, why: 'Parent(5) = ⌊5/2⌋ = 2.' },
+  { q: 'Build-Max-Heap ha complessità O(n log n)?', a: false, why: 'Analisi ammortizzata → O(n), non n·log n.' },
+  { q: 'Heap Sort è stabile come Merge Sort?', a: false, why: 'Gli scambi heapify possono invertire elementi uguali.' }
+];
+let qAns = 0, qOk = 0;
+function renderQuiz() {
+  document.getElementById('quizPanel').innerHTML = quizData.map((item, i) => `
+    <div class="quiz-q" id="qq${i}">
+      <p><strong>${i+1}.</strong> ${item.q}</p>
+      <div class="quiz-btns">
+        <button onclick="answerQuiz(${i},true)">Vero</button>
+        <button onclick="answerQuiz(${i},false)">Falso</button>
+      </div>
+      <div class="quiz-feedback" id="qf${i}"></div>
+    </div>`).join('');
+  qAns = 0; qOk = 0;
+  document.getElementById('quizScore').textContent = 'Rispondi alle 10 domande.';
+}
+function answerQuiz(i, ans) {
+  const el = document.getElementById('qq'+i);
+  if (el.classList.contains('answered-correct') || el.classList.contains('answered-wrong')) return;
+  const ok = ans === quizData[i].a;
+  el.classList.add(ok ? 'answered-correct' : 'answered-wrong');
+  const fb = document.getElementById('qf'+i);
+  fb.classList.add('show');
+  fb.innerHTML = (ok ? '<span class="good">✓</span> ' : '<span class="bad">✗</span> ') + quizData[i].why;
+  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  qAns++; if (ok) qOk++;
+  document.getElementById('quizScore').textContent = `Punteggio: ${qOk}/${qAns}` + (qAns < quizData.length ? ` — ancora ${quizData.length-qAns}` : ' — Completato!');
+}
+document.getElementById('quizReset').onclick = renderQuiz;
+renderQuiz();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

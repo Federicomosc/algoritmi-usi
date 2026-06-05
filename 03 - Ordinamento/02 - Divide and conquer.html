@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divide and Conquer — Algoritmi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0e0e12; --bg2: #14141a; --bg3: #1c1c24; --bg4: #24242e;
+  --border: #2e2e3e; --text: #d4d0c8; --text-dim: #7a7890; --text-bright: #f0ece0;
+  --gold: #e8c547; --teal: #4ec9a8; --red: #e06c75; --blue: #61afef;
+  --purple: #c678dd; --orange: #e5953a; --green: #98c379; --sidebar-w: 280px;
+  --accent: #e5953a; --chart-grid: #2e2e3e; --chart-text: #7a7890; --tooltip-bg: #1c1c24;
+}
+html[data-theme="light"] {
+  --bg: #f4f1ea; --bg2: #ebe6dc; --bg3: #ffffff; --bg4: #f0ece4;
+  --border: #d4cfc4; --text: #3a3848; --text-dim: #6a6878; --text-bright: #1a1828;
+  --gold: #9a7b10; --teal: #1a7a62; --red: #b8323c; --blue: #2a6cb8;
+  --purple: #7a3a9a; --orange: #a85a18; --green: #3a7a32; --accent: #a85a18;
+  --chart-grid: #d4cfc4; --chart-text: #6a6878; --tooltip-bg: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.7; }
+#sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding-bottom: 40px; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.sidebar-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.sidebar-header .title { color: var(--accent); font-family: 'Lora', serif; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.sidebar-header .sub { color: var(--text-dim); font-size: 11px; margin-top: 3px; }
+.nav-section { padding: 6px 0; }
+.nav-label { padding: 4px 20px; font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-top: 8px; }
+.nav-link { display: block; padding: 5px 20px 5px 28px; color: var(--text-dim); text-decoration: none; font-size: 13px; border-left: 2px solid transparent; transition: all .15s; }
+.nav-link:hover { color: var(--text-bright); background: var(--bg3); border-left-color: var(--accent); }
+.nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(229,149,58,.07); }
+.nav-link.sub { padding-left: 40px; font-size: 12px; }
+#main { margin-left: var(--sidebar-w); max-width: 920px; padding: 48px 56px 80px; }
+.hero { background: linear-gradient(135deg, #1a1814 0%, #12121c 100%); border: 1px solid var(--border); border-radius: 12px; padding: 40px 44px; margin-bottom: 56px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(229,149,58,.14) 0%, transparent 70%); pointer-events: none; }
+.hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1.3; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-dim); margin-top: 10px; font-size: 14px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; border: 1px solid; }
+.tag.g { border-color: var(--accent); color: var(--accent); background: rgba(229,149,58,.08); }
+.tag.t { border-color: var(--teal); color: var(--teal); background: rgba(78,201,168,.08); }
+.tag.b { border-color: var(--blue); color: var(--blue); background: rgba(97,175,239,.08); }
+.part-label { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+section { margin-bottom: 56px; }
+section h2 { font-family: 'Lora', serif; font-size: 22px; font-weight: 700; color: var(--text-bright); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+section h2 .num { color: var(--accent); margin-right: 8px; font-size: 16px; }
+section h3 { font-size: 14px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .07em; margin: 28px 0 12px; }
+section h4 { font-size: 14px; font-weight: 600; color: var(--text-bright); margin: 20px 0 8px; }
+p { margin-bottom: 12px; }
+ul, ol { padding-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 5px; }
+strong { color: var(--text-bright); font-weight: 600; }
+em { color: var(--accent); font-style: italic; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg4); color: var(--teal); padding: 1px 6px; border-radius: 4px; }
+pre { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.65; color: var(--text); }
+pre .kw { color: var(--purple); font-weight: 600; }
+pre .fn { color: var(--blue); }
+pre .cm { color: var(--text-dim); font-style: italic; }
+pre .nm { color: var(--orange); }
+pre .op { color: var(--red); }
+pre .st { color: var(--green); }
+pre .hl { background: rgba(229,149,58,.12); border-radius: 3px; padding: 0 2px; }
+.box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.box-def { background: rgba(97,175,239,.07); border-color: var(--blue); }
+.box-thm { background: rgba(229,149,58,.07); border-color: var(--accent); }
+.box-tip { background: rgba(78,201,168,.07); border-color: var(--teal); }
+.box-warn { background: rgba(224,108,117,.07); border-color: var(--red); }
+.box-ex { background: rgba(152,195,121,.07); border-color: var(--green); }
+.box-breve { background: rgba(229,149,58,.1); border-color: var(--accent); border-left-width: 4px; }
+.box-sol { background: rgba(97,175,239,.05); border-color: var(--blue); }
+.box-breve .box-label { color: var(--accent); }
+.box-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.box-def .box-label { color: var(--blue); }
+.box-thm .box-label { color: var(--accent); }
+.box-tip .box-label { color: var(--teal); }
+.box-warn .box-label { color: var(--red); }
+.box-ex .box-label { color: var(--green); }
+.box-sol .box-label { color: var(--blue); }
+.tbl-wrap { overflow-x: auto; margin: 16px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg4); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.good { color: var(--green); }
+.bad { color: var(--red); }
+.mark { color: var(--accent); font-weight: 600; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } #main { margin-left: 0; padding: 24px; } }
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li { counter-increment: step; padding: 10px 16px 10px 48px; position: relative; margin-bottom: 8px; background: var(--bg3); border-radius: 6px; border: 1px solid var(--border); }
+.steps li::before { content: counter(step); position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.math { font-family: 'Lora', serif; font-style: italic; color: var(--blue); }
+.formula { text-align: center; font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--blue); padding: 14px 0; margin: 8px 0; }
+.cx { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+.cx-n2 { background: rgba(224,108,117,.15); color: var(--red); }
+.cx-n { background: rgba(152,195,121,.15); color: var(--green); }
+.cx-logn { background: rgba(78,201,168,.15); color: var(--teal); }
+.cx-nlogn { background: rgba(229,149,58,.15); color: var(--accent); }
+.cx-exp { background: rgba(198,120,221,.15); color: var(--purple); }
+hr.part { border: none; border-top: 1px solid var(--accent); opacity: .3; margin: 64px 0 48px; }
+.ex-diff { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.ex-diff.facile { background: rgba(152,195,121,.15); color: var(--green); }
+.ex-diff.medio { background: rgba(97,175,239,.15); color: var(--blue); }
+.ex-diff.avanzato { background: rgba(224,108,117,.15); color: var(--red); }
+details { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; color: var(--text-bright); }
+details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
+.theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 200; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg3); color: var(--accent); font-size: 18px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,.25); transition: transform .15s; }
+.theme-toggle:hover { transform: scale(1.08); }
+.nota { border-bottom: 1px dashed var(--accent); cursor: help; position: relative; color: var(--accent); font-weight: 600; }
+.nota::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); width: max-content; max-width: 320px; padding: 10px 14px; background: var(--tooltip-bg); border: 1px solid var(--accent); border-radius: 8px; font-size: 12px; font-weight: 400; font-family: 'Inter', sans-serif; color: var(--text); line-height: 1.5; white-space: normal; opacity: 0; visibility: hidden; transition: opacity .15s; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,.3); pointer-events: none; }
+.nota:hover::after, .nota:focus::after { opacity: 1; visibility: visible; }
+.interactive-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; }
+.interactive-panel h4 { margin-top: 0; color: var(--accent); font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; align-items: center; }
+.btn-row button, .btn-row input[type=text], .btn-row input[type=number] { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif; }
+.btn-row button { cursor: pointer; font-weight: 600; }
+.btn-row button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn-row button:hover:not(:disabled) { filter: brightness(1.1); }
+.btn-row button:disabled { opacity: .45; cursor: default; }
+.slider-row { display: flex; align-items: center; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+.slider-row label { font-size: 13px; color: var(--text-dim); min-width: 80px; }
+.slider-row input[type=range] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.slider-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--accent); font-weight: 600; min-width: 48px; }
+.merge-visual { display: flex; flex-direction: column; gap: 16px; margin: 16px 0; }
+.merge-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.merge-row .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; min-width: 70px; }
+.cell { min-width: 44px; height: 44px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; background: var(--bg4); transition: all .25s; }
+.cell.active { border-color: var(--accent); background: rgba(229,149,58,.2); transform: scale(1.08); }
+.cell.done { border-color: var(--green); background: rgba(152,195,121,.12); opacity: .85; }
+.cell.out { border-color: var(--teal); background: rgba(78,201,168,.15); }
+.merge-arrow { color: var(--text-dim); font-size: 18px; margin: 0 4px; }
+.log-area { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); background: var(--bg4); padding: 12px; border-radius: 6px; max-height: 100px; overflow-y: auto; margin-top: 12px; }
+.bs-visual { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; align-items: center; justify-content: center; }
+.bs-cell { min-width: 48px; height: 48px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; background: var(--bg4); transition: all .2s; position: relative; }
+.bs-cell.discarded { opacity: .25; }
+.bs-cell.range { border-color: var(--blue); background: rgba(97,175,239,.12); }
+.bs-cell.mid { border-color: var(--accent); background: rgba(229,149,58,.2); box-shadow: 0 0 12px rgba(229,149,58,.3); }
+.bs-cell.found { border-color: var(--green); background: rgba(152,195,121,.25); }
+.chart-wrap { position: relative; height: 300px; margin-top: 12px; }
+.chart-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.chart-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg4); color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer; }
+.chart-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(229,149,58,.1); }
+.quiz-q { background: var(--bg4); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border: 1px solid var(--border); }
+.quiz-q.answered-correct { border-color: var(--green); background: rgba(152,195,121,.08); }
+.quiz-q.answered-wrong { border-color: var(--red); background: rgba(224,108,117,.08); }
+.quiz-q p { margin-bottom: 10px; font-size: 14px; }
+.quiz-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.quiz-btns button { padding: 6px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; }
+.quiz-btns button:hover { border-color: var(--accent); color: var(--accent); }
+.quiz-btns button:disabled { opacity: .5; cursor: default; }
+.quiz-feedback { font-size: 12px; margin-top: 8px; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-score { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--teal); margin-top: 16px; padding: 12px; background: var(--bg4); border-radius: 8px; text-align: center; }
+.btn-reset { margin-top: 12px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--teal); background: transparent; color: var(--teal); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset:hover { background: rgba(78,201,168,.1); }
+.dc-diagram { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+.dc-box { background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+.dc-box .icon { font-size: 28px; margin-bottom: 8px; }
+.dc-box h5 { color: var(--accent); font-size: 13px; margin-bottom: 6px; }
+.dc-box p { font-size: 12px; color: var(--text-dim); margin: 0; }
+@media (max-width: 600px) { .dc-diagram { grid-template-columns: 1fr; } }
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Cartella 03 — Ordinamento</div>
+    <div class="sub">PDF 02 · Divide and Conquer</div>
+  </div>
+  <a class="nav-link" href="../index.html">← Indice appunti</a>
+  <a class="nav-link" href="../guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="../final/index.html">Final 2021–2025</a>
+  <div class="nav-section">
+    <div class="nav-label">Teoria</div>
+    <a class="nav-link" href="#s1">1. Strategia D&amp;C</a>
+    <a class="nav-link" href="#s2">2. Merge (unione insiemi)</a>
+    <a class="nav-link sub" href="#s2-simple">MergeSimple</a>
+    <a class="nav-link sub" href="#s2-bs">MergeSimple2 + BS</a>
+    <a class="nav-link" href="#s3">3. Binary Search</a>
+    <a class="nav-link" href="#s4">4. Merge sequenze ordinate</a>
+    <a class="nav-link sub" href="#s4-lower">Limite Θ(n)</a>
+    <a class="nav-link" href="#s5">5. MergeSort</a>
+    <a class="nav-link" href="#s6">6. MergeR ricorsivo</a>
+    <a class="nav-link" href="#s7">7. Karatsuba</a>
+    <a class="nav-link" href="#s8">8. Mediana / k-esimo</a>
+    <div class="nav-label">Interattivo</div>
+    <a class="nav-link" href="#ix-merge">Animatore Merge</a>
+    <a class="nav-link" href="#ix-bs">Simulatore Binary Search</a>
+    <a class="nav-link" href="#ix-chart">Grafici complessità</a>
+    <a class="nav-link" href="#ix-quiz">Quiz</a>
+    <div class="nav-label">Esercizi</div>
+    <a class="nav-link" href="#ex">Esercizi guidati</a>
+    <a class="nav-link" href="#sol">Soluzioni</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <div class="part-label">Corso Algoritmi · USI · Carzaniga</div>
+  <h1><span>Divide and Conquer</span><br>Algoritmi «dividi e conquista»</h1>
+  <p>Appunti completi dal PDF «Divide-and-Conquer Algorithms» (4 marzo 2026). Unione di insiemi, ricerca binaria, merge, MergeSort, Karatsuba e selezione del k-esimo elemento.</p>
+  <div class="hero-tags">
+    <span class="tag g">Divide &amp; Conquer</span>
+    <span class="tag t">O(n log n)</span>
+    <span class="tag b">MergeSort</span>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In parole semplici — cosa impari qui</div>
+  La tecnica <strong>divide &amp; conquer</strong> spezza un problema grande in pezzi più piccoli, li risolve ricorsivamente e combina i risultati. Da qui nascono <strong>Binary Search</strong> (O(log n)), <strong>MergeSort</strong> (O(n log n)), <strong>Karatsuba</strong> (moltiplicazione più veloce) e la ricerca del <strong>k-esimo elemento</strong> senza ordinare tutto l'array.
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s1">
+<h2><span class="num">§1</span> La strategia Divide and Conquer</h2>
+
+<p>La tecnica <strong>Divide and Conquer</strong> (D&amp;C, «dividi e conquista») risolve un problema ricorsivamente seguendo tre fasi distinte. È alla base di algoritmi fondamentali come MergeSort, QuickSort, ricerca binaria e Karatsuba.</p>
+
+<div class="dc-diagram">
+  <div class="dc-box">
+    <div class="icon">✂</div>
+    <h5>Divide</h5>
+    <p>Scomponi il problema in sottoproblemi più piccoli dello stesso tipo, tipicamente di dimensione n/b per qualche b &gt; 1.</p>
+  </div>
+  <div class="dc-box">
+    <div class="icon">⚡</div>
+    <h5>Conquer</h5>
+    <p>Risolvi ricorsivamente i sottoproblemi. Il caso base è quando la dimensione è sufficientemente piccola da risolvere direttamente in tempo costante.</p>
+  </div>
+  <div class="dc-box">
+    <div class="icon">🔗</div>
+    <h5>Combine</h5>
+    <p>Combina le soluzioni dei sottoproblemi per ottenere la soluzione del problema originale. Il costo di combinazione è spesso critico.</p>
+  </div>
+</div>
+
+<div class="box box-def">
+  <div class="box-label">Ricorrenza generale D&amp;C</div>
+  <p>Se dividiamo in <strong>a</strong> sottoproblemi di dimensione <strong>n/b</strong> ciascuno, e la fase di combinazione costa <span class="math">f(n)</span>:</p>
+  <div class="formula">T(n) = a · T(n/b) + f(n)</div>
+  <p>Il <strong>Master Theorem</strong> (visto nel corso) permette di risolvere molte ricorrenze di questo tipo senza espandere l'albero di ricorsione.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>D&amp;C</strong> = dividi in sottoproblemi indipendenti → risolvi ricorsivamente → combina. La complessità dipende da <em>quanti</em> sottoproblemi (a), <em>quanto</em> sono piccoli (b) e <em>quanto costa</em> combinare (f(n)).</p>
+</div>
+
+<h3>Esempi di ricorrenze D&amp;C</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Algoritmo</th><th>Ricorrenza</th><th>Soluzione</th></tr>
+  <tr><td>Binary Search</td><td>T(n) = T(n/2) + O(1)</td><td><span class="cx cx-logn">O(log n)</span></td></tr>
+  <tr><td>MergeSort</td><td>T(n) = 2T(n/2) + O(n)</td><td><span class="cx cx-nlogn">O(n log n)</span></td></tr>
+  <tr><td>Karatsuba</td><td>T(ℓ) = 3T(ℓ/2) + O(ℓ)</td><td><span class="cx cx-exp">O(ℓ<sup>log₂3</sup>) ≈ O(ℓ<sup>1.59</sup>)</span></td></tr>
+  <tr><td>Selection (random)</td><td>T(n) = T(n/2) + O(n)</td><td><span class="cx cx-n">O(n) atteso</span></td></tr>
+</table>
+</div>
+</section>
+
+<hr class="part">
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s2">
+<h2><span class="num">§2</span> Merge — unione di insiemi</h2>
+
+<p>Il problema <strong>Merge</strong> (unione di insiemi): dati due insiemi <em>A</em> e <em>B</em> (rappresentati come array), costruire l'insieme <em>C = A ∪ B</em> senza duplicati. È un buon punto di partenza per capire come la struttura dei dati e le operazioni ausiliarie influenzano la complessità.</p>
+
+<h3 id="s2-simple">MergeSimple — approccio naïve (slide)</h3>
+<p>Le slide scorrono prima tutti gli elementi di <em>A</em>, poi tutti quelli di <em>B</em>, usando <code>Find</code> lineare per evitare duplicati nell'output.</p>
+
+<pre><span class="fn">MergeSimple</span>(A, B)
+<span class="kw">for</span> i = 1 <span class="kw">to</span> length(A)
+    <span class="kw">if not</span> <span class="fn">Find</span>(A[1 .. i−1], A[i])
+        output A[i]
+<span class="kw">for</span> i = 1 <span class="kw">to</span> length(B)
+    <span class="kw">if not</span> <span class="fn">Find</span>(A, B[i]) <span class="kw">and not</span> <span class="fn">Find</span>(B[1 .. i−1], B[i])
+        output B[i]</pre>
+
+<p>Con <code>n = length(A) + length(B)</code> e <code>Find</code> che costa O(k) su un prefisso di lunghezza k:</p>
+<div class="formula">T(n) = ∑<sub>i=1</sub><sup>n</sup> T<sub>Find</sub>(i) = ∑ O(i) = <span class="hl">O(n²)</span></div>
+
+<div class="box box-warn">
+  <div class="box-label">Attenzione</div>
+  <p>MergeSimple non sfrutta alcuna struttura: ogni confronto è una scansione completa. Possiamo fare molto meglio se <em>B</em> è ordinato.</p>
+</div>
+
+<h3 id="s2-bs">MergeSimple2 — con Binary Search</h3>
+<p>Se <em>B</em> è ordinato, per ogni x ∈ A cerchiamo x in B con <strong>Binary Search</strong> in <span class="cx cx-logn">O(log m)</span> invece di scansionare tutto B.</p>
+
+<pre><span class="kw">function</span> <span class="fn">MergeSimple2</span>(A, B)    <span class="cm">// B è ordinato</span>
+    C ← array vuoto
+    <span class="kw">for each</span> x <span class="kw">in</span> A
+        <span class="kw">if not</span> <span class="fn">BinarySearch</span>(B, x)    <span class="cm">// O(log m)</span>
+            append x to C
+    append all elements of B to C
+    <span class="kw">return</span> C</pre>
+
+<p>Complessità totale: n chiamate a Binary Search → <span class="cx cx-nlogn">O(n log m)</span>. Se n ≈ m: <span class="cx cx-nlogn">O(n log n)</span>. Miglioramento significativo rispetto a O(n²), ma ancora non ottimale per il merge di sequenze <em>già ordinate</em>.</p>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>MergeSimple</strong>: doppio ciclo → O(n²). <strong>MergeSimple2</strong>: un ciclo + BS → O(n log n). La chiave è sfruttare l'ordine di B per cercare in tempo logaritmico.</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s3">
+<h2><span class="num">§3</span> Binary Search</h2>
+
+<p>La <strong>ricerca binaria</strong> trova un elemento x in un array <em>ordinato</em> A[1..n] confrontando x con l'elemento centrale e scartando metà dell'array ad ogni passo.</p>
+
+<pre><span class="fn">BinarySearch</span>(A, key)          <span class="cm">← versione slide</span>
+first = 1
+last  = length(A)
+<span class="kw">while</span> first ≤ last
+    middle = ⌈(first + last) / 2⌉
+    <span class="kw">if</span> A[middle] = key
+        <span class="kw">return</span> <span class="kw">true</span>
+    <span class="kw">elseif</span> first = last
+        <span class="kw">return</span> <span class="kw">false</span>
+    <span class="kw">elseif</span> A[middle] &gt; key
+        last = middle − 1
+    <span class="kw">else</span> first = middle + 1
+<span class="kw">return</span> <span class="kw">false</span></pre>
+
+<div class="box box-tip">
+  <div class="box-label">Perché ⌈(first+last)/2⌉?</div>
+  Le slide usano l'<strong>arrotondamento per eccesso</strong> per il punto medio, così l'intervallo si restringe sempre anche con 2 elementi. L'idea resta la stessa: dimezzare l'intervallo ad ogni passo.
+</div>
+
+<h3>Complessità</h3>
+<p>Ad ogni iterazione l'intervallo [p, q] si dimezza. Partendo da n elementi, servono al più ⌈log₂ n⌉ + 1 iterazioni → <span class="cx cx-logn">O(log n)</span>.</p>
+
+<div class="box box-thm">
+  <div class="box-label">Ricorrenza</div>
+  <div class="formula">T(n) = T(n/2) + O(1) ⟹ T(n) = O(log n)</div>
+  <p>Con il Master Theorem: a=1, b=2, f(n)=O(1). Caso 1: T(n) = Θ(log n).</p>
+</div>
+
+<h3>Spiegazione visiva</h3>
+<p>Su un array ordinato, ad ogni passo:</p>
+<ol class="steps">
+  <li>Calcoliamo l'indice medio m = ⌊(p+q)/2⌋</li>
+  <li>Confrontiamo A[m] con x: se uguale, trovato; se A[m] &lt; x, cerchiamo a destra (p ← m+1); altrimenti a sinistra (q ← m−1)</li>
+  <li>L'intervallo attivo si dimezza → al massimo log₂ n passi</li>
+</ol>
+
+<div class="box box-tip">
+  <div class="box-label">Prerequisito</div>
+  <p>Binary Search funziona <strong>solo su array ordinati</strong>. Su array non ordinati non c'è modo di scartare metà degli elementi con un solo confronto.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>Binary Search</strong>: dimezza l'intervallo ad ogni passo → O(log n). Prerequisito: array ordinato. È il mattoncino che rende MergeSimple2 O(n log n).</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s4">
+<h2><span class="num">§4</span> Merge di sequenze ordinate</h2>
+
+<p>Problema diverso dall'unione di insiemi: dati due array <strong>già ordinati</strong> A[1..n] e B[1..m], costruire l'array ordinato C[1..n+m] che contiene tutti gli elementi (con duplicati se presenti).</p>
+
+<h3>Algoritmo Merge corretto</h3>
+<p>Usiamo due puntatori i e j. Ad ogni passo confrontiamo A[i] e B[j], mettiamo il minore in C e avanziamo il puntatore corrispondente.</p>
+
+<pre><span class="kw">function</span> <span class="fn">Merge</span>(A, B)
+    n ← length(A); m ← length(B)
+    C ← array di dimensione n + m
+    i ← 1; j ← 1; k ← 1
+    <span class="kw">while</span> i ≤ n <span class="kw">and</span> j ≤ m
+        <span class="kw">if</span> A[i] ≤ B[j]
+            C[k] ← A[i]; i ← i + 1
+        <span class="kw">else</span>
+            C[k] ← B[j]; j ← j + 1
+        k ← k + 1
+    <span class="kw">while</span> i ≤ n    <span class="cm">// copia resto di A</span>
+        C[k] ← A[i]; i ← i + 1; k ← k + 1
+    <span class="kw">while</span> j ≤ m    <span class="cm">// copia resto di B</span>
+        C[k] ← B[j]; j ← j + 1; k ← k + 1
+    <span class="kw">return</span> C</pre>
+
+<p>Ogni elemento viene copiato esattamente una volta in C → esattamente n + m operazioni → <span class="cx cx-n">Θ(n + m)</span>.</p>
+
+<h3 id="s4-lower">Perché non si può fare meglio di Θ(n)?</h3>
+
+<div class="box box-thm">
+  <div class="box-label">Limite inferiore</div>
+  <p>Per produrre l'output C[1..n+m] dobbiamo scrivere n + m elementi. Ogni scrittura richiede almeno un passo elementare → <strong>almeno Θ(n + m) operazioni</strong>. L'algoritmo Merge è quindi <em>asintoticamente ottimo</em> per questo problema.</p>
+</div>
+
+<p>Nota: MergeSimple2 era O(n log n) perché per ogni elemento di A faceva una ricerca in B. Merge «a due puntatori» sfrutta il fatto che <em>entrambe</em> le sequenze sono ordinate e che stiamo costruendo l'output in ordine: un solo confronto per elemento, senza bisogno di cercare.</p>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>Merge (sequenze ordinate)</strong>: due puntatori, un confronto per elemento → Θ(n+m). Non si può battere Θ(n) perché l'output ha n elementi da scrivere.</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s5">
+<h2><span class="num">§5</span> MergeSort</h2>
+
+<p><strong>MergeSort</strong> è l'algoritmo di ordinamento per eccellenza basato su D&amp;C. Divide l'array a metà, ordina ricorsivamente le due metà, poi le unisce con Merge.</p>
+
+<pre><span class="kw">function</span> <span class="fn">MergeSort</span>(A, p, r)
+    <span class="kw">if</span> p &lt; r
+        q ← ⌊(p + r) / 2⌋
+        <span class="fn">MergeSort</span>(A, p, q)
+        <span class="fn">MergeSort</span>(A, q + 1, r)
+        <span class="fn">Merge</span>(A, p, q, r)    <span class="cm">// combina le due metà ordinate</span></pre>
+
+<h3>Analisi della complessità</h3>
+<p>Ad ogni livello di ricorsione:</p>
+<ul>
+  <li><strong>Divide</strong>: calcolo di q → O(1)</li>
+  <li><strong>Conquer</strong>: 2 sottoproblemi di dimensione n/2</li>
+  <li><strong>Combine</strong>: Merge delle due metà → O(n)</li>
+</ul>
+
+<div class="formula">T(n) = 2T(n/2) + O(n)</div>
+
+<p>Con il Master Theorem (caso 2, f(n) = Θ(n<sup>log<sub>b</sub> a</sup> log<sup>k</sup> n) con k=0): <span class="cx cx-nlogn">T(n) = O(n log n)</span>.</p>
+
+<p>Alternativamente, l'albero di ricorsione ha log₂ n livelli; a ogni livello il lavoro totale di Merge è O(n) → O(n log n).</p>
+
+<div class="box box-warn">
+  <div class="box-label">Non in-place</div>
+  <p>MergeSort standard <strong>non è in-place</strong>: Merge richiede un array ausiliario di dimensione O(n). Lo spazio totale è O(n) oltre all'input. Esistono varianti in-place ma con costi nascosti o peggiori nel caso peggiore.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>MergeSort</strong>: dividi a metà → ordina ricorsivamente → Merge in O(n). Ricorrenza 2T(n/2)+O(n) → O(n log n). Stabile, prevedibile, ma richiede O(n) spazio extra.</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s6">
+<h2><span class="num">§6</span> MergeR — merge ricorsivo</h2>
+
+<p>Una variante <strong>ricorsiva</strong> del merge: invece di usare due puntatori iterativi, divide entrambe le sequenze a metà e combina ricorsivamente.</p>
+
+<pre><span class="kw">function</span> <span class="fn">MergeR</span>(A, B)
+    <span class="kw">if</span> A is empty <span class="kw">then return</span> B
+    <span class="kw">if</span> B is empty <span class="kw">then return</span> A
+    n ← length(A); m ← length(B)
+    A₁ ← A[1..⌊n/2⌋]; A₂ ← A[⌊n/2⌋+1..n]
+    B₁ ← B[1..⌊m/2⌋]; B₂ ← B[⌊m/2⌋+1..m]
+    C₁ ← <span class="fn">MergeR</span>(A₁, B₁)
+    C₂ ← <span class="fn">MergeR</span>(A₂, B₂)
+    <span class="kw">return</span> concatenate(C₁, C₂)    <span class="cm">// ⚠ non preserva l'ordine!</span></pre>
+
+<p>Analisi: T(n,m) = T(⌊n/2⌋, ⌊m/2⌋) + T(⌈n/2⌉, ⌈m/2⌉) + O(n+m) → <span class="cx cx-n">O(n + m)</span> (stesso ordine di grandezza del Merge iterativo).</p>
+
+<div class="box box-ex">
+  <div class="box-label">Esercizio — correggere MergeR</div>
+  <p>La versione sopra <strong>non produce un array ordinato</strong>: concatena C₁ e C₂ senza unire correttamente gli elementi «al centro». Ad esempio, MergeR([1,3,5], [2,4,6]) potrebbe dare [1,2,3,4,5,6] per caso, ma MergeR([1,2,3], [4,5,6]) fallisce.</p>
+  <p><strong>Compito:</strong> correggere MergeR in modo che produca l'unione ordinata corretta, mantenendo la struttura ricorsiva e complessità O(n+m). Suggerimento: al caso base (n=1 o m=1), usa il merge elementare; oppure combina C₁ e C₂ con un Merge iterativo finale.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>MergeR</strong>: merge ricorsivo O(n), ma la versione naïve con semplice concatenazione è <em>sbagliata</em>. Serve un passo di combinazione che rispetti l'ordine.</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s7">
+<h2><span class="num">§7</span> Moltiplicazione Karatsuba</h2>
+
+<p>La moltiplicazione «scolastica» di due numeri di ℓ cifre richiede O(ℓ²) operazioni. <strong>Karatsuba</strong> (1960) riduce le moltiplicazioni ricorsive da 4 a 3.</p>
+
+<h3>Idea</h3>
+<p>Siano x e y numeri di ℓ cifre. Dividiamo ciascuno in due metà:</p>
+<div class="formula">x = a · 10<sup>ℓ/2</sup> + b &nbsp;&nbsp; y = c · 10<sup>ℓ/2</sup> + d</div>
+<p>Allora: x · y = ac · 10<sup>ℓ</sup> + (ad + bc) · 10<sup>ℓ/2</sup> + bd</p>
+
+<p>Naïve: calcolare ac, ad, bc, bd → <strong>4 moltiplicazioni</strong> ricorsive + O(ℓ) addizioni.</p>
+
+<p><strong>Trucco di Karatsuba:</strong> osserviamo che ad + bc = (a+b)(c+d) − ac − bd. Quindi servono solo <strong>3 moltiplicazioni</strong>: ac, bd, e (a+b)(c+d).</p>
+
+<pre><span class="kw">function</span> <span class="fn">Karatsuba</span>(x, y)
+    <span class="kw">if</span> ℓ ≤ soglia <span class="kw">then return</span> moltiplicazione elementare(x, y)
+    dividi x in (a, b) e y in (c, d)    <span class="cm">// metà cifre ciascuno</span>
+    p₁ ← <span class="fn">Karatsuba</span>(a, c)
+    p₂ ← <span class="fn">Karatsuba</span>(b, d)
+    p₃ ← <span class="fn">Karatsuba</span>(a + b, c + d)
+    <span class="kw">return</span> p₁ · 10<sup>ℓ</sup> + (p₃ − p₁ − p₂) · 10<sup>ℓ/2</sup> + p₂</pre>
+
+<h3>Complessità</h3>
+<div class="formula">T(ℓ) = 3T(ℓ/2) + O(ℓ)</div>
+<p>Master Theorem, caso 2 con a=3, b=2: T(ℓ) = O(ℓ<sup>log₂ 3</sup>) ≈ <span class="cx cx-exp">O(ℓ<sup>1.585</sup>)</span> ≈ <span class="cx cx-exp">O(ℓ<sup>1.59</sup>)</span>.</p>
+
+<div class="grid2">
+  <div class="box box-def">
+    <div class="box-label">Naïve</div>
+    <p>4 mult. ricorsive → O(ℓ²)</p>
+  </div>
+  <div class="box box-thm">
+    <div class="box-label">Karatsuba</div>
+    <p>3 mult. ricorsive → O(ℓ<sup>1.59</sup>)</p>
+  </div>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>Karatsuba</strong>: da 4 a 3 moltiplicazioni ricorsive usando (a+b)(c+d) − ac − bd. Ricorrenza 3T(ℓ/2)+O(ℓ) → O(ℓ<sup>log₂3</sup>) ≈ O(ℓ<sup>1.59</sup>).</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="s8">
+<h2><span class="num">§8</span> Mediana e k-esimo elemento</h2>
+
+<p>Problema <strong>Selection</strong>: dato un array A[1..n] non ordinato e un intero k, trovare l'elemento che occuperebbe la posizione k se A fosse ordinato (il k-esimo più piccolo).</p>
+
+<h3>SimpleMedian — approccio naïve</h3>
+<pre><span class="kw">function</span> <span class="fn">SimpleMedian</span>(A)
+    B ← <span class="fn">MergeSort</span>(A)
+    <span class="kw">return</span> B[⌈n/2⌉]</pre>
+<p>Costo: O(n log n) per il sort + O(1) per leggere la mediana. Funziona ma è eccessivo: non ci serve l'intero array ordinato.</p>
+
+<h3>Ricorrenza del problema select</h3>
+<p>Se potessimo trovare la mediana esatta in O(n) e usarla come pivot (partizionamento come QuickSort), otterremmo:</p>
+<div class="formula">T(n) = T(n/2) + O(n) ⟹ T(n) = O(n)</div>
+<p>Nel caso peggiore (pivot sempre minimo/massimo) QuickSelect degenera a O(n²).</p>
+
+<h3>Ricorrenza select (slide)</h3>
+<p>Partizionando in <code>A<sub>L</sub></code>, <code>A<sub>v</sub></code>, <code>A<sub>R</sub></code> rispetto a un pivot <code>v</code>:</p>
+<div class="formula" style="font-size:14px;text-align:left;padding:12px 20px">
+  select(A, k) =<br>
+  &nbsp;&nbsp;select(A<sub>L</sub>, k) &nbsp; se k ≤ |A<sub>L</sub>|<br>
+  &nbsp;&nbsp;v &nbsp; se |A<sub>L</sub>| &lt; k ≤ |A<sub>L</sub>| + |A<sub>v</sub>|<br>
+  &nbsp;&nbsp;select(A<sub>R</sub>, k − |A<sub>L</sub>| − |A<sub>v</sub>|) &nbsp; altrimenti
+</div>
+
+<div class="box box-ex">
+  <div class="box-label">Esempio slide — k = 7</div>
+  A = ⟨2, 36, 5, 21, 8, 13, 11, 20, 5, 4, 1⟩, pivot v = 5 → A<sub>L</sub> = ⟨2,4,1⟩, A<sub>v</sub> = ⟨5,5⟩, A<sub>R</sub> = ⟨36,21,8,13,11,20⟩.<br>
+  |A<sub>L</sub>|=3, |A<sub>v</sub>|=2 → k=7 cade in A<sub>R</sub> → cerchiamo il <strong>2° più piccolo</strong> di A<sub>R</sub> → risposta <strong>8</strong>.
+</div>
+
+<h3>Selection con pivot casuale (slide 137)</h3>
+<pre><span class="fn">Selection</span>(A, k)
+    v = A[random(1 .. |A|)]
+    A<sub>L</sub>, A<sub>v</sub>, A<sub>R</sub> = ∅
+    <span class="kw">for</span> i = 1 <span class="kw">to</span> |A|
+        <span class="kw">if</span> A[i] &lt; v       A<sub>L</sub> = A<sub>L</sub> ∪ {A[i]}
+        <span class="kw">elseif</span> A[i] = v   A<sub>v</sub> = A<sub>v</sub> ∪ {A[i]}
+        <span class="kw">else</span>            A<sub>R</sub> = A<sub>R</sub> ∪ {A[i]}
+    <span class="kw">if</span> k ≤ |A<sub>L</sub>| <span class="kw">return</span> <span class="fn">Selection</span>(A<sub>L</sub>, k)
+    <span class="kw">elseif</span> k &gt; |A<sub>L</sub>| + |A<sub>v</sub>| <span class="kw">return</span> <span class="fn">Selection</span>(A<sub>R</sub>, k − |A<sub>L</sub>| − |A<sub>v</sub>|)
+    <span class="kw">else return</span> v</pre>
+
+<pre><span class="kw">function</span> <span class="fn">RandomizedSelect</span>(A, p, r, k)   <span class="cm">← equivalente in-place</span>
+    <span class="kw">if</span> p = r <span class="kw">then return</span> A[p]
+    q ← <span class="fn">RandomPartition</span>(A, p, r)    <span class="cm">// pivot casuale, O(n)</span>
+    i ← q − p + 1    <span class="cm">// rank del pivot</span>
+    <span class="kw">if</span> k = i <span class="kw">then return</span> A[q]
+    <span class="kw">else if</span> k &lt; i <span class="kw">then return</span> <span class="fn">RandomizedSelect</span>(A, p, q − 1, k)
+    <span class="kw">else return</span> <span class="fn">RandomizedSelect</span>(A, q + 1, r, k − i)</pre>
+
+<p>Con pivot scelto uniformemente a caso, la dimensione del sottoproblema atteso è ≤ 3n/4 → ricorrenza attesa T(n) ≤ T(n/4) + O(n) → <span class="cx cx-n">O(n) nel caso atteso</span>.</p>
+
+<div class="box box-tip">
+  <div class="box-label">Mediana della mediana</div>
+  <p>Esiste anche l'algoritmo deterministico <strong>Median-of-Medians</strong> (Blum et al.) che garantisce T(n) = O(n) nel worst case, ma è più complesso e con costanti più alte. In pratica si usa quasi sempre la versione randomizzata.</p>
+</div>
+
+<div class="box box-breve">
+  <div class="box-label">In breve</div>
+  <p><strong>SimpleMedian</strong>: sort + leggi centro → O(n log n). <strong>RandomizedSelect</strong>: partiziona con pivot casuale → O(n) atteso. Non serve ordinare tutto l'array.</p>
+</div>
+</section>
+
+<hr class="part">
+
+<!-- ════════════════════════════════════════════════════ -->
+<section id="ix-merge">
+<h2><span class="num">§I</span> Animatore Merge</h2>
+
+<div class="interactive-panel">
+  <h4>Merge di due sequenze ordinate — passo per passo</h4>
+  <p style="font-size:13px;color:var(--text-dim)">Confronta A[i] e B[j], copia il minore in C. Osserva come i puntatori avanzano.</p>
+  <div class="merge-visual" id="mergeVisual"></div>
+  <div class="btn-row">
+    <button id="mergePrev">← Indietro</button>
+    <button class="primary" id="mergeNext">Avanti →</button>
+    <button id="mergePlay">▶ Auto</button>
+    <button id="mergeReset">Reset</button>
+  </div>
+  <div class="log-area" id="mergeLog">Premi Avanti per iniziare.</div>
+</div>
+</section>
+
+<section id="ix-bs">
+<h2><span class="num">§II</span> Simulatore Binary Search</h2>
+
+<div class="interactive-panel">
+  <h4>Cerca un valore in un array ordinato</h4>
+  <div class="btn-row">
+    <label>Target:</label>
+    <input type="number" id="bsTarget" value="23" min="1" max="100">
+    <button class="primary" id="bsStep">Passo</button>
+    <button id="bsReset">Reset</button>
+  </div>
+  <div class="bs-visual" id="bsVisual"></div>
+  <div class="log-area" id="bsLog">Array ordinato 1..32. Imposta il target e premi Passo.</div>
+</div>
+</section>
+
+<section id="ix-chart">
+<h2><span class="num">§III</span> Grafici di complessità</h2>
+
+<div class="interactive-panel">
+  <h4>Confronto asintotico e albero MergeSort</h4>
+  <div class="chart-tabs">
+    <button class="chart-tab active" data-chart="growth">n² vs n log n</button>
+    <button class="chart-tab" data-chart="msTree">Albero MergeSort</button>
+  </div>
+  <div class="slider-row">
+    <label>n =</label>
+    <input type="range" id="chartN" min="4" max="64" value="16" step="1">
+    <span class="slider-val" id="chartNVal">16</span>
+  </div>
+  <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+  <p id="chartInsight" style="font-size:13px;color:var(--text-dim);margin-top:12px"></p>
+</div>
+</section>
+
+<section id="ix-quiz">
+<h2><span class="num">§IV</span> Quiz</h2>
+<div id="quizPanel"></div>
+<div class="quiz-score" id="quizScore">Rispondi alle domande.</div>
+<button class="btn-reset" id="quizReset">Ricomincia quiz</button>
+</section>
+
+<hr class="part">
+
+<section id="ex">
+<h2><span class="num">§E</span> Esercizi guidati</h2>
+
+<div class="box box-ex">
+  <p><strong>Esercizio 1</strong> <span class="ex-diff facile">Facile</span> — Calcola T(n) per T(n) = T(n/2) + 1 con T(1)=1. Quanti passi servono per n=1024?</p>
+</div>
+<div class="box box-ex">
+  <p><strong>Esercizio 2</strong> <span class="ex-diff medio">Medio</span> — MergeSort su n=8: quanti livelli ha l'albero di ricorsione? Quanto lavoro di Merge c'è in totale a ogni livello?</p>
+</div>
+<div class="box box-ex">
+  <p><strong>Esercizio 3</strong> <span class="ex-diff medio">Medio</span> — Correggi MergeR: scrivi pseudocodice che produca l'unione ordinata corretta di A e B in O(n+m).</p>
+</div>
+<div class="box box-ex">
+  <p><strong>Esercizio 4</strong> <span class="ex-diff medio">Medio</span> — Karatsuba: per ℓ=1024 cifre, quante moltiplicazioni ricorsive fa il metodo naïve vs Karatsuba al primo livello di split?</p>
+</div>
+<div class="box box-ex">
+  <p><strong>Esercizio 5</strong> <span class="ex-diff avanzato">Avanzato</span> — Mostra che RandomizedSelect ha complessità attesa O(n) usando la ricorrenza T(n) ≤ (3/4)T(n) + cn e il metodo dell'albero di ricorsione.</p>
+</div>
+<div class="box box-ex">
+  <p><strong>Esercizio 6</strong> <span class="ex-diff facile">Facile</span> — Perché MergeSimple2 è O(n log n) ma Merge (sequenze ordinate) è Θ(n)? Qual è la differenza strutturale?</p>
+</div>
+</section>
+
+<section id="sol">
+<h2><span class="num">§S</span> Soluzioni</h2>
+
+<details open>
+<summary>Esercizio 1 — Soluzione</summary>
+<div class="sol-body">
+  <p>T(n) = T(n/2) + 1. Espandendo: T(n) = T(n/4) + 2 = … = T(1) + log₂ n = 1 + log₂ n.</p>
+  <p>Per n=1024 = 2¹⁰: T(1024) = 1 + 10 = <strong>11 passi</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 2 — Soluzione</summary>
+<div class="sol-body">
+  <p>L'albero ha ⌈log₂ 8⌉ = <strong>3 livelli</strong> di chiamate ricorsive (più il livello base).</p>
+  <p>A ogni livello il Merge totale su tutti i sottoproblemi è O(n): livello 0 un merge da 8, livello 1 due merge da 4, livello 2 quattro merge da 2 → 8 + 4 + 4 = 16 = 2n confronti/copie. In generale: log₂ n livelli × O(n) = O(n log n).</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 3 — Soluzione</summary>
+<div class="sol-body">
+<pre><span class="kw">function</span> <span class="fn">MergeR</span>(A, B)
+    <span class="kw">if</span> length(A) = 0 <span class="kw">then return</span> B
+    <span class="kw">if</span> length(B) = 0 <span class="kw">then return</span> A
+    <span class="kw">if</span> length(A) = 1 <span class="kw">and</span> length(B) = 1
+        <span class="kw">if</span> A[1] ≤ B[1] <span class="kw">then return</span> [A[1], B[1]]
+        <span class="kw">else return</span> [B[1], A[1]]
+    n ← length(A); m ← length(B)
+    A₁ ← A[1..⌊n/2⌋]; A₂ ← A[⌊n/2⌋+1..n]
+    B₁ ← B[1..⌊m/2⌋]; B₂ ← B[⌊m/2⌋+1..m]
+    C₁ ← <span class="fn">MergeR</span>(A₁, B₁)
+    C₂ ← <span class="fn">MergeR</span>(A₂, B₂)
+    <span class="kw">return</span> <span class="fn">Merge</span>(C₁, C₂)    <span class="cm">// merge iterativo Θ(|C₁|+|C₂|)</span></pre>
+  <p>Al caso base gestiamo le sequenze di lunghezza 1; la combinazione finale usa il Merge corretto a due puntatori. Complessità: T(n,m) = T(⌊n/2⌋,⌊m/2⌋) + T(⌈n/2⌉,⌈m/2⌉) + O(n+m) = O(n+m).</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 4 — Soluzione</summary>
+<div class="sol-body">
+  <p>Al primo split di numeri da ℓ=1024 cifre in due metà da 512:</p>
+  <ul>
+    <li><strong>Naïve:</strong> 4 moltiplicazioni ricorsive su numeri da 512 cifre (ac, ad, bc, bd).</li>
+    <li><strong>Karatsuba:</strong> 3 moltiplicazioni ricorsive (ac, bd, (a+b)(c+d)).</li>
+  </ul>
+  <p>Risparmio del 25% delle moltiplicazioni a ogni livello; composto su log₂ ℓ = 10 livelli porta da O(ℓ²) a O(ℓ<sup>1.59</sup>).</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 5 — Soluzione</summary>
+<div class="sol-body">
+  <p>Con pivot casuale, almeno 1/4 degli elementi finisce nel lato «sbagliato» con probabilità ≥ 1/2, quindi il sottoproblema ha dimensione ≤ 3n/4 in attesa.</p>
+  <p>Ricorrenza attesa: T(n) ≤ T(3n/4) + cn. Albero di ricorsione: n + (3/4)n + (3/4)²n + … = n · Σ<sub>i≥0</sub>(3/4)<sup>i</sup> = n · 1/(1−3/4) = <strong>4n = O(n)</strong>.</p>
+</div>
+</details>
+
+<details>
+<summary>Esercizio 6 — Soluzione</summary>
+<div class="sol-body">
+  <p><strong>MergeSimple2:</strong> per ogni x ∈ A fa una <em>ricerca</em> in B → n ricerche × O(log m) = O(n log n). Non costruisce l'output in ordine incrementale.</p>
+  <p><strong>Merge (sequenze ordinate):</strong> entrambe le sequenze sono ordinate e costruiamo C in ordine con due puntatori → un passo per elemento, Θ(n+m). Sfrutta la struttura dell'input in modo più profondo.</p>
+</div>
+</details>
+</section>
+
+</main>
+
+<script>
+/* ── SIDEBAR ACTIVE ─────────────────────────────── */
+const sections = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+/* ── TEMA ───────────────────────────────────────── */
+const themeBtn = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'light' ? '🌙' : '☀';
+themeBtn.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('algo-theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀';
+  updateChart();
+});
+
+function chartColors() {
+  const s = getComputedStyle(document.documentElement);
+  return { grid: s.getPropertyValue('--chart-grid').trim(), text: s.getPropertyValue('--chart-text').trim() };
+}
+
+/* ── MERGE ANIMATOR ─────────────────────────────── */
+const MERGE_A = [2, 5, 8, 12, 15];
+const MERGE_B = [1, 3, 6, 9, 11, 14];
+let mergeSteps = [], mergeIdx = -1, mergeTimer = null;
+
+function buildMergeSteps() {
+  const steps = [];
+  const A = [...MERGE_A], B = [...MERGE_B];
+  let i = 0, j = 0, k = 0;
+  const C = [];
+  steps.push({ i, j, C: [...C], msg: 'Inizio: i=0, j=0. Confrontiamo A[0] e B[0].' });
+  while (i < A.length && j < B.length) {
+    const ai = A[i], bj = B[j];
+    if (ai <= bj) {
+      C.push(ai);
+      steps.push({ i, j, C: [...C], pick: 'A', val: ai, msg: `A[${i}]=${ai} ≤ B[${j}]=${bj} → copio ${ai} in C.` });
+      i++;
+    } else {
+      C.push(bj);
+      steps.push({ i, j, C: [...C], pick: 'B', val: bj, msg: `B[${j}]=${bj} < A[${i}]=${ai} → copio ${bj} in C.` });
+      j++;
+    }
+  }
+  while (i < A.length) {
+    C.push(A[i]);
+    steps.push({ i, j, C: [...C], pick: 'A', val: A[i], msg: `Resto di A: copio ${A[i]}.`, drain: 'A' });
+    i++;
+  }
+  while (j < B.length) {
+    C.push(B[j]);
+    steps.push({ i, j, C: [...C], pick: 'B', val: B[j], msg: `Resto di B: copio ${B[j]}.`, drain: 'B' });
+    j++;
+  }
+  steps.push({ i, j, C: [...C], done: true, msg: `Completato! C = [${C.join(', ')}] in ${C.length} passi = Θ(n+m).` });
+  return steps;
+}
+
+function renderMerge() {
+  const el = document.getElementById('mergeVisual');
+  const st = mergeIdx >= 0 ? mergeSteps[mergeIdx] : null;
+  const A = MERGE_A, B = MERGE_B;
+  function row(label, arr, ptr, side) {
+    let html = `<div class="merge-row"><span class="lbl">${label}</span>`;
+    arr.forEach((v, idx) => {
+      let cls = 'cell';
+      if (st && side === st.pick && idx === (side === 'A' ? st.i : st.j) && !st.done) cls += ' active';
+      else if (st && ((side === 'A' && idx < st.i) || (side === 'B' && idx < st.j))) cls += ' done';
+      html += `<div class="${cls}">${v}</div>`;
+    });
+    html += '</div>';
+    return html;
+  }
+  let html = row('A', A, st?.i, 'A') + row('B', B, st?.j, 'B');
+  html += '<div class="merge-row"><span class="lbl">C</span>';
+  const cArr = st ? st.C : [];
+  for (let x = 0; x < A.length + B.length; x++) {
+    const v = cArr[x];
+    html += `<div class="cell${v !== undefined ? ' out' : ''}">${v !== undefined ? v : '·'}</div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  document.getElementById('mergeLog').textContent = st ? st.msg : 'Premi Avanti per iniziare il merge.';
+}
+
+function mergeGo(n) {
+  mergeIdx = Math.max(-1, Math.min(mergeSteps.length - 1, n));
+  renderMerge();
+}
+
+document.getElementById('mergeNext').onclick = () => { if (mergeTimer) clearInterval(mergeTimer); mergeTimer = null; mergeGo(mergeIdx + 1); };
+document.getElementById('mergePrev').onclick = () => { if (mergeTimer) clearInterval(mergeTimer); mergeTimer = null; mergeGo(mergeIdx - 1); };
+document.getElementById('mergeReset').onclick = () => { if (mergeTimer) clearInterval(mergeTimer); mergeTimer = null; mergeGo(-1); };
+document.getElementById('mergePlay').onclick = function() {
+  if (mergeTimer) { clearInterval(mergeTimer); mergeTimer = null; this.textContent = '▶ Auto'; return; }
+  this.textContent = '⏸ Pausa';
+  mergeTimer = setInterval(() => {
+    if (mergeIdx >= mergeSteps.length - 1) { clearInterval(mergeTimer); mergeTimer = null; this.textContent = '▶ Auto'; return; }
+    mergeGo(mergeIdx + 1);
+  }, 900);
+};
+mergeSteps = buildMergeSteps();
+renderMerge();
+
+/* ── BINARY SEARCH SIMULATOR ────────────────────── */
+const BS_ARR = Array.from({length: 32}, (_, i) => i + 1);
+let bsP = 0, bsQ = BS_ARR.length - 1, bsDone = false, bsTarget = 23;
+
+function renderBS() {
+  const el = document.getElementById('bsVisual');
+  el.innerHTML = BS_ARR.map((v, i) => {
+    let cls = 'bs-cell';
+    if (bsDone && v === bsTarget) cls += ' found';
+    else if (i >= bsP && i <= bsQ) {
+      cls += ' range';
+      const m = Math.floor((bsP + bsQ) / 2);
+      if (i === m && !bsDone) cls += ' mid';
+    } else cls += ' discarded';
+    return `<div class="${cls}">${v}</div>`;
+  }).join('');
+}
+
+function bsLog(msg) { document.getElementById('bsLog').textContent = msg; }
+
+document.getElementById('bsStep').onclick = () => {
+  bsTarget = +document.getElementById('bsTarget').value;
+  if (bsDone) return;
+  if (bsP > bsQ) { bsDone = true; bsLog(`Target ${bsTarget} NON trovato.`); renderBS(); return; }
+  const m = Math.floor((bsP + bsQ) / 2);
+  const mv = BS_ARR[m];
+  if (mv === bsTarget) {
+    bsDone = true;
+    bsLog(`Trovato! A[${m}] = ${bsTarget}. Passi: ${Math.ceil(Math.log2(BS_ARR.length))} max.`);
+  } else if (mv < bsTarget) {
+    bsLog(`A[${m}]=${mv} < ${bsTarget} → cerco a destra: p ← ${m+1}`);
+    bsP = m + 1;
+  } else {
+    bsLog(`A[${m}]=${mv} > ${bsTarget} → cerco a sinistra: q ← ${m-1}`);
+    bsQ = m - 1;
+  }
+  renderBS();
+};
+
+document.getElementById('bsReset').onclick = () => {
+  bsP = 0; bsQ = BS_ARR.length - 1; bsDone = false;
+  bsTarget = +document.getElementById('bsTarget').value;
+  bsLog(`Reset. Cerco ${bsTarget} in array 1..32.`);
+  renderBS();
+};
+renderBS();
+
+/* ── CHARTS ─────────────────────────────────────── */
+let chartInst = null;
+let chartMode = 'growth';
+
+document.querySelectorAll('.chart-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    chartMode = tab.dataset.chart;
+    updateChart();
+  });
+});
+
+document.getElementById('chartN').addEventListener('input', function() {
+  document.getElementById('chartNVal').textContent = this.value;
+  updateChart();
+});
+
+function mergeSortTreeWork(n) {
+  const levels = [];
+  let size = n, total = 0;
+  while (size > 1) {
+    levels.push({ size, count: n / size, work: n });
+    total += n;
+    size = Math.floor(size / 2);
+  }
+  return { levels, total, depth: Math.ceil(Math.log2(n)) };
+}
+
+function updateChart() {
+  const n = +document.getElementById('chartN').value;
+  const ctx = document.getElementById('mainChart');
+  const c = chartColors();
+  if (chartInst) chartInst.destroy();
+
+  if (chartMode === 'growth') {
+    const labels = [], n2 = [], nlogn = [], nlin = [];
+    for (let i = 2; i <= n; i++) {
+      labels.push(i);
+      n2.push(i * i);
+      nlogn.push(i * Math.log2(i));
+      nlin.push(i);
+    }
+    chartInst = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'n² (MergeSimple)', data: n2, borderColor: '#e06c75', borderWidth: 2, pointRadius: 0, tension: .3 },
+          { label: 'n log n (MergeSort)', data: nlogn, borderColor: '#e5953a', borderWidth: 2.5, pointRadius: 0, tension: .3 },
+          { label: 'n (Merge)', data: nlin, borderColor: '#98c379', borderWidth: 2, pointRadius: 0, tension: 0 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: c.text } } },
+        scales: {
+          x: { title: { display: true, text: 'n', color: c.text }, ticks: { color: c.text }, grid: { color: c.grid } },
+          y: { title: { display: true, text: 'operazioni', color: c.text }, ticks: { color: c.text }, grid: { color: c.grid } }
+        }
+      }
+    });
+    document.getElementById('chartInsight').textContent =
+      `A n=${n}: n²=${n*n}, n log n≈${Math.round(n*Math.log2(n))}, n=${n}. MergeSort batte MergeSimple; Merge (Θ(n)) è il più efficiente per sequenze già ordinate.`;
+  } else {
+    const { levels, total, depth } = mergeSortTreeWork(n);
+    chartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: levels.map((_, i) => `Livello ${i}`),
+        datasets: [{
+          label: `Lavoro Merge per livello (totale O(n log n) = ${Math.round(total)} ops)`,
+          data: levels.map(l => l.work),
+          backgroundColor: levels.map((_, i) => `rgba(229,149,58,${0.4 + i * 0.08})`),
+          borderColor: '#e5953a',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: c.text } } },
+        scales: {
+          x: { title: { display: true, text: 'livello albero ricorsione', color: c.text }, ticks: { color: c.text }, grid: { color: c.grid } },
+          y: { title: { display: true, text: 'O(n) merge per livello', color: c.text }, ticks: { color: c.text }, grid: { color: c.grid } }
+        }
+      }
+    });
+    document.getElementById('chartInsight').textContent =
+      `MergeSort su n=${n}: ${depth} livelli di ricorsione. A ogni livello il merge totale è O(n)=${n} → ${depth}×${n} ≈ ${Math.round(total)} operazioni = O(n log n).`;
+  }
+}
+updateChart();
+
+/* ── QUIZ ───────────────────────────────────────── */
+const quizData = [
+  { q: 'MergeSimple ha complessità O(n²) quando n ≈ m?', a: true, why: 'Per ogni elemento di A scansiona tutto B: n×m = O(n²).' },
+  { q: 'Binary Search funziona su array non ordinati?', a: false, why: 'Serve l\'ordine per scartare metà dell\'intervallo ad ogni passo.' },
+  { q: 'Merge di due sequenze ordinate è Θ(n+m)?', a: true, why: 'Ogni elemento viene copiato una volta; limite inferiore Ω(n+m).' },
+  { q: 'MergeSort è un algoritmo in-place?', a: false, why: 'Merge richiede array ausiliario O(n).' },
+  { q: 'La ricorrenza di MergeSort T(n)=2T(n/2)+O(n) dà O(n log n)?', a: true, why: 'Master Theorem caso 2, oppure log n livelli × O(n) per livello.' },
+  { q: 'Karatsuba usa 3 moltiplicazioni ricorsive invece di 4?', a: true, why: 'Usa (a+b)(c+d) − ac − bd al posto di calcolare ad e bc separatamente.' },
+  { q: 'T(ℓ)=3T(ℓ/2)+O(ℓ) risolve in O(ℓ²)?', a: false, why: 'Master: O(ℓ^log₂3) ≈ O(ℓ^1.59), molto meglio di O(ℓ²).' },
+  { q: 'SimpleMedian costa O(n log n)?', a: true, why: 'Fa MergeSort sull\'intero array.' },
+  { q: 'RandomizedSelect ha complessità attesa O(n)?', a: true, why: 'Pivot casuale → sottoproblema ≤ 3n/4 in attesa → ricorrenza geometrica.' },
+  { q: 'MergeR naïve con concatenazione produce sempre output ordinato?', a: false, why: 'Concatenare C₁ e C₂ non garantisce ordine globale; serve merge corretto.' }
+];
+let qAns = 0, qOk = 0;
+
+function renderQuiz() {
+  document.getElementById('quizPanel').innerHTML = quizData.map((item, i) => `
+    <div class="quiz-q" id="qq${i}">
+      <p><strong>${i+1}.</strong> ${item.q}</p>
+      <div class="quiz-btns">
+        <button onclick="answerQuiz(${i},true)">Vero</button>
+        <button onclick="answerQuiz(${i},false)">Falso</button>
+      </div>
+      <div class="quiz-feedback" id="qf${i}"></div>
+    </div>`).join('');
+  qAns = 0; qOk = 0;
+  document.getElementById('quizScore').textContent = 'Rispondi alle 10 domande.';
+}
+function answerQuiz(i, ans) {
+  const el = document.getElementById('qq'+i);
+  if (el.classList.contains('answered-correct') || el.classList.contains('answered-wrong')) return;
+  const ok = ans === quizData[i].a;
+  el.classList.add(ok ? 'answered-correct' : 'answered-wrong');
+  const fb = document.getElementById('qf'+i);
+  fb.classList.add('show');
+  fb.innerHTML = (ok ? '<span class="good">✓</span> ' : '<span class="bad">✗</span> ') + quizData[i].why;
+  el.querySelectorAll('button').forEach(b => b.disabled = true);
+  qAns++; if (ok) qOk++;
+  document.getElementById('quizScore').textContent = `Punteggio: ${qOk}/${qAns}` + (qAns < quizData.length ? ` — ancora ${quizData.length-qAns}` : ' — Completato!');
+}
+document.getElementById('quizReset').onclick = renderQuiz;
+renderQuiz();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>
