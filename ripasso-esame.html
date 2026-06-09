@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ripasso pre-esame — Algoritmi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#e06c75;
+}
+html[data-theme="light"] {
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+  --gold:#9a7b10;--teal:#1a7a62;--red:#b8323c;--blue:#2a6cb8;
+  --purple:#7a3a9a;--orange:#a85a18;--green:#3a7a32;--accent:#b8323c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.65}
+
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:48px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-label{padding:4px 20px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:12px}
+.nav-link{display:block;padding:6px 20px 6px 28px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:all .15s}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+
+#main{margin-left:var(--sidebar-w);max-width:820px;padding:48px 48px 100px}
+.hero{background:linear-gradient(135deg,#1a1214,#12121c);border:1px solid var(--border);border-radius:12px;padding:36px 40px;margin-bottom:40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(224,108,117,.12) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-family:'Lora',serif;font-size:28px;font-weight:700;color:var(--text-bright);line-height:1.25}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:10px;max-width:560px}
+
+section{margin-bottom:44px;scroll-margin-top:80px}
+section h2{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--text-bright);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+section h2 .badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0}
+section h3{font-size:13px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 10px}
+p{margin-bottom:10px}
+ul,ol{padding-left:18px;margin-bottom:12px}
+li{margin-bottom:4px;font-size:14px}
+strong{color:var(--text-bright)}
+a{color:var(--teal);text-decoration:none;font-weight:500}
+a:hover{text-decoration:underline}
+code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg4);color:var(--teal);padding:1px 5px;border-radius:4px}
+
+.flash{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:12px 16px;margin:10px 0;font-size:14px}
+.flash b{color:var(--text-bright)}
+.flash.gold{border-color:var(--gold)} .flash.teal{border-color:var(--teal)}
+.flash.blue{border-color:var(--blue)} .flash.orange{border-color:var(--orange)}
+.flash.green{border-color:var(--green)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+.tbl-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg4);color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue)}
+
+.box{border-radius:8px;padding:14px 18px;margin:16px 0;border-left:3px solid}
+.box-warn{background:rgba(224,108,117,.07);border-color:var(--red)}
+.box-tip{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;color:var(--red)}
+
+.checklist{list-style:none;padding:0}
+.checklist li{padding:8px 14px 8px 36px;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:13px}
+.checklist li::before{content:'☐';position:absolute;left:12px;color:var(--accent)}
+
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+@media(max-width:768px){#main{margin-left:0;padding:24px 20px 60px}}
+</style>
+<link rel="stylesheet" href="./mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Ripasso pre-esame</div>
+    <div class="sub">Tutto in 1 pagina · USI</div>
+  </div>
+  <a class="nav-link" href="index.html">← Indice appunti</a>
+  <a class="nav-link" href="guida-studio.html">Guida allo studio</a>
+  <a class="nav-link" href="final/index.html">Final 2021–2025</a>
+  <div class="nav-label">Capitoli</div>
+  <a class="nav-link" href="#c01">01 Complessità</a>
+  <a class="nav-link" href="#c02">02 Strutture dati</a>
+  <a class="nav-link" href="#c03">03 Ordinamento</a>
+  <a class="nav-link" href="#c04">04 Alberi</a>
+  <a class="nav-link" href="#c05">05 Grafi</a>
+  <a class="nav-link" href="#c06">06 Greedy & DP</a>
+  <div class="nav-label">Esame</div>
+  <a class="nav-link" href="#pattern">Pattern domande</a>
+  <a class="nav-link" href="#ricorrenze">Ricorrenze DP</a>
+  <a class="nav-link" href="#complessita">Tabella complessità</a>
+  <a class="nav-link" href="#errori">Errori da evitare</a>
+  <a class="nav-link" href="#ultima">Checklist ultima ora</a>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Ripasso</span><br>prima dell'esame</h1>
+  <p>Riassunto ultra-semplificato di tutto il corso. Una riga = un concetto. Leggilo la sera prima e la mattina dell'esame — poi fai 2–3 esercizi dal <a href="final/index.html">final</a>.</p>
+</div>
+
+<div class="box box-warn">
+  <div class="box-label">Come usarlo</div>
+  <p style="margin:0;font-size:14px">Non studiare solo questo file: serve a <strong>richiamare</strong> ciò che già sai. Se un punto non ti dice niente, apri il capitolo completo dall'indice.</p>
+</div>
+
+<!-- ═══ 01 ═══ -->
+<section id="c01">
+<h2><span class="badge" style="background:rgba(232,197,71,.15);color:var(--gold)">01</span>Complessità</h2>
+
+<div class="flash gold"><b>Θ</b> = bound stretto · <b>O</b> = upper bound (≤) · <b>Ω</b> = lower bound (≥)</div>
+<div class="flash gold"><b>Ciclo annidato</b> su n → spesso Θ(n²). Dividi per 2 a ogni livello → Θ(n log n).</div>
+<div class="flash gold"><b>P</b> = risolvibile in tempo polinomiale · <b>NP</b> = certificato verificabile in polinomiale · <b>NP-completo</b> = il più difficile di NP</div>
+<div class="flash gold"><b>All'esame P/NP:</b> in P → scrivi algoritmo. In NP → certificato + Verification(p, cert) polinomiale.</div>
+</section>
+
+<!-- ═══ 02 ═══ -->
+<section id="c02">
+<h2><span class="badge" style="background:rgba(198,120,221,.15);color:var(--purple)">02</span>Strutture dati</h2>
+
+<div class="grid2">
+  <div class="flash teal"><b>Array</b> — accesso O(1), insert/delete O(n)</div>
+  <div class="flash teal"><b>Lista</b> — insert/delete O(1) se hai puntatore, accesso O(n)</div>
+  <div class="flash teal"><b>Stack</b> — LIFO · <b>Queue</b> — FIFO</div>
+  <div class="flash teal"><b>Hash</b> — medio O(1) search/insert; worst O(n)</div>
+</div>
+<div class="flash teal"><b>Chaining</b> = lista di collisioni · <b>Open addressing</b> = cerca slot libero (linear probing…)</div>
+<div class="flash teal"><b>Grafo sparso</b> → lista adiacenze · <b>denso</b> → matrice O(V²)</div>
+</section>
+
+<!-- ═══ 03 ═══ -->
+<section id="c03">
+<h2><span class="badge" style="background:rgba(229,149,58,.15);color:var(--orange)">03</span>Ordinamento</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Algoritmo</th><th>Complessità</th><th>Nota veloce</th></tr>
+<tr><td>Insertion sort</td><td class="mono">Θ(n²)</td><td>Ok per n piccolo o quasi ordinato</td></tr>
+<tr><td>MergeSort</td><td class="mono">Θ(n log n)</td><td>Divide et impera, stabile, O(n) extra</td></tr>
+<tr><td>QuickSort</td><td class="mono">O(n log n) avg, O(n²) worst</td><td>Partition + pivot; worst se pivot sempre min/max</td></tr>
+<tr><td>HeapSort</td><td class="mono">Θ(n log n)</td><td>In-place, usa max-heap</td></tr>
+</table>
+</div>
+
+<div class="flash orange"><b>Master theorem</b> (semplificato): T(n)=aT(n/b)+f(n) → confronta f(n) con n<sup>log_b a</sup></div>
+<div class="flash orange"><b>Heap</b> = array con padre ≥ figli (max-heap). Insert/extract → O(log n) con heapify.</div>
+</section>
+
+<!-- ═══ 04 ═══ -->
+<section id="c04">
+<h2><span class="badge" style="background:rgba(152,195,121,.15);color:var(--green)">04</span>Alberi</h2>
+
+<div class="flash green"><b>BST</b> — sinistra &lt; radice &lt; destra. Inorder = ordine crescente.</div>
+<div class="flash green"><b>Insert</b> — scendi fino a foglia, appendi. <b>Delete</b> — 0 figli: rimuovi; 1 figlio: sali; 2 figli: sostituisci con successor.</div>
+<div class="flash green"><b>Range [a,b]</b> — se key &lt; a vai destra; se key &gt; b vai sinistra; altrimenti conta + ricorsione.</div>
+
+<h3>Red-Black (5 regole)</h3>
+<ul>
+  <li>Radice nera · foglie NIL nere · rosso → figli neri · stesso n° neri su ogni percorso</li>
+  <li>Insert → rotazioni + ricolora per ripristinare invarianti</li>
+</ul>
+
+<div class="flash green"><b>B-tree</b> — molti figli per nodo, altezza O(log n), per disco. Cerca/inserisci dividendo nodi pieni.</div>
+</section>
+
+<!-- ═══ 05 ═══ -->
+<section id="c05">
+<h2><span class="badge" style="background:rgba(97,175,239,.15);color:var(--blue)">05</span>Grafi</h2>
+
+<div class="flash blue"><b>BFS</b> — coda, livello per livello, shortest path su grafi non pesati. O(V+E)</div>
+<div class="flash blue"><b>DFS</b> — ricorsione/stack, esplora in profondità. Colori WHITE/GRAY/BLACK. O(V+E)</div>
+<div class="flash blue"><b>Componenti connesse</b> — ripeti BFS/DFS su vertici non visitati</div>
+<div class="flash blue"><b>MST</b> — albero che collega tutti con peso minimo</div>
+
+<div class="grid2">
+  <div class="flash blue"><b>Kruskal</b> — ordina archi, prendi se non crea ciclo (Union-Find)</div>
+  <div class="flash blue"><b>Prim</b> — cresce albero da un vertice, scegli arco minimo verso fuori</div>
+</div>
+
+<div class="flash blue"><b>Dijkstra</b> — distanze minime, pesi ≥ 0. Relax archi da vertice con D minimo. O((V+E) log V) con heap.</div>
+<div class="flash blue"><b>NO Dijkstra</b> con pesi negativi → usa Bellman-Ford (non chiesto spesso)</div>
+</section>
+
+<!-- ═══ 06 ═══ -->
+<section id="c06">
+<h2><span class="badge" style="background:rgba(229,149,58,.15);color:var(--orange)">06</span>Greedy & Programmazione dinamica</h2>
+
+<h3>Quando usare cosa</h3>
+<div class="tbl-wrap">
+<table>
+<tr><th>Greedy ✓</th><th>Serve DP ✗</th></tr>
+<tr><td>Activity selection (non pesata)</td><td>Weighted activity selection</td></tr>
+<tr><td>Huffman</td><td>Knapsack 0-1</td></tr>
+<tr><td>Fractional knapsack</td><td>LIS (versione ottimale generale)</td></tr>
+<tr><td>MST (Kruskal/Prim)</td><td>Problemi con scelta che blocca il futuro</td></tr>
+</table>
+</div>
+
+<div class="flash orange"><b>Greedy</b> — scelta locale migliore + optimal substructure. Se fallisce → DP.</div>
+<div class="flash orange"><b>DP</b> — 1) definisci sottoproblema 2) ricorrenza 3) casi base 4) tabella bottom-up 5) ricostruisci soluzione</div>
+<div class="flash orange"><b>Weighted activity</b> — greedy earliest-finish NON ottimo. DP: OPT[i] = max peso compatibile + OPT[p(i)]</div>
+<div class="flash orange"><b>Knapsack 0-1</b> — K(w,j) = max con/senza oggetto j. Tabella (W+1)×(n+1)</div>
+</section>
+
+<!-- ═══ PATTERN ESAME ═══ -->
+<section id="pattern">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--accent)">★</span>Pattern domande esame</h2>
+
+<div class="flash"><b>Algo-X / Better-Algo-X</b><br>
+1) Cosa calcola? (1 frase, non riga per riga) · 2) Complessità worst case · 3) Idea miglioramento (sort, two pointers, counting array) · 4) Pseudocodice + nuova complessità</div>
+
+<div class="flash"><b>BST range / size</b><br>
+Poda rami impossibili. Con campo <code>size</code> → O(h). Non visitare tutto l'albero.</div>
+
+<div class="flash"><b>Grafi / BFS</b><br>
+Modella come grafo → BFS/DFS. Raggio minimo → binary search su r + Check(r) monotono.</div>
+
+<div class="flash"><b>DP esame</b><br>
+Identifica sottoproblema → ricorrenza → casi base → tabella → O(dimensione tabella).</div>
+
+<div class="flash"><b>Two pointers</b><br>
+Array ordinato → due indici i,j. Spesso dopo sort O(n log n) → totale O(n log n) o O(n).</div>
+
+<div class="flash"><b>Heap</b><br>
+Delete pos i = sposta ultimo in i + heapify up/down. O(log n).</div>
+
+<div class="flash"><b>P / NP decisionale</b><br>
+NP: certificato + verificatore polinomiale. P: algoritmo risolutivo esplicito.</div>
+
+<p style="margin-top:14px"><a href="final/index.html">→ Esercizi finali per categoria</a></p>
+</section>
+
+<!-- ═══ RICORRENZE ═══ -->
+<section id="ricorrenze">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--accent)">★</span>Ricorrenze DP da ricordare</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Problema</th><th>Ricorrenza (semplificata)</th></tr>
+<tr><td>Weighted activity</td><td class="mono">OPT[i] = max(w_i + OPT[p(i)], OPT[i-1])</td></tr>
+<tr><td>Knapsack 0-1</td><td class="mono">K(w,j) = max(K(w,j-1), v_j + K(w-w_j,j-1))</td></tr>
+<tr><td>LIS</td><td class="mono">L(j) = 1 + max L(i) per i&lt;j, A[i]&lt;A[j]</td></tr>
+<tr><td>MergeSort</td><td class="mono">T(n) = 2T(n/2) + Θ(n) → Θ(n log n)</td></tr>
+<tr><td>Binary search</td><td class="mono">T(n) = T(n/2) + Θ(1) → Θ(log n)</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ═══ COMPLESSITÀ ═══ -->
+<section id="complessita">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--accent)">★</span>Tabella complessità rapida</h2>
+
+<div class="tbl-wrap">
+<table>
+<tr><th>Operazione</th><th>Lista</th><th>BST avg</th><th>Hash avg</th><th>Heap</th></tr>
+<tr><td>Search</td><td class="mono">O(n)</td><td class="mono">O(h)</td><td class="mono">O(1)</td><td class="mono">O(n)</td></tr>
+<tr><td>Insert</td><td class="mono">O(1)*</td><td class="mono">O(h)</td><td class="mono">O(1)</td><td class="mono">O(log n)</td></tr>
+<tr><td>Delete</td><td class="mono">O(1)*</td><td class="mono">O(h)</td><td class="mono">O(1)</td><td class="mono">O(log n)</td></tr>
+<tr><td>Min/Max</td><td class="mono">O(n)</td><td class="mono">O(h)</td><td class="mono">—</td><td class="mono">O(1)</td></tr>
+</table>
+</div>
+<p style="font-size:12px;color:var(--text-dim)">* lista = O(1) se hai già il puntatore al nodo</p>
+</section>
+
+<!-- ═══ ERRORI ═══ -->
+<section id="errori">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--accent)">!</span>Errori da evitare</h2>
+
+<ul>
+  <li><strong>Parafrasare codice</strong> invece di dire cosa calcola</li>
+  <li><strong>Greedy su knapsack 0-1</strong> — funziona solo frazionario</li>
+  <li><strong>Dijkstra con pesi negativi</strong></li>
+  <li><strong>Confondere O e Θ</strong></li>
+  <li><strong>NP = «impossibile»</strong> — significa certificato verificabile velocemente</li>
+  <li><strong>Visitare tutto il BST</strong> quando puoi podare il range</li>
+  <li><strong>Dimenticare analisi complessità</strong> alla fine di ogni algoritmo scritto</li>
+</ul>
+</section>
+
+<!-- ═══ ULTIMA ORA ═══ -->
+<section id="ultima">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--accent)">✓</span>Checklist ultima ora</h2>
+
+<p>Spunta mentalmente — se qualcosa non ti viene, 15 min sul capitolo corrispondente.</p>
+
+<ul class="checklist">
+  <li>So analizzare un doppio ciclo e dire Θ(n²)</li>
+  <li>So tracciare BFS con coda su 6 nodi</li>
+  <li>So tracciare Dijkstra con tabella D[]</li>
+  <li>So spiegare perché greedy fallisce su weighted activity</li>
+  <li>So riempire tabella knapsack K(w,j)</li>
+  <li>So scrivere Better-Algo-X (sort + two pointers)</li>
+  <li>So dire P vs NP con certificato o algoritmo</li>
+  <li>So contare chiavi in range [a,b] su BST podando</li>
+  <li>Ho fatto almeno 3 esercizi final da solo</li>
+</ul>
+
+<div class="box box-tip" style="border-color:var(--teal);background:rgba(78,201,168,.07)">
+  <div class="box-label" style="color:var(--teal)">Strategia in aula</div>
+  <ol style="margin:0;font-size:14px">
+    <li>Leggi tutti gli esercizi (5 min)</li>
+    <li>Parti da quello che riconosci</li>
+    <li>Algo-X: prima semantica + complessità, poi Better</li>
+    <li>Pseudocodice pulito + complessità finale</li>
+  </ol>
+</div>
+</section>
+
+</main>
+
+<script>
+const tb = document.getElementById('themeToggle');
+const s = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', s);
+tb.textContent = s === 'light' ? '🌙' : '☀';
+tb.onclick = () => {
+  const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('algo-theme', n);
+  tb.textContent = n === 'light' ? '🌙' : '☀';
+};
+</script>
+<script src="./mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista con sentinella — Guida interattiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--dim:#7a7890;--bright:#f0ece0;
+  --purple:#c678dd;--teal:#4ec9a8;--blue:#61afef;--green:#98c379;
+  --orange:#e5953a;--red:#e06c75;--gold:#e8c547;
+}
+html[data-theme="light"] {
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--dim:#6a6878;--bright:#1a1828;
+  --purple:#7a3a9a;--teal:#1a7a62;--blue:#2a6cb8;--green:#3a7a32;
+  --orange:#a85a18;--red:#b8323c;--gold:#9a7b10;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;font-size:15px;padding:24px 20px 60px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-family:'Lora',serif;font-size:26px;color:var(--bright);margin-bottom:6px}
+h1 span{color:var(--purple)}
+.sub{color:var(--dim);font-size:14px;margin-bottom:24px}
+.sub a{color:var(--teal);text-decoration:none;font-weight:500}
+
+/* tabs operazioni */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.tab{padding:10px 18px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--dim);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.tab:hover{border-color:var(--purple);color:var(--bright)}
+.tab.active{background:rgba(198,120,221,.15);border-color:var(--purple);color:var(--purple)}
+
+.panel{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.panel h2{font-family:'Lora',serif;font-size:18px;color:var(--bright);margin-bottom:12px}
+
+.layout{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
+
+svg{width:100%;max-width:680px;display:block;margin:0 auto;border-radius:10px;background:var(--bg4);border:1px solid var(--border)}
+
+.arrow-guide{display:flex;gap:16px;justify-content:center;margin-bottom:10px;font-size:12px;font-weight:600}
+.arrow-guide span{display:flex;align-items:center;gap:6px}
+.arrow-guide .arr-icon{width:28px;height:3px;border-radius:2px;position:relative}
+.arrow-guide .arr-icon::after{content:'';position:absolute;right:-1px;top:-4px;border:5px solid transparent}
+.arrow-guide .next-c{background:var(--blue)} .arrow-guide .next-c::after{border-left-color:var(--blue)}
+.arrow-guide .prev-c{background:var(--green)} .arrow-guide .prev-c::after{border-right-color:var(--green);right:auto;left:-1px}
+
+.progress{height:4px;background:var(--border);border-radius:2px;margin:14px 0;overflow:hidden}
+.progress-bar{height:100%;background:var(--purple);transition:width .3s}
+
+.step-title{font-size:15px;font-weight:600;color:var(--purple);margin-bottom:8px}
+.step-desc{font-size:14px;color:var(--text);margin-bottom:14px}
+.step-desc code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg4);color:var(--teal);padding:1px 6px;border-radius:4px}
+
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+button{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:1px solid var(--border);background:var(--bg4);color:var(--text);cursor:pointer}
+button:hover{filter:brightness(1.1)}
+button.primary{background:var(--purple);color:var(--bg);border-color:var(--purple)}
+button:disabled{opacity:.35;cursor:not-allowed}
+.step-counter{text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);margin-top:10px}
+
+/* pseudocodice */
+.pseudo{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.85;background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.pseudo .line{padding:1px 8px;border-radius:4px}
+.pseudo .line.hl{background:rgba(198,120,221,.25);color:var(--bright);font-weight:600}
+.pseudo .line.dim{color:var(--dim);opacity:.5}
+.pseudo .fn{color:var(--blue)}
+
+/* legenda chi è cosa */
+.legend{display:flex;flex-direction:column;gap:8px}
+.leg-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg4);border-radius:8px;border:1px solid var(--border);font-size:13px}
+.leg-item.active{border-color:var(--purple);background:rgba(198,120,221,.1)}
+.leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;margin-top:3px}
+.leg-item strong{color:var(--bright);display:block;font-size:12px;margin-bottom:2px}
+
+.intro-box{background:rgba(78,201,168,.08);border:1px solid var(--teal);border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:14px}
+.intro-box strong{color:var(--teal)}
+
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--purple);font-size:18px;cursor:pointer}
+</style>
+<link rel="stylesheet" href="../mobile.css">
+</head>
+<body>
+<button class="theme-toggle" id="themeToggle" title="Tema">☀</button>
+
+<div class="wrap">
+  <h1><span>Lista con sentinella</span> — guida passo-passo</h1>
+  <p class="sub">
+    Ogni operazione spiegata riga per riga ·
+    <a href="01 - Strutture elementari e hash tables.html#s4">← Capitolo 02</a> ·
+    <a href="../index.html">Indice</a>
+  </p>
+
+  <div class="intro-box">
+    <strong>Cos'è L.nil?</strong> È un nodo <em>fittizio</em> (sentinella): non contiene dati utili, ma fa da «ancora».
+    Lista vuota = <code>nil.next</code> e <code>nil.prev</code> puntano entrambi a <code>nil</code>.
+    Così Insert e Delete usano sempre lo stesso codice, senza <code>if lista vuota</code>.
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-op="init">List-Init</button>
+    <button class="tab" data-op="insert">List-Insert</button>
+    <button class="tab" data-op="search">List-Search</button>
+    <button class="tab" data-op="delete">List-Delete</button>
+  </div>
+
+  <div class="panel">
+    <h2 id="opTitle">List-Init(L)</h2>
+    <div class="layout">
+      <div>
+        <div class="arrow-guide">
+          <span><i class="arr-icon next-c"></i> <span style="color:var(--blue)">next</span> = avanti (→)</span>
+          <span><i class="arr-icon prev-c"></i> <span style="color:var(--green)">prev</span> = indietro (←)</span>
+        </div>
+        <svg id="svg" viewBox="0 0 720 380" role="img"></svg>
+        <div class="progress"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+        <div class="step-title" id="stepTitle"></div>
+        <div class="step-desc" id="stepDesc"></div>
+        <div class="controls">
+          <button id="btnPrev">← Indietro</button>
+          <button id="btnNext" class="primary">Avanti →</button>
+          <button id="btnPlay">▶ Auto</button>
+          <button id="btnReset">↺ Ricomincia</button>
+        </div>
+        <div class="step-counter" id="stepCounter"></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--dim);margin-bottom:8px">PSEUDOCODICE</div>
+        <div class="pseudo" id="pseudo"></div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--dim);margin-bottom:8px">CHI È COSA — in questo step</div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const OPS = {
+  init: {
+    title: 'List-Init(L) — crea lista vuota',
+    pseudo: [
+      { id: 'h0', t: 'List-Init(L)', fn: 1 },
+      { id: 'h1', t: 'L.nil.prev = L.nil' },
+      { id: 'h2', t: 'L.nil.next = L.nil' },
+    ],
+    steps: [
+      {
+        hl: ['h0'], title: 'Partiamo da zero',
+        desc: 'Abbiamo la struttura lista <strong>L</strong>. Contiene un solo nodo reale: la <strong>sentinella</strong> <code>L.nil</code>. Non c\'è ancora nessun dato utile.',
+        keys: [], showNilLoop: false,
+        legend: [
+          { id: 'L', color: 'var(--purple)', name: 'L', text: 'La lista (struttura che contiene tutto)' },
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Nodo sentinella — ancora fissa, non ha key' },
+        ]
+      },
+      {
+        hl: ['h1'], title: 'Riga 1: L.nil.prev = L.nil',
+        desc: 'Il puntatore <code>prev</code> di nil punta a <strong>nil stesso</strong>. Significa: «prima di nil non c\'è nessun nodo dati».',
+        keys: [], showNilLoop: 'prev',
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Sentinella' },
+          { id: 'prev', color: 'var(--green)', name: 'L.nil.prev', text: 'Puntatore «indietro» — ora punta a nil (lista vuota)' },
+        ]
+      },
+      {
+        hl: ['h2'], title: 'Riga 2: L.nil.next = L.nil',
+        desc: 'Anche <code>next</code> punta a nil. Lista vuota = nil forma un anello con sé stesso. <strong>Init completato.</strong>',
+        keys: [], showNilLoop: 'both',
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Sentinella' },
+          { id: 'next', color: 'var(--blue)', name: 'L.nil.next', text: 'Puntatore «avanti» — primo nodo dati (qui: nil, nessun dato)' },
+          { id: 'prev', color: 'var(--green)', name: 'L.nil.prev', text: 'Ultimo nodo dati (qui: nil)' },
+        ]
+      },
+    ]
+  },
+
+  insert: {
+    title: 'List-Insert(L, x) — inserisce in testa O(1)',
+    pseudo: [
+      { id: 'i0', t: 'List-Insert(L, x)', fn: 1 },
+      { id: 'i1', t: 'x.next = L.nil.next' },
+      { id: 'i2', t: 'L.nil.next.prev = x' },
+      { id: 'i3', t: 'L.nil.next = x' },
+      { id: 'i4', t: 'x.prev = L.nil' },
+    ],
+    steps: [
+      {
+        hl: ['i0'], title: 'Setup: lista con 21, inseriamo 14',
+        desc: 'Lista attuale: <code>nil ↔ 21 ↔ nil</code>. Creiamo un nuovo nodo <strong>x</strong> con <code>x.key = 14</code>. Insert mette sempre in <strong>testa</strong> (prima del 21).',
+        keys: [21], ghost: null,
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Sentinella — L.nil.next punta al primo nodo (21)' },
+          { id: 'n21', color: 'var(--purple)', name: 'nodo 21', text: 'Unico nodo dati attuale' },
+          { id: 'x', color: 'var(--teal)', name: 'x (nuovo)', text: 'Nodo da inserire, x.key = 14 — ancora scollegato' },
+        ]
+      },
+      {
+        hl: ['i1'], title: 'Riga 1: x.next = L.nil.next',
+        desc: 'Il nuovo nodo guarda avanti: <code>x.next</code> = ciò che era il primo nodo → il <strong>21</strong>. Il 14 diventerà il nuovo primo, ma punta già al vecchio primo.',
+        keys: [21], ghost: { key: 14, linkNext: 21 },
+        highlightArrow: 'x-next',
+        legend: [
+          { id: 'x', color: 'var(--teal)', name: 'x.key = 14', text: 'x.next ora punta al 21' },
+          { id: 'next', color: 'var(--blue)', name: 'x.next', text: '= L.nil.next (prima del insert era 21)' },
+          { id: 'n21', color: 'var(--purple)', name: 'nodo 21', text: 'Destinazione di x.next' },
+        ]
+      },
+      {
+        hl: ['i2'], title: 'Riga 2: L.nil.next.prev = x',
+        desc: 'Il nodo che era primo (il <strong>21</strong>) deve aggiornare il suo <code>prev</code>: ora «indietro» c\'è x (14), non più nil direttamente come predecessore dati.',
+        keys: [21], ghost: { key: 14, linkNext: 21, linkPrevFrom: 21 },
+        highlightArrow: 'n1-prev',
+        legend: [
+          { id: 'n21', color: 'var(--purple)', name: '21.prev', text: 'Ora punta a x (14) — era nil' },
+          { id: 'x', color: 'var(--teal)', name: 'x', text: 'Destinazione del prev del 21' },
+        ]
+      },
+      {
+        hl: ['i3'], title: 'Riga 3: L.nil.next = x',
+        desc: 'La sentinella aggiorna il suo <code>next</code>: il primo nodo dati è ora <strong>x (14)</strong>, non più 21. Il 14 è ufficialmente in testa.',
+        keys: [21], ghost: { key: 14, linkNext: 21, linked: true },
+        highlightArrow: 'nil-next',
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil.next', text: 'Ora punta a x (14) — nuovo primo nodo' },
+          { id: 'x', color: 'var(--teal)', name: 'x.key = 14', text: 'Nuovo primo nodo della lista' },
+        ]
+      },
+      {
+        hl: ['i4'], title: 'Riga 4: x.prev = L.nil',
+        desc: 'x dice che «indietro» c\'è nil (perché è in testa). <strong>Insert completato.</strong> Lista: <code>nil ↔ 14 ↔ 21 ↔ nil</code>. Costo: O(1).',
+        keys: [14, 21], ghost: null,
+        highlightArrow: 'x-prev',
+        legend: [
+          { id: 'x', color: 'var(--teal)', name: 'x.prev', text: '= L.nil (14 è in testa)' },
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Sentinella — next→14, prev→21' },
+          { id: 'n21', color: 'var(--purple)', name: '21', text: 'Secondo nodo — prev→14, next→nil' },
+        ]
+      },
+    ]
+  },
+
+  search: {
+    title: 'List-Search(L, k) — cerca chiave k, O(n)',
+    pseudo: [
+      { id: 's0', t: 'List-Search(L, k)   k=21', fn: 1 },
+      { id: 's1', t: 'x = L.nil.next' },
+      { id: 's2', t: 'while x ≠ L.nil and x.key ≠ k' },
+      { id: 's3', t: '    x = x.next' },
+      { id: 's4', t: 'return x' },
+    ],
+    steps: [
+      {
+        hl: ['s0'], title: 'Cerchiamo k = 21',
+        desc: 'Lista: <code>nil ↔ 14 ↔ 21 ↔ nil</code>. Obiettivo: trovare un nodo con <code>key = 21</code> o restituire nil se assente.',
+        keys: [14, 21], cursor: null,
+        legend: [
+          { id: 'k', color: 'var(--gold)', name: 'k = 21', text: 'Chiave cercata (parametro)' },
+          { id: 'x', color: 'var(--orange)', name: 'x', text: 'Cursore di scansione — partirà da L.nil.next' },
+        ]
+      },
+      {
+        hl: ['s1'], title: 'Riga 1: x = L.nil.next',
+        desc: '<strong>x</strong> parte dal primo nodo dati → il <strong>14</strong>. Non partiamo mai da nil stesso per i dati, ma da nil.next.',
+        keys: [14, 21], cursor: 0,
+        legend: [
+          { id: 'x', color: 'var(--orange)', name: 'x', text: 'Punta al nodo 14 (L.nil.next)' },
+          { id: 'n14', color: 'var(--purple)', name: 'nodo 14', text: 'x.key = 14 — confrontiamo con k=21' },
+        ]
+      },
+      {
+        hl: ['s2'], title: 'While: x ≠ nil e x.key ≠ k',
+        desc: 'Controllo: x è il 14 (≠ nil ✓), ma <code>14 ≠ 21</code> → continuo il ciclo. Devo avanzare.',
+        keys: [14, 21], cursor: 0, checkFail: true,
+        legend: [
+          { id: 'x', color: 'var(--orange)', name: 'x.key = 14', text: '14 ≠ 21 → condizione vera, entro nel ciclo' },
+          { id: 'k', color: 'var(--gold)', name: 'k = 21', text: 'Non uguale — non posso ancora return' },
+        ]
+      },
+      {
+        hl: ['s3'], title: 'Riga 3: x = x.next',
+        desc: 'Avanzo al nodo successivo. <code>x.next</code> del 14 è il <strong>21</strong>. Ora x punta al 21.',
+        keys: [14, 21], cursor: 1,
+        legend: [
+          { id: 'x', color: 'var(--orange)', name: 'x', text: 'Avanzato al nodo 21' },
+          { id: 'n21', color: 'var(--purple)', name: 'nodo 21', text: 'x.key = 21 — confronto con k' },
+        ]
+      },
+      {
+        hl: ['s2', 's4'], title: 'While: 21 = k → esco e return x',
+        desc: '<code>x.key = 21 = k</code> → la seconda condizione del while è falsa → esco. <strong>return x</strong> (puntatore al nodo 21). Trovato!',
+        keys: [14, 21], cursor: 1, found: 21,
+        legend: [
+          { id: 'x', color: 'var(--orange)', name: 'return x', text: 'Restituisco puntatore al nodo 21' },
+          { id: 'k', color: 'var(--gold)', name: 'k = 21', text: 'Trovato! Costo = 2 nodi visitati' },
+        ]
+      },
+    ]
+  },
+
+  delete: {
+    title: 'List-Delete(L, x) — rimuove nodo x, O(1)',
+    pseudo: [
+      { id: 'd0', t: 'List-Delete(L, x)   x = nodo 14', fn: 1 },
+      { id: 'd1', t: 'x.prev.next = x.next' },
+      { id: 'd2', t: 'x.next.prev = x.prev' },
+    ],
+    steps: [
+      {
+        hl: ['d0'], title: 'Eliminiamo il nodo x (key=14)',
+        desc: 'Lista: <code>nil ↔ 14 ↔ 21 ↔ nil</code>. Abbiamo già il puntatore <strong>x</strong> al nodo 14 (es. da Search). Non cerchiamo — scolleghiamo.',
+        keys: [14, 21], del: null,
+        legend: [
+          { id: 'x', color: 'var(--red)', name: 'x (nodo 14)', text: 'Nodo da eliminare — conosciamo il puntatore' },
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'x.prev = nil (14 è in testa)' },
+          { id: 'n21', color: 'var(--purple)', name: 'nodo 21', text: 'x.next = 21' },
+        ]
+      },
+      {
+        hl: ['d1'], title: 'Riga 1: x.prev.next = x.next',
+        desc: 'Il predecessore di x (nil) deve saltare x: <code>nil.next</code> passa da 14 al <strong>21</strong>. Il 14 non è più raggiungibile da nil.',
+        keys: [14, 21], del: 14, skipNext: true,
+        highlightArrow: 'nil-next',
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'x.prev (= nil)', text: 'nil.next = x.next = 21 — salta il 14' },
+          { id: 'x', color: 'var(--red)', name: 'x (14)', text: 'Non più collegato avanti da nil' },
+          { id: 'n21', color: 'var(--purple)', name: '21', text: 'Nuovo primo nodo dati' },
+        ]
+      },
+      {
+        hl: ['d2'], title: 'Riga 2: x.next.prev = x.prev',
+        desc: 'Il successore (21) aggiorna il suo prev: <code>21.prev = nil</code> (prima era 14). Il 14 è completamente scollegato.',
+        keys: [14, 21], del: 14, skipBoth: true,
+        highlightArrow: 'n1-prev',
+        legend: [
+          { id: 'n21', color: 'var(--purple)', name: '21.prev', text: '= x.prev = nil' },
+          { id: 'x', color: 'var(--red)', name: 'x (14)', text: 'Orfano — memoria liberabile. Delete = O(1)' },
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'Lista ora: nil ↔ 21 ↔ nil' },
+        ]
+      },
+      {
+        hl: ['d0'], title: 'Risultato finale',
+        desc: 'Lista aggiornata: solo il <strong>21</strong>. Non abbiamo «cancellato» la cella — abbiamo <em>scollegato</em> x aggiornando i puntatori dei vicini.',
+        keys: [21], del: null,
+        legend: [
+          { id: 'nil', color: 'var(--dim)', name: 'L.nil', text: 'next → 21, prev → 21' },
+          { id: 'n21', color: 'var(--purple)', name: '21', text: 'Unico nodo dati rimasto' },
+        ]
+      },
+    ]
+  }
+};
+
+let currentOp = 'init';
+let stepIdx = 0;
+let timer = null;
+
+function colors() {
+  const s = getComputedStyle(document.documentElement);
+  return {
+    bg4: s.getPropertyValue('--bg4').trim(),
+    border: s.getPropertyValue('--border').trim(),
+    border: s.getPropertyValue('--border').trim(),
+    text: s.getPropertyValue('--bright').trim(),
+    dim: s.getPropertyValue('--dim').trim(),
+    purple: s.getPropertyValue('--purple').trim(),
+    teal: s.getPropertyValue('--teal').trim(),
+    blue: s.getPropertyValue('--blue').trim(),
+    green: s.getPropertyValue('--green').trim(),
+    orange: s.getPropertyValue('--orange').trim(),
+    red: s.getPropertyValue('--red').trim(),
+    gold: s.getPropertyValue('--gold').trim(),
+  };
+}
+
+function pointerSummary(keys, skipNext, del) {
+  if (!keys.length) return ['nil.next = nil', 'nil.prev = nil'];
+  const first = skipNext && keys.length > 1 ? keys[1] : keys[0];
+  const lines = [`nil.next → ${first}`, `nil.prev → ${keys[keys.length - 1]}`];
+  keys.forEach((k, i) => {
+    if (skipNext && k === del) return;
+    const nxt = i < keys.length - 1 ? keys[i + 1] : 'nil';
+    const prv = i === 0 ? 'nil' : keys[i - 1];
+    lines.push(`${k}.next → ${nxt}`, `${k}.prev → ${prv}`);
+  });
+  return lines;
+}
+
+function renderSvg(st, c) {
+  const NW = 60, NH = 54, GAP = 120;
+  const nilX = 80, nodeY = 175;
+  const NEXT_Y = 108, PREV_Y = 292;
+  const ARC_NEXT_Y = 42, ARC_PREV_Y = 348;
+  const keys = st.keys || [];
+
+  function nx(i) { return nilX + NW + GAP + i * (NW + GAP); }
+  function nilCx() { return nilX + NW / 2; }
+  function nodeCx(i) { return nx(i) + NW / 2; }
+  function rightMost() { return keys.length ? nodeCx(keys.length - 1) : nilCx(); }
+
+  let svg = `<defs>
+    <marker id="mN" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${c.blue}"/></marker>
+    <marker id="mP" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 Z" fill="${c.green}"/></marker>
+    <marker id="mT" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="${c.teal}"/></marker>
+    <filter id="glow"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${c.purple}" flood-opacity=".9"/></filter>
+  </defs>`;
+
+  const h = st.highlightArrow;
+
+  function pill(x, y, text, col, bg) {
+    const w = Math.max(text.length * 6.5 + 16, 80);
+    return `<rect x="${x - w/2}" y="${y - 11}" width="${w}" height="20" rx="5" fill="${bg || c.bg4}" stroke="${col}" stroke-width="1.2"/>
+            <text x="${x}" y="${y + 4}" text-anchor="middle" fill="${col}" font-size="9.5" font-weight="600" font-family="JetBrains Mono">${text}</text>`;
+  }
+
+  /* freccia orizzontale nella corsia next */
+  function segNext(x1, x2, label, id) {
+    if (!h || h !== id) return;
+    svg += `<line x1="${x1}" y1="${NEXT_Y}" x2="${x2 - 8}" y2="${NEXT_Y}" stroke="${c.blue}" stroke-width="3" marker-end="url(#mN)" filter="url(#glow)"/>`;
+    svg += `<line x1="${x1}" y1="${nodeY}" x2="${x1}" y2="${NEXT_Y + 2}" stroke="${c.blue}" stroke-width="1" opacity=".4"/>`;
+    svg += `<line x1="${x2}" y1="${nodeY}" x2="${x2}" y2="${NEXT_Y + 2}" stroke="${c.blue}" stroke-width="1" opacity=".4"/>`;
+    if (label) svg += pill((x1 + x2) / 2, NEXT_Y - 18, label, c.blue);
+  }
+
+  function segPrev(x1, x2, label, id) {
+    if (!h || h !== id) return;
+    svg += `<line x1="${x1}" y1="${PREV_Y}" x2="${x2 + 8}" y2="${PREV_Y}" stroke="${c.green}" stroke-width="3" marker-end="url(#mP)" filter="url(#glow)"/>`;
+    svg += `<line x1="${x1}" y1="${nodeY + NH}" x2="${x1}" y2="${PREV_Y - 2}" stroke="${c.green}" stroke-width="1" opacity=".4"/>`;
+    svg += `<line x1="${x2}" y1="${nodeY + NH}" x2="${x2}" y2="${PREV_Y - 2}" stroke="${c.green}" stroke-width="1" opacity=".4"/>`;
+    if (label) svg += pill((x1 + x2) / 2, PREV_Y + 22, label, c.green);
+  }
+
+  function wrapNext(fromX, toX, label, id) {
+    if (!h || h !== id) return;
+    svg += `<path d="M ${fromX} ${nodeY} L ${fromX} ${ARC_NEXT_Y} L ${toX} ${ARC_NEXT_Y} L ${toX} ${nodeY}" fill="none" stroke="${c.blue}" stroke-width="3" marker-end="url(#mN)" filter="url(#glow)"/>`;
+    if (label) svg += pill((fromX + toX) / 2, ARC_NEXT_Y - 14, label, c.blue, 'rgba(97,175,239,.12)');
+  }
+
+  function wrapPrev(fromX, toX, label, id) {
+    if (!h || h !== id) return;
+    svg += `<path d="M ${fromX} ${nodeY + NH} L ${fromX} ${ARC_PREV_Y} L ${toX} ${ARC_PREV_Y} L ${toX} ${nodeY + NH}" fill="none" stroke="${c.green}" stroke-width="3" marker-end="url(#mP)" filter="url(#glow)"/>`;
+    if (label) svg += pill((fromX + toX) / 2, ARC_PREV_Y + 16, label, c.green, 'rgba(152,195,121,.12)');
+  }
+
+  if (h || st.showNilLoop) {
+    svg += `<text x="14" y="${NEXT_Y + 4}" fill="${c.blue}" font-size="10" font-weight="700" font-family="Inter" transform="rotate(-90 14 ${NEXT_Y})">next</text>`;
+    svg += `<text x="14" y="${PREV_Y + 4}" fill="${c.green}" font-size="10" font-weight="700" font-family="Inter" transform="rotate(-90 14 ${PREV_Y})">prev</text>`;
+  }
+
+  /* init: piccolo anello su nil */
+  if (st.showNilLoop) {
+    if (st.showNilLoop === 'prev' || st.showNilLoop === 'both') {
+      svg += `<path d="M ${nilCx() - 28} ${nodeY + NH/2} A 28 22 0 1 1 ${nilCx() + 28} ${nodeY + NH/2}" fill="none" stroke="${c.green}" stroke-width="2.5" marker-end="url(#mP)"/>`;
+      svg += pill(nilCx() - 55, nodeY + NH/2, 'prev→nil', c.green);
+    }
+    if (st.showNilLoop === 'next' || st.showNilLoop === 'both') {
+      svg += `<path d="M ${nilCx() + 28} ${nodeY + NH/2} A 28 22 0 1 1 ${nilCx() - 28} ${nodeY + NH/2}" fill="none" stroke="${c.blue}" stroke-width="2.5" marker-end="url(#mN)"/>`;
+      svg += pill(nilCx() + 55, nodeY + NH/2, 'next→nil', c.blue);
+    }
+  }
+
+  if (keys.length > 0 && h) {
+    const first = st.skipNext && keys.length > 1 ? 1 : 0;
+    const last = keys.length - 1;
+    const firstK = keys[first], lastK = keys[last];
+
+    segNext(nilCx(), nodeCx(first), `nil.next → ${firstK}`, 'nil-next');
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (st.skipNext && keys[i] === st.del) continue;
+      segNext(nodeCx(i), nodeCx(i + 1), `${keys[i]}.next → ${keys[i + 1]}`, `n${i}-next`);
+    }
+
+    wrapNext(nodeCx(last), nilCx(), `${lastK}.next → nil`, 'last-next');
+
+    segPrev(nodeCx(0), nilCx(), `${keys[0]}.prev → nil`, 'x-prev');
+
+    for (let i = 1; i < keys.length; i++) {
+      if (st.skipBoth && keys[i - 1] === st.del) continue;
+      segPrev(nodeCx(i), nodeCx(i - 1), `${keys[i]}.prev → ${keys[i - 1]}`, `n${i}-prev`);
+    }
+
+    wrapPrev(nilCx(), nodeCx(last), `nil.prev → ${lastK}`, 'last-prev');
+  }
+
+  /* ghost insert */
+  if (st.ghost && st.ghost.linkNext && !st.ghost.linked && h === 'x-next') {
+    const gx = 560, gy = 55, tx = keys.length ? nodeCx(0) : nilCx();
+    svg += `<path d="M ${gx + NW/2} ${gy + NH} L ${gx + NW/2} ${ARC_NEXT_Y - 8} L ${tx} ${ARC_NEXT_Y - 8} L ${tx} ${nodeY}" fill="none" stroke="${c.teal}" stroke-width="3" stroke-dasharray="7 4" marker-end="url(#mT)" filter="url(#glow)"/>`;
+    svg += pill((gx + tx) / 2 + 40, ARC_NEXT_Y - 8, 'x.next = L.nil.next', c.teal, 'rgba(78,201,168,.15)');
+  }
+
+  /* ── nodi ── */
+  svg += `<rect x="${nilX}" y="${nodeY}" width="${NW}" height="${NH}" rx="8" fill="${c.bg4}" stroke="${c.dim}" stroke-width="2" stroke-dasharray="5 3"/>`;
+  svg += `<text x="${nilCx()}" y="${nodeY + 33}" text-anchor="middle" fill="${c.dim}" font-size="14" font-weight="700" font-family="JetBrains Mono">nil</text>`;
+  svg += `<text x="${nilCx()}" y="${nodeY - 12}" text-anchor="middle" fill="${c.purple}" font-size="11" font-weight="700" font-family="Inter">L.nil</text>`;
+
+  keys.forEach((k, i) => {
+    const x = nx(i);
+    const isDel = st.del === k, isCursor = st.cursor === i, isFound = st.found === k;
+    let fill = 'rgba(198,120,221,.22)', stroke = c.purple;
+    if (isDel) { fill = 'rgba(224,108,117,.35)'; stroke = c.red; }
+    if (isCursor) { fill = 'rgba(229,149,58,.35)'; stroke = c.orange; }
+    if (isFound) { fill = 'rgba(152,195,121,.35)'; stroke = c.green; }
+    svg += `<rect x="${x}" y="${nodeY}" width="${NW}" height="${NH}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isCursor || isDel ? 2.5 : 2}"/>`;
+    svg += `<text x="${nodeCx(i)}" y="${nodeY + 21}" text-anchor="middle" fill="${c.dim}" font-size="8" font-family="Inter">key</text>`;
+    svg += `<text x="${nodeCx(i)}" y="${nodeY + 40}" text-anchor="middle" fill="${c.text}" font-size="18" font-weight="700" font-family="JetBrains Mono">${k}</text>`;
+    if (isCursor) svg += `<text x="${nodeCx(i)}" y="${nodeY - 16}" text-anchor="middle" fill="${c.orange}" font-size="12" font-weight="700" font-family="Inter">← x</text>`;
+    if (isDel) svg += `<text x="${nodeCx(i)}" y="${nodeY + NH + 14}" text-anchor="middle" fill="${c.red}" font-size="10" font-weight="600" font-family="Inter">elimina</text>`;
+  });
+
+  if (st.ghost) {
+    const g = st.ghost;
+    const gx = g.linked ? nx(0) : 560, gy = g.linked ? nodeY : 55;
+    svg += `<rect x="${gx}" y="${gy}" width="${NW}" height="${NH}" rx="8" fill="rgba(78,201,168,.28)" stroke="${c.teal}" stroke-width="2.5"/>`;
+    svg += `<text x="${gx + NW/2}" y="${gy + 40}" text-anchor="middle" fill="${c.text}" font-size="18" font-weight="700" font-family="JetBrains Mono">${g.key}</text>`;
+    svg += `<text x="${gx + NW/2}" y="${gy - 8}" text-anchor="middle" fill="${c.teal}" font-size="11" font-weight="700" font-family="Inter">nuovo x</text>`;
+  }
+
+  /* tabella puntatori quando nessuna freccia attiva → zero sovrapposizioni */
+  if (!h && !st.showNilLoop) {
+    const lines = pointerSummary(keys, st.skipNext, st.del);
+    const boxY = nodeY + NH + 36;
+    const boxH = 16 + lines.length * 16;
+    svg += `<rect x="100" y="${boxY}" width="520" height="${boxH}" rx="8" fill="${c.bg4}" stroke="${c.border}" stroke-width="1"/>`;
+    svg += `<text x="112" y="${boxY + 16}" fill="${c.dim}" font-size="9" font-weight="700" font-family="Inter">PUNTATORI (nessuna freccia per chiarezza — premi Avanti)</text>`;
+    lines.forEach((ln, i) => {
+      svg += `<text x="120" y="${boxY + 34 + i * 16}" fill="${c.teal}" font-size="11" font-family="JetBrains Mono">${ln}</text>`;
+    });
+  }
+
+  if (st.checkFail) {
+    svg += `<rect x="180" y="6" width="360" height="24" rx="5" fill="rgba(224,108,117,.15)" stroke="${c.red}"/>`;
+    svg += `<text x="360" y="22" text-anchor="middle" fill="${c.red}" font-size="11" font-weight="600" font-family="Inter">14 ≠ 21 → continua il while</text>`;
+  }
+  if (st.found) {
+    svg += `<rect x="200" y="6" width="320" height="24" rx="5" fill="rgba(152,195,121,.15)" stroke="${c.green}"/>`;
+    svg += `<text x="360" y="22" text-anchor="middle" fill="${c.green}" font-size="11" font-weight="600" font-family="Inter">21 = k → return x ✓</text>`;
+  }
+
+  return svg;
+}
+
+function renderPseudo(lines, hl) {
+  document.getElementById('pseudo').innerHTML = lines.map(l => {
+    const cls = hl.includes(l.id) ? 'line hl' : 'line';
+    return `<div class="${cls}">${l.fn ? `<span class="fn">${l.t}</span>` : l.t}</div>`;
+  }).join('');
+}
+
+function renderLegend(items) {
+  document.getElementById('legend').innerHTML = items.map(it =>
+    `<div class="leg-item active">
+      <div class="leg-dot" style="background:${it.color}"></div>
+      <div><strong>${it.name}</strong>${it.text}</div>
+    </div>`
+  ).join('');
+}
+
+function draw() {
+  const op = OPS[currentOp];
+  const st = op.steps[stepIdx];
+  const c = colors();
+
+  document.getElementById('opTitle').textContent = op.title;
+  document.getElementById('svg').innerHTML = renderSvg(st, c);
+  document.getElementById('stepTitle').textContent = st.title;
+  document.getElementById('stepDesc').innerHTML = st.desc;
+  document.getElementById('stepCounter').textContent = `Passo ${stepIdx + 1} / ${op.steps.length}`;
+  document.getElementById('prog').style.width = ((stepIdx + 1) / op.steps.length * 100) + '%';
+  renderPseudo(op.pseudo, st.hl);
+  renderLegend(st.legend);
+
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === op.steps.length - 1;
+  document.getElementById('btnPlay').textContent = timer ? '⏸ Pausa' : '▶ Auto';
+}
+
+function go(n) {
+  stepIdx = Math.max(0, Math.min(OPS[currentOp].steps.length - 1, n));
+  draw();
+}
+
+function stopAuto() {
+  if (timer) { clearInterval(timer); timer = null; }
+}
+
+function switchOp(op) {
+  stopAuto();
+  currentOp = op;
+  stepIdx = 0;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.op === op));
+  draw();
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => switchOp(t.dataset.op);
+});
+document.getElementById('btnNext').onclick = () => { stopAuto(); go(stepIdx + 1); };
+document.getElementById('btnPrev').onclick = () => { stopAuto(); go(stepIdx - 1); };
+document.getElementById('btnReset').onclick = () => { stopAuto(); go(0); };
+document.getElementById('btnPlay').onclick = () => {
+  if (timer) { stopAuto(); draw(); return; }
+  timer = setInterval(() => {
+    if (stepIdx >= OPS[currentOp].steps.length - 1) { stopAuto(); draw(); return; }
+    go(stepIdx + 1);
+  }, 1800);
+  draw();
+};
+
+const tb = document.getElementById('themeToggle');
+const th = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', th);
+tb.textContent = th === 'light' ? '🌙' : '☀';
+tb.onclick = () => {
+  const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('algo-theme', n);
+  tb.textContent = n === 'light' ? '🌙' : '☀';
+  draw();
+};
+
+draw();
+</script>
+<script src="../mobile.js"></script>
+</body>
+</html>

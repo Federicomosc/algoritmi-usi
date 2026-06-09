@@ -6,6 +6,7 @@ Appunti interattivi per il corso di **Algoritmi & Strutture Dati** (Prof. Antoni
 
 - **14 capitoli** HTML con spiegazioni, simulatori e quiz
 - **Guida allo studio** (`guida-studio.html`)
+- **Ripasso pre-esame** (`ripasso-esame.html`) — riassunto ultra-semplificato
 - **Final 2021–2025** con soluzioni passo-passo (`final/`)
 - **PDF** originali del corso nelle cartelle tematiche
 

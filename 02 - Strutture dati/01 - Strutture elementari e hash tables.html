@@ -160,6 +160,12 @@ details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
 @keyframes svg-slide-in { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
 .svg-pulse { animation: svg-pulse 1s ease infinite; }
 .svg-new-key { animation: svg-slide-in .45s ease; }
+.list-pseudo { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.75; background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.list-pseudo .line { padding: 1px 6px; border-radius: 3px; white-space: pre; }
+.list-pseudo .line.hl { background: rgba(198,120,221,.22); color: var(--text-bright); font-weight: 600; }
+.list-pseudo .line.dim { color: var(--text-dim); }
+.list-pseudo .fn { color: var(--blue); }
+.list-playground { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 </style>
 <link rel="stylesheet" href="../mobile.css">
 </head>
@@ -416,6 +422,39 @@ x = L.nil.next
 <span class="fn">List-Delete</span>(L, x)          <span class="cm">← O(1) dato il puntatore a x</span>
 x.prev.next = x.next
 x.next.prev = x.prev</pre>
+
+<div class="interactive-panel svg-anim-panel" id="anim-list">
+  <h4>Simulatore — Lista doppiamente concatenata con sentinella <code>L.nil</code></h4>
+  <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px">Segui l'animazione passo-passo oppure prova tu con <strong>List-Insert</strong>, <strong>List-Search</strong> e <strong>List-Delete</strong>.
+    <a href="lista-sentinella-interattiva.html" style="color:var(--teal);font-weight:600">→ Guida dettagliata interattiva (nuovo)</a></p>
+
+  <div class="grid2" style="align-items:start">
+    <div>
+      <svg id="listSvg" viewBox="0 0 720 290" role="img" aria-label="Lista concatenata con sentinella"></svg>
+      <div class="svg-progress"><div class="svg-progress-bar" id="listSvgProg" style="width:0%"></div></div>
+      <p class="svg-caption" id="listSvgCaption"></p>
+      <div class="btn-row" style="justify-content:center">
+        <button class="primary" id="listSvgPlay">▶ Play</button>
+        <button id="listSvgPrev">◀ Indietro</button>
+        <button id="listSvgNext">Avanti ▶</button>
+        <button id="listSvgReset">↺ Demo</button>
+      </div>
+    </div>
+    <div class="list-pseudo" id="listPseudo"></div>
+  </div>
+
+  <div class="list-playground">
+    <h4 style="font-size:14px;color:var(--teal);margin-bottom:8px">Prova tu</h4>
+    <div class="btn-row">
+      <input type="text" id="listKey" placeholder="chiave (es. 42)" style="width:120px">
+      <button class="primary" id="listInsert">List-Insert</button>
+      <button id="listSearch">List-Search</button>
+      <button id="listDelete">List-Delete</button>
+      <button id="listLiveReset">↺ Reset lista</button>
+    </div>
+    <div class="log-area" id="listLog">Inserisci chiavi per costruire la lista. Insert = in testa O(1).</div>
+  </div>
+</div>
 
 <div class="box box-thm">
   <div class="box-label">Vantaggio della sentinella</div>
@@ -831,7 +870,7 @@ const navObs = new IntersectionObserver(entries => {
 sections.forEach(s => navObs.observe(s));
 
 const themeBtn = document.getElementById('themeToggle');
-let queueSvgAnim, hashSvgAnim;
+let queueSvgAnim, hashSvgAnim, listSvgAnim;
 const saved = localStorage.getItem('algo-theme') || 'dark';
 document.documentElement.setAttribute('data-theme', saved);
 themeBtn.textContent = saved === 'light' ? '🌙' : '☀';
@@ -841,7 +880,7 @@ themeBtn.addEventListener('click', () => {
   localStorage.setItem('algo-theme', next);
   themeBtn.textContent = next === 'light' ? '🌙' : '☀';
   if (alphaChart) buildAlphaChart(+document.getElementById('alphaSlider').value / 2);
-  setTimeout(() => { queueSvgAnim?.redraw(); hashSvgAnim?.redraw(); }, 30);
+  setTimeout(() => { queueSvgAnim?.redraw(); hashSvgAnim?.redraw(); listSvgAnim?.redraw(); listLiveRedraw?.(); }, 30);
 });
 
 /* ── STACK ────────────────────────────────────────── */
@@ -1301,6 +1340,242 @@ hashSvgAnim = makeSvgAnim({
   render: renderHashSvg,
   ids: { svg: 'hashSvg', cap: 'hashSvgCaption', prog: 'hashSvgProg', play: 'hashSvgPlay', prev: 'hashSvgPrev', next: 'hashSvgNext', reset: 'hashSvgReset' }
 });
+
+/* ── SENTINEL LINKED LIST ─────────────────────────── */
+const LIST_PSEUDO_LINES = [
+  { n: 0, t: 'List-Init(L)', fn: true },
+  { n: 1, t: 'L.nil.prev = L.nil' },
+  { n: 2, t: 'L.nil.next = L.nil' },
+  { n: 3, t: '', dim: true },
+  { n: 4, t: 'List-Insert(L, x)    ← O(1)' },
+  { n: 5, t: 'x.next = L.nil.next' },
+  { n: 6, t: 'L.nil.next.prev = x' },
+  { n: 7, t: 'L.nil.next = x' },
+  { n: 8, t: 'x.prev = L.nil' },
+  { n: 9, t: '', dim: true },
+  { n: 10, t: 'List-Search(L, k)    ← O(n)' },
+  { n: 11, t: 'x = L.nil.next' },
+  { n: 12, t: 'while x ≠ L.nil and x.key ≠ k' },
+  { n: 13, t: '    x = x.next' },
+  { n: 14, t: 'return x' },
+  { n: 15, t: '', dim: true },
+  { n: 16, t: 'List-Delete(L, x)    ← O(1)' },
+  { n: 17, t: 'x.prev.next = x.next' },
+  { n: 18, t: 'x.next.prev = x.prev' },
+];
+
+function renderListPseudo(hl) {
+  document.getElementById('listPseudo').innerHTML = LIST_PSEUDO_LINES.map(l => {
+    if (!l.t) return '';
+    const cls = hl && hl.includes(l.n) ? 'line hl' : (l.dim ? 'line dim' : 'line');
+    return `<div class="${cls}">${l.fn ? `<span class="fn">${l.t}</span>` : l.t}</div>`;
+  }).join('');
+}
+
+function renderSentinelListSvg(st, c) {
+  const NW = 54, NH = 46, GAP = 58;
+  const nilX = 36, y = 118;
+  const keys = st.keys || [];
+  const ghost = st.ghost || null;
+  const searchIdx = st.searchIdx ?? -1;
+  const found = st.found;
+  const delKey = st.delKey;
+  const newLinks = st.newLinks || [];
+
+  let svg = `<defs>
+    <marker id="arrNext" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="${c.blue}"/></marker>
+    <marker id="arrPrev" markerWidth="7" markerHeight="7" refX="1" refY="3.5" orient="auto"><path d="M7,0 L0,3.5 L7,7 Z" fill="${c.green}"/></marker>
+    <marker id="arrAccentL" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="${c.accent}"/></marker>
+  </defs>`;
+
+  /* sentinel nil */
+  const nilStroke = st.hlNil ? c.accent : c.dim;
+  svg += `<rect x="${nilX}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="${c.bg4}" stroke="${nilStroke}" stroke-width="2" stroke-dasharray="5 3"/>`;
+  svg += `<text x="${nilX + NW/2}" y="${y + 28}" text-anchor="middle" fill="${c.dim}" font-size="13" font-weight="700" font-family="JetBrains Mono,monospace">nil</text>`;
+  svg += `<text x="${nilX + NW/2}" y="${y - 10}" text-anchor="middle" fill="${c.dim}" font-size="9" font-family="Inter,sans-serif">L.nil</text>`;
+
+  if (keys.length === 0 && !ghost) {
+    svg += `<path d="M ${nilX + NW + 4} ${y + 12} C ${nilX + NW + 28} ${y - 28}, ${nilX - 24} ${y - 28}, ${nilX - 2} ${y + 12}" fill="none" stroke="${c.accent}" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrAccentL)"/>`;
+    svg += `<text x="${nilX + NW/2}" y="${y + NH + 22}" text-anchor="middle" fill="${c.accent}" font-size="10" font-family="Inter,sans-serif">next e prev → nil (lista vuota)</text>`;
+  }
+
+  function nodeX(i) { return nilX + NW + GAP + i * (NW + GAP); }
+
+  keys.forEach((k, i) => {
+    const x = nodeX(i);
+    const isSearch = searchIdx === i;
+    const isFound = found === k;
+    const isDel = delKey === k;
+    let fill = 'rgba(198,120,221,.15)';
+    let stroke = c.accent;
+    if (isDel) { fill = 'rgba(224,108,117,.2)'; stroke = c.red; }
+    else if (isFound) { fill = 'rgba(78,201,168,.25)'; stroke = c.teal; }
+    else if (isSearch) { fill = 'rgba(232,197,71,.2)'; stroke = c.gold || '#e8c547'; }
+    svg += `<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isSearch || isFound || isDel ? 2.5 : 1.5}" class="${ghost && ghost.key === k ? '' : ''}"/>`;
+    svg += `<text x="${x + NW/2}" y="${y + 21}" text-anchor="middle" fill="${c.dim}" font-size="8" font-family="Inter,sans-serif">key</text>`;
+    svg += `<text x="${x + NW/2}" y="${y + 36}" text-anchor="middle" fill="${c.text}" font-size="16" font-weight="700" font-family="JetBrains Mono,monospace">${k}</text>`;
+  });
+
+  if (ghost) {
+    const gx = ghost.atHead ? nodeX(-1) + NW + GAP - 10 : (ghost.floatX || 520);
+    const gy = ghost.floatY || (y - 50);
+    if (ghost.floating) {
+      svg += `<rect x="${gx}" y="${gy}" width="${NW}" height="${NH}" rx="8" fill="rgba(78,201,168,.2)" stroke="${c.teal}" stroke-width="2" class="svg-new-key"/>`;
+      svg += `<text x="${gx + NW/2}" y="${gy + 36}" text-anchor="middle" fill="${c.text}" font-size="16" font-weight="700" font-family="JetBrains Mono,monospace">${ghost.key}</text>`;
+      svg += `<text x="${gx + NW/2}" y="${gy - 8}" text-anchor="middle" fill="${c.teal}" font-size="10" font-family="Inter,sans-serif">nuovo nodo x</text>`;
+    }
+  }
+
+  function arrowNext(x1, x2, yA, hl) {
+    const col = hl ? c.accent : c.blue;
+    svg += `<line x1="${x1}" y1="${yA}" x2="${x2 - 6}" y2="${yA}" stroke="${col}" stroke-width="${hl ? 2.5 : 1.5}" marker-end="url(#arrNext)"/>`;
+  }
+  function arrowPrev(x1, x2, yA, hl) {
+    const col = hl ? c.accent : c.green;
+    svg += `<line x1="${x1}" y1="${yA}" x2="${x2 + 6}" y2="${yA}" stroke="${col}" stroke-width="${hl ? 2.5 : 1.5}" marker-end="url(#arrPrev)"/>`;
+  }
+
+  const yNext = y - 14, yPrev = y + NH + 14;
+
+  if (keys.length > 0 || ghost) {
+    const firstX = keys.length ? nodeX(0) : nilX + NW + GAP;
+    if (keys.length > 0) {
+      arrowNext(nilX + NW, firstX, yNext, newLinks.includes('nil-next'));
+      arrowPrev(firstX, nilX, yPrev, newLinks.includes('first-prev'));
+    }
+    for (let i = 0; i < keys.length - 1; i++) {
+      arrowNext(nodeX(i) + NW, nodeX(i + 1), yNext, false);
+      arrowPrev(nodeX(i + 1), nodeX(i) + NW, yPrev, false);
+    }
+    if (keys.length > 0) {
+      const lastX = nodeX(keys.length - 1);
+      arrowNext(lastX + NW, nilX, yNext, false);
+      arrowPrev(nilX + NW, lastX, yPrev, newLinks.includes('nil-prev'));
+    }
+  }
+
+  if (ghost && ghost.linkNext) {
+    const tx = keys.length ? nodeX(0) : nilX;
+    svg += `<line x1="${ghost.atHead ? nodeX(-1) + NW + GAP + NW/2 : 520}" y1="${ghost.floating ? y - 50 + NH/2 : y + NH/2}" x2="${tx + NW/2}" y2="${yNext - 6}" stroke="${c.teal}" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrAccentL)"/>`;
+    svg += `<text x="${(520 + tx)/2}" y="${yNext - 20}" text-anchor="middle" fill="${c.teal}" font-size="9" font-family="JetBrains Mono,monospace">x.next</text>`;
+  }
+
+  if (st.opLabel) {
+    svg += `<text x="360" y="28" text-anchor="middle" fill="${c.text}" font-size="13" font-weight="600" font-family="Inter,sans-serif">${st.opLabel}</text>`;
+  }
+
+  return svg;
+}
+
+const listAnimSteps = [
+  { keys: [], hlNil: true, hl: [0, 1, 2], opLabel: 'List-Init',
+    caption: '<strong>List-Init:</strong> la sentinella <code>L.nil</code> punta a sé stessa: <code>nil.next = nil</code> e <code>nil.prev = nil</code>. Lista vuota, nessun caso speciale negli Insert.' },
+  { keys: [], ghost: { key: 21, floating: true, floatX: 480, floatY: 48 }, hl: [4], opLabel: 'List-Insert(21)',
+    caption: '<strong>Insert(21):</strong> creiamo il nodo <code>x</code> con <code>x.key = 21</code>. Ora eseguiamo i 4 passi del pseudocodice.' },
+  { keys: [], ghost: { key: 21, floating: true, linkNext: true, atHead: true }, hl: [5], opLabel: 'x.next = L.nil.next',
+    caption: '<strong>Passo 1:</strong> <code>x.next = L.nil.next</code> — il nuovo nodo punta al primo elemento (qui nil, perché lista vuota).' },
+  { keys: [], ghost: { key: 21, atHead: true, floating: false }, newLinks: ['nil-prev'], hl: [6], opLabel: 'L.nil.next.prev = x',
+    caption: '<strong>Passo 2:</strong> <code>L.nil.next.prev = x</code> — il nodo che era dopo nil (nil stesso) aggiorna il suo prev.' },
+  { keys: [21], newLinks: ['nil-next', 'nil-prev'], hl: [7, 8], opLabel: 'L.nil.next = x; x.prev = L.nil',
+    caption: '<strong>Passi 3–4:</strong> <code>L.nil.next = x</code> e <code>x.prev = L.nil</code>. Il nodo 21 è in testa. Lista: nil ↔ 21 ↔ nil.' },
+  { keys: [21], ghost: { key: 14, floating: true, floatX: 200, floatY: 48 }, hl: [4, 5], opLabel: 'List-Insert(14)',
+    caption: '<strong>Insert(14):</strong> stessi 4 passi. <code>x.next = L.nil.next</code> → x punta al 21 (primo nodo).' },
+  { keys: [14, 21], hl: [6, 7, 8], opLabel: 'Dopo Insert(14)',
+    caption: '<strong>Risultato:</strong> nil ↔ 14 ↔ 21 ↔ nil. Ordine di scan: 14, poi 21. Insert sempre <span class="good">O(1)</span>, senza <code>if lista vuota</code>.' },
+  { keys: [14, 21], searchIdx: 0, hl: [10, 11, 12], opLabel: 'List-Search(21)',
+    caption: '<strong>Search(21):</strong> parto da <code>x = L.nil.next</code> (14). <code>14 ≠ 21</code> → avanzo con <code>x = x.next</code>.' },
+  { keys: [14, 21], searchIdx: 1, found: 21, hl: [12, 14], opLabel: 'Search — trovato!',
+    caption: '<strong>Search(21):</strong> ora <code>x.key = 21</code> → ritorno x. Costo = numero nodi visitati.' },
+  { keys: [14, 21], searchIdx: 0, hl: [11, 12, 13], opLabel: 'List-Search(99)',
+    caption: '<strong>Search(99):</strong> visito 14… poi 21… <code>x = nil</code> → non trovato. Worst-case <span class="cx cx-n">Θ(n)</span>.' },
+  { keys: [14, 21], delKey: 14, hl: [16, 17, 18], opLabel: 'List-Delete(14)',
+    caption: '<strong>Delete(14):</strong> <code>x.prev.next = x.next</code> (nil → 21) e <code>x.next.prev = x.prev</code> (21 → nil). Due assegnazioni, <span class="good">O(1)</span>.' },
+  { keys: [21], hl: [16], opLabel: 'Dopo Delete(14)',
+    caption: '<strong>Lista aggiornata:</strong> nil ↔ 21 ↔ nil. Il nodo 14 non è più raggiungibile da nil — è stato «scollegato».' },
+  { keys: [], hl: [0, 1, 2], hlNil: true, opLabel: 'Delete(21) → vuota',
+    caption: '<strong>Delete(21):</strong> lista di nuovo vuota. <code>nil.next = nil</code>. Stesso codice Insert/Delete funziona sempre — ecco il vantaggio della sentinella.' },
+];
+
+function renderListAnimStep(st, idx, total, c) {
+  renderListPseudo(st.hl);
+  return renderSentinelListSvg(st, c);
+}
+
+listSvgAnim = makeSvgAnim({
+  steps: listAnimSteps,
+  render: renderListAnimStep,
+  ids: { svg: 'listSvg', cap: 'listSvgCaption', prog: 'listSvgProg', play: 'listSvgPlay', prev: 'listSvgPrev', next: 'listSvgNext', reset: 'listSvgReset' }
+});
+['listSvgPlay', 'listSvgPrev', 'listSvgNext', 'listSvgReset'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => { listLiveMode = false; });
+});
+
+/* Live playground (separate from demo animation) */
+let listLiveKeys = [];
+let listLiveMode = false;
+
+function listLiveRedraw() {
+  if (!listLiveMode) return;
+  const c = svgColors();
+  const st = { keys: [...listLiveKeys], opLabel: 'La tua lista' };
+  document.getElementById('listSvg').innerHTML = renderSentinelListSvg(st, c);
+  renderListPseudo([]);
+}
+
+function listLog(msg) {
+  const el = document.getElementById('listLog');
+  el.textContent = msg + '\n' + el.textContent.split('\n').slice(0, 3).join('\n');
+}
+
+document.getElementById('listInsert').onclick = () => {
+  listLiveMode = true;
+  listSvgAnim.stop();
+  const k = document.getElementById('listKey').value.trim();
+  if (!k) return;
+  listLiveKeys.unshift(isNaN(+k) ? k : +k);
+  listLog(`List-Insert: ${k} in testa → [${listLiveKeys.join(', ')}]`);
+  listLiveRedraw();
+};
+document.getElementById('listSearch').onclick = () => {
+  listLiveMode = true;
+  listSvgAnim.stop();
+  const k = document.getElementById('listKey').value.trim();
+  if (!k) return;
+  const key = isNaN(+k) ? k : +k;
+  const idx = listLiveKeys.indexOf(key);
+  const c = svgColors();
+  if (idx >= 0) {
+    listLog(`List-Search(${k}): trovato al nodo ${idx + 1} (costo ${idx + 1})`);
+    document.getElementById('listSvg').innerHTML = renderSentinelListSvg({ keys: listLiveKeys, searchIdx: idx, found: key, opLabel: `Search(${k}) ✓` }, c);
+  } else {
+    listLog(`List-Search(${k}): scansionati ${listLiveKeys.length} nodi → nil (non trovato)`);
+    document.getElementById('listSvg').innerHTML = renderSentinelListSvg({ keys: listLiveKeys, searchIdx: listLiveKeys.length - 1, opLabel: `Search(${k}) ✗` }, c);
+  }
+  renderListPseudo([10, 11, 12, 13, 14]);
+};
+document.getElementById('listDelete').onclick = () => {
+  listLiveMode = true;
+  listSvgAnim.stop();
+  const k = document.getElementById('listKey').value.trim();
+  if (!k) return;
+  const key = isNaN(+k) ? k : +k;
+  const idx = listLiveKeys.indexOf(key);
+  if (idx < 0) { listLog(`List-Delete(${k}): chiave non in lista`); return; }
+  const c = svgColors();
+  document.getElementById('listSvg').innerHTML = renderSentinelListSvg({ keys: [...listLiveKeys], delKey: key, opLabel: `Delete(${k})` }, c);
+  listLiveKeys.splice(idx, 1);
+  listLog(`List-Delete(${k}): x.prev.next = x.next; x.next.prev = x.prev`);
+  setTimeout(listLiveRedraw, 700);
+  renderListPseudo([16, 17, 18]);
+};
+document.getElementById('listLiveReset').onclick = () => {
+  listLiveKeys = [];
+  listLiveMode = false;
+  listLog('Reset lista live.');
+  listSvgAnim.stop();
+  document.getElementById('listSvgReset').click();
+};
+renderListPseudo(listAnimSteps[0].hl);
 </script>
 <script src="../mobile.js"></script>
 </body>

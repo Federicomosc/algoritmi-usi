@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENQUEUE — Coda circolare animata</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8f9fc; --panel:#fff; --border:#c8cdd8; --text:#1a1a2e;
+  --dim:#5a6278; --blue:#2563eb; --blue-light:#dbeafe;
+  --highlight:#fef08a; --green:#16a34a; --red:#dc2626;
+  --cell-w:52px; --cell-h:56px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px 20px 40px}
+.wrap{max-width:920px;margin:0 auto}
+h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.sub{color:var(--dim);font-size:14px;margin-bottom:24px}
+.sub a{color:var(--blue)}
+
+.layout{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+@media(max-width:780px){.layout{grid-template-columns:1fr}}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+
+/* ── Array diagram ── */
+.diagram-wrap{overflow-x:auto;padding:8px 0 16px}
+.diagram{position:relative;padding:36px 12px 52px;min-width:680px}
+.cells{display:flex;gap:4px;justify-content:center}
+.cell{
+  width:var(--cell-w);height:var(--cell-h);
+  border:2px solid var(--border);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;
+  position:relative;transition:background .35s,border-color .35s,transform .25s;
+}
+.cell.empty{
+  background:repeating-linear-gradient(
+    -45deg, transparent, transparent 4px,
+    rgba(0,0,0,.07) 4px, rgba(0,0,0,.07) 5px
+  );
+  background-color:#e8eaef;
+}
+.cell.occupied{background:#fff;color:var(--text)}
+.cell.active-write{
+  border-color:var(--green);background:#dcfce7;
+  transform:scale(1.08);box-shadow:0 0 0 3px rgba(22,163,74,.25);
+}
+.cell.active-tail{border-color:var(--blue);box-shadow:0 0 0 2px rgba(37,99,235,.3)}
+.cell-index{
+  position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+  font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;
+}
+
+/* Pointers */
+.pointers{position:relative;height:32px;margin-top:4px}
+.ptr{
+  position:absolute;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  transition:left .45s cubic-bezier(.4,0,.2,1);
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--blue);
+}
+.ptr .arrow{font-size:20px;line-height:1}
+.ptr.head{bottom:0}
+.ptr.tail{top:-28px;flex-direction:column-reverse}
+.ptr.tail .arrow{transform:rotate(180deg)}
+
+/* Status badges */
+.status{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+.badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace}
+.badge.true{background:#fee2e2;color:var(--red)}
+.badge.false{background:#f1f5f9;color:var(--dim)}
+
+/* Step description */
+.step-desc{
+  background:#f1f5f9;border-radius:8px;padding:14px 16px;
+  font-size:14px;line-height:1.55;min-height:72px;margin-top:12px;
+  border-left:3px solid var(--blue);
+}
+.step-desc strong{color:var(--blue)}
+
+/* Pseudocode */
+.pseudo{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7}
+.pseudo .line{padding:2px 8px;border-radius:4px;white-space:pre-wrap}
+.pseudo .line.hl{background:var(--highlight);font-weight:600}
+.pseudo .line.dim{color:var(--dim)}
+.pseudo .kw{color:#7c3aed}
+.pseudo .fn{color:var(--blue)}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+button{
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+  padding:9px 18px;border-radius:8px;border:1px solid var(--border);
+  background:#fff;cursor:pointer;transition:all .15s;
+}
+button:hover{background:#f1f5f9}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+button.primary:hover{background:#1d4ed8}
+button:disabled{opacity:.4;cursor:not-allowed}
+.step-counter{font-size:12px;color:var(--dim);margin-top:10px;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ENQUEUE(Q, x) — Coda circolare</h1>
+  <p class="sub">Animazione passo-passo come nella presentazione · <a href="esercizi.py">esercizi.py</a> · <a href="../index.html">Indice</a></p>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="diagram-wrap">
+        <div class="diagram" id="diagram">
+          <div class="cells" id="cells"></div>
+          <div class="pointers" id="pointers"></div>
+        </div>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="step-desc" id="stepDesc"></div>
+
+      <div class="controls">
+        <button id="btnPrev">← Indietro</button>
+        <button id="btnNext" class="primary">Avanti →</button>
+        <button id="btnPlay">▶ Auto</button>
+        <button id="btnReset">↺ Reset</button>
+      </div>
+      <div class="step-counter" id="stepCounter"></div>
+    </div>
+
+    <div class="panel">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:10px">PSEUDOCODICE</div>
+      <div class="pseudo" id="pseudo"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LENGTH = 12;
+
+const PSEUDO = [
+  { line: 1, text: 'ENQUEUE(Q, x)' },
+  { line: 2, text: '1  if Q.queue-full' },
+  { line: 3, text: '2      error "overflow"' },
+  { line: 4, text: '3  Q[Q.tail] = x' },
+  { line: 5, text: '4  if Q.tail < Q.length' },
+  { line: 6, text: '5      Q.tail = Q.tail + 1' },
+  { line: 7, text: '6  else' },
+  { line: 8, text: '7      Q.tail = 1' },
+  { line: 9, text: '8  if Q.tail == Q.head' },
+  { line: 10, text: '9      Q.queue-full = TRUE' },
+  { line: 11, text: '10 Q.queue-empty = FALSE' },
+];
+
+function cloneState(s) {
+  return { Q: [...s.Q], head: s.head, tail: s.tail, queue_empty: s.queue_empty, queue_full: s.queue_full };
+}
+
+function initialDiagramState() {
+  const Q = new Array(LENGTH + 1).fill(null);
+  ['A','B','C','D','E','F'].forEach((v, i) => { Q[6 + i] = v; });
+  return { Q, head: 6, tail: 12, queue_empty: false, queue_full: false };
+}
+
+function buildSteps() {
+  const steps = [];
+  let s = initialDiagramState();
+
+  function snap(desc, hl, extra = {}) {
+    steps.push({ state: cloneState(s), desc, hl, op: extra.op || null, writeIdx: extra.writeIdx ?? null, ...extra });
+  }
+
+  // ── ENQUEUE(G) ──
+  snap('Stato iniziale del diagramma: head=6, tail=12. Elementi A…F negli slot 6–11. Prossimo inserimento nello slot 12.', [], { label: 'Inizio' });
+
+  snap('ENQUEUE(Q, \'G\'): riga 1 — controllo overflow. queue-full = FALSE → possiamo inserire.', [2], { label: 'ENQUEUE(G) — check' });
+
+  s.Q[s.tail] = 'G';
+  snap('Riga 3: Q[Q.tail] = x → scriviamo \'G\' in Q[12].', [4], { op: 'write', writeIdx: 12, label: 'ENQUEUE(G) — scrivi' });
+
+  const tailBefore = s.tail;
+  s.tail = s.tail < LENGTH ? s.tail + 1 : 1;
+  snap(`Riga 4–5: tail (${tailBefore}) < length (${LENGTH}) → tail = ${s.tail}.`, [5, 6], { label: 'ENQUEUE(G) — avanza tail' });
+
+  if (s.tail === s.head) s.queue_full = true;
+  snap(`Riga 8: tail (${s.tail}) ≠ head (${s.head}) → coda non piena.`, [9], { label: 'ENQUEUE(G) — check full' });
+
+  s.queue_empty = false;
+  snap('Riga 10: queue-empty = FALSE. Inserimento completato.', [11], { label: 'ENQUEUE(G) — fine' });
+
+  // ── ENQUEUE(H) ──
+  snap('ENQUEUE(Q, \'H\'): controllo overflow — OK.', [2], { label: 'ENQUEUE(H) — check' });
+
+  s.Q[s.tail] = 'H';
+  snap('Riga 3: Q[1] = \'H\' — tail era 1, scriviamo nello slot 1 (wrap-around!).', [4], { op: 'write', writeIdx: 1, label: 'ENQUEUE(H) — scrivi' });
+
+  const tb2 = s.tail;
+  s.tail = s.tail < LENGTH ? s.tail + 1 : 1;
+  snap(`Riga 4–5: tail = ${tb2} + 1 = ${s.tail}.`, [5, 6], { label: 'ENQUEUE(H) — avanza tail' });
+
+  if (s.tail === s.head) s.queue_full = true;
+  snap(`Riga 8–10: tail ≠ head, queue-empty = FALSE. Coda: A…G negli slot 6–12, H nello slot 1.`, [9, 11], { label: 'ENQUEUE(H) — fine' });
+
+  // ── DEQUEUE (bonus) ──
+  snap('DEQUEUE(Q): estraiamo da head=6 → restituisce \'A\'.', [], { label: 'DEQUEUE — inizio' });
+  s.Q[s.head] = null;
+  s.head = s.head < LENGTH ? s.head + 1 : 1;
+  if (s.head === s.tail) s.queue_empty = true;
+  s.queue_full = false;
+  snap(`head avanza a ${s.head}. Primo elemento ora è 'B'.`, [], { label: 'DEQUEUE — fine' });
+
+  return steps;
+}
+
+const STEPS = buildSteps();
+let stepIdx = 0;
+let autoTimer = null;
+
+function isOccupied(state, i) {
+  if (state.queue_empty) return false;
+  if (state.queue_full) return true;
+  const { head, tail } = state;
+  if (head < tail) return i >= head && i < tail;
+  return i >= head || i < tail;
+}
+
+function cellLeft(i) {
+  const cells = document.getElementById('cells');
+  const cell = cells.children[i - 1];
+  if (!cell) return 0;
+  const diagram = document.getElementById('diagram');
+  const dRect = diagram.getBoundingClientRect();
+  const cRect = cell.getBoundingClientRect();
+  return cRect.left - dRect.left + cRect.width / 2;
+}
+
+function renderPseudo(hlLines) {
+  const el = document.getElementById('pseudo');
+  el.innerHTML = PSEUDO.map(p => {
+    const cls = hlLines.includes(p.line) ? 'line hl' : (p.line === 1 ? 'line dim' : 'line');
+    return `<div class="${cls}">${p.text}</div>`;
+  }).join('');
+}
+
+function renderStatus(state) {
+  document.getElementById('status').innerHTML = `
+    <span class="badge ${state.queue_full}">queue-full = ${state.queue_full ? 'TRUE' : 'FALSE'}</span>
+    <span class="badge ${state.queue_empty}">queue-empty = ${state.queue_empty ? 'TRUE' : 'FALSE'}</span>
+    <span class="badge false">head = ${state.head}</span>
+    <span class="badge false">tail = ${state.tail}</span>
+  `;
+}
+
+function render(step) {
+  const { state, desc, hl, writeIdx, label } = step;
+  const cellsEl = document.getElementById('cells');
+
+  cellsEl.innerHTML = '';
+  for (let i = 1; i <= LENGTH; i++) {
+    const occ = isOccupied(state, i);
+    const div = document.createElement('div');
+    div.className = 'cell' + (occ ? ' occupied' : ' empty');
+    if (writeIdx === i) div.classList.add('active-write');
+    else if (state.tail === i && step.op !== 'write') div.classList.add('active-tail');
+    div.textContent = state.Q[i] || '';
+    const idx = document.createElement('span');
+    idx.className = 'cell-index';
+    idx.textContent = i;
+    div.appendChild(idx);
+    cellsEl.appendChild(div);
+  }
+
+  requestAnimationFrame(() => {
+    const ptrEl = document.getElementById('pointers');
+    ptrEl.innerHTML = `
+      <div class="ptr head" style="left:${cellLeft(state.head)}px">
+        <span>Q.head</span><span class="arrow">↑</span>
+      </div>
+      <div class="ptr tail" style="left:${cellLeft(state.tail)}px">
+        <span>Q.tail</span><span class="arrow">↑</span>
+      </div>
+    `;
+  });
+
+  renderStatus(state);
+  renderPseudo(hl || []);
+  document.getElementById('stepDesc').innerHTML = label
+    ? `<strong>${label}</strong><br>${desc}`
+    : desc;
+  document.getElementById('stepCounter').textContent =
+    `Passo ${stepIdx + 1} / ${STEPS.length}`;
+
+  document.getElementById('btnPrev').disabled = stepIdx === 0;
+  document.getElementById('btnNext').disabled = stepIdx === STEPS.length - 1;
+}
+
+function goTo(i) {
+  stepIdx = Math.max(0, Math.min(STEPS.length - 1, i));
+  render(STEPS[stepIdx]);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  document.getElementById('btnPlay').textContent = '▶ Auto';
+}
+
+document.getElementById('btnNext').onclick = () => { stopAuto(); goTo(stepIdx + 1); };
+document.getElementById('btnPrev').onclick = () => { stopAuto(); goTo(stepIdx - 1); };
+document.getElementById('btnReset').onclick = () => { stopAuto(); goTo(0); };
+document.getElementById('btnPlay').onclick = () => {
+  if (autoTimer) { stopAuto(); return; }
+  document.getElementById('btnPlay').textContent = '⏸ Pausa';
+  autoTimer = setInterval(() => {
+    if (stepIdx >= STEPS.length - 1) { stopAuto(); return; }
+    goTo(stepIdx + 1);
+  }, 1400);
+};
+
+window.addEventListener('resize', () => render(STEPS[stepIdx]));
+goTo(0);
+</script>
+</body>
+</html>
