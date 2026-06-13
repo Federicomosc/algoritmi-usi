@@ -209,6 +209,27 @@ details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
   Un algoritmo <strong>greedy</strong> (vorace) risolve un problema facendo, a ogni passo, la scelta che <em>sembra</em> migliore <strong>adesso</strong>, senza tornare indietro. Funziona solo se il problema ha la <strong>greedy-choice property</strong> (una scelta locale porta sempre a una soluzione globale) e la <strong>optimal-substructure property</strong> (il sottoproblema residuo ha la stessa struttura). L'MST con <code>GENERIC-MST</code> è il modello: si aggiunge l'arco più leggero «sicuro». Ma attenzione: il greedy <span class="bad">fallisce</span> su resto monete (senza nickels) e sullo zaino 0-1, mentre funziona su knapsack frazionario, activity selection e Huffman.
 </div>
 
+<div class="box box-ex">
+  <div class="box-label">Prima di tutto: un mini-esempio greedy (scelta delle attività)</div>
+  <p style="margin-top:0">«Greedy» vuol dire: <strong>a ogni passo prendo la scelta che conviene di più <em>ora</em>, e non ci ripenso più</strong>. Vediamolo sul problema classico: hai <strong>una sola aula</strong> e tante attività, ognuna con un orario di inizio e fine. Vuoi far entrare il <strong>maggior numero possibile</strong> di attività senza sovrapposizioni.</p>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th>Attività</th><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td></tr>
+  <tr><th>Inizio</th><td>1</td><td>2</td><td>4</td><td>5</td><td>6</td></tr>
+  <tr><th>Fine</th><td>3</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+  </table>
+  </div>
+  <p>La mossa greedy giusta qui è: <strong>scegli sempre l'attività che finisce prima</strong>. Perché? Perché chi finisce presto «libera l'aula» prima, lasciando più spazio alle altre. Quindi prima ordino per orario di <em>fine</em> (sono già in ordine: A=3, B=5, C=6, D=7, E=8) e poi scorro:</p>
+  <ol class="steps">
+    <li>Prendo <code>A</code> (finisce alle 3). È la prima, la tengo. L'aula si libera alle <strong>3</strong>.</li>
+    <li><code>B</code> inizia alle 2, ma l'aula è occupata fino alle 3 → si sovrappone → <strong>scarto</strong>.</li>
+    <li><code>C</code> inizia alle 4, l'aula è libera dalle 3 → ci sta → la tengo. Aula libera alle <strong>6</strong>.</li>
+    <li><code>D</code> inizia alle 5 &lt; 6 → si sovrappone → <strong>scarto</strong>.</li>
+    <li><code>E</code> inizia alle 6, l'aula è libera dalle 6 → ci sta → la tengo. Fine.</li>
+  </ol>
+  <p style="margin-bottom:0">Risultato: <code>A, C, E</code> → <strong>3 attività</strong>, il massimo possibile. La regola «scegli chi finisce prima» è semplice ma dimostrabilmente <em>ottima</em> per questo problema. <strong>Però attenzione:</strong> il greedy non è sempre giusto. Es. per dare un resto di 30 centesimi con monete da 25, 10, 1, il greedy fa <code>25+1+1+1+1+1</code> (6 monete), mentre la soluzione migliore è <code>10+10+10</code> (3 monete). Per questo serve sempre <em>dimostrare</em> che la scelta greedy porta all'ottimo, prima di fidarsi.</p>
+</div>
+
 <!-- ═══ 1. RECAP MST ═══ -->
 <section id="s1">
 <h2><span class="num">1</span>Recap MST → cos'è il greedy</h2>

@@ -223,6 +223,35 @@ details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
   <p>La <strong>programmazione dinamica</strong> (DP) risolve problemi di <em>ottimizzazione</em> spezzandoli in sottoproblemi più piccoli e <strong>ricordando le risposte già calcolate</strong>. Il nome non significa «scrivere un programma»: negli anni '50 «programming» voleva dire <em>pianificazione</em>. L'idea chiave: quando risolvi un sottoproblema, <strong>salvi il risultato in una tabella</strong> così non lo ricalcoli. Serve quando i sottoproblemi si <strong>sovrappongono</strong> (come in Fibonacci) e quando vale la <strong>optimal substructure</strong> (la soluzione ottima del problema grande si costruisce da soluzioni ottime dei pezzi).</p>
 </div>
 
+<div class="box box-ex">
+  <div class="box-label">Prima di tutto: capiamo la DP con Fibonacci (l'esempio più semplice)</div>
+  <p style="margin-top:0">I numeri di Fibonacci si definiscono così: <code>fib(0)=0</code>, <code>fib(1)=1</code>, e ogni numero è la somma dei due precedenti: <code>fib(n) = fib(n−1) + fib(n−2)</code>. Sembra facile da calcolare con la ricorsione… ma c'è una trappola.</p>
+  <p><strong>Il problema della ricorsione «ingenua».</strong> Per calcolare <code>fib(5)</code> servono <code>fib(4)</code> e <code>fib(3)</code>; ma <code>fib(4)</code> a sua volta richiede di nuovo <code>fib(3)</code>… e così via. Lo stesso conto viene rifatto <strong>tante volte</strong>:</p>
+  <pre style="font-size:12px;padding:14px">fib(5)
+├─ fib(4)
+│  ├─ fib(3)        ← calcolato qui...
+│  │  ├─ fib(2)
+│  │  └─ fib(1)
+│  └─ fib(2)        ← ...e di nuovo qui
+└─ fib(3)           ← ...e ANCORA da capo qui!</pre>
+  <p>Più <code>n</code> cresce, più questo spreco esplode (tempo esponenziale). <strong>L'idea della DP</strong> è banale ma potentissima: <em>calcola ogni <code>fib(k)</code> una sola volta e scrivilo in una tabella</em>. Quando ti serve di nuovo, lo <strong>leggi</strong> invece di ricalcolarlo.</p>
+  <p>Riempiamo la tabella dal piccolo verso il grande («bottom-up»). Partiamo dai due valori noti e poi ogni cella è la somma delle due a sinistra:</p>
+  <div class="tbl-wrap">
+  <table>
+  <tr><th><code>n</code></th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+  <tr><th><code>fib[n]</code></th><td>0</td><td>1</td><td><mark class="mark">1</mark></td><td><mark class="mark">2</mark></td><td><mark class="mark">3</mark></td><td><mark class="mark">5</mark></td></tr>
+  </table>
+  </div>
+  <ol class="steps">
+    <li><code>fib[0]=0</code>, <code>fib[1]=1</code> → li so già (casi base).</li>
+    <li><code>fib[2] = fib[1]+fib[0] = 1+0 = 1</code>. Lo scrivo in tabella.</li>
+    <li><code>fib[3] = fib[2]+fib[1] = 1+1 = 2</code>.</li>
+    <li><code>fib[4] = fib[3]+fib[2] = 2+1 = 3</code>.</li>
+    <li><code>fib[5] = fib[4]+fib[3] = 3+2 = 5</code>. Risposta: <strong>5</strong>.</li>
+  </ol>
+  <p style="margin-bottom:0">Ogni casella calcolata <strong>una volta sola</strong>, guardando solo quelle già pronte: da tempo esponenziale a tempo lineare. <strong>Questa è tutta la DP.</strong> Ogni problema più difficile (zaino, LIS, edit distance…) è la stessa ricetta in 3 mosse: <strong>(1)</strong> definisci cosa significa una casella della tabella, <strong>(2)</strong> trova la formula che lega una casella a quelle più piccole, <strong>(3)</strong> riempi la tabella dal piccolo al grande e leggi il risultato finale.</p>
+</div>
+
 
 <!-- ════════════════════════════════════════════════════ -->
 <section id="s1">

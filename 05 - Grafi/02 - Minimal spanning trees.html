@@ -208,6 +208,23 @@ details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
   Dato un <strong>grafo pesato connesso</strong> <code>G = (V, E)</code> con funzione peso <code>w : E → ℝ</code>, un <strong>minimum spanning tree</strong> (MST) è un sottoinsieme aciclico <code>T ⊆ E</code> che <em>copre</em> tutti i vertici (spanning tree) minimizzando <code>w(T) = Σ<sub>(u,v)∈T</sub> w(u,v)</code>. L'approccio delle slide è <strong>greedy</strong>: si aggiunge un arco alla volta, scegliendo sempre un <strong>safe edge</strong> — l'arco di peso minimo che attraversa un <strong>cut</strong> rispettato dall'insieme parziale <code>A</code>. <strong>Kruskal</strong> ordina gli archi e unisce componenti con <strong>Union-Find</strong>; <strong>Prim</strong> fa crescere un singolo albero <code>T</code> aggiornando <code>W[v]</code> e <code>P[v]</code>.
 </div>
 
+<div class="box box-ex">
+  <div class="box-label">Prima di tutto: cos'è un MST, con un mini-esempio (4 nodi)</div>
+  <p style="margin-top:0">In parole povere: hai delle città e delle strade, ognuna con un costo. Vuoi <strong>collegarle tutte spendendo il meno possibile</strong>, senza costruire strade inutili (cioè senza formare anelli/cicli). Quel insieme di strade più economico è l'MST.</p>
+  <p>Esempio con 4 città e i costi delle strade:</p>
+  <pre style="font-size:12px;padding:14px">A–B: 1     B–C: 2     A–C: 3     C–D: 4     B–D: 5</pre>
+  <p>Usiamo <strong>Kruskal</strong>, che è il metodo più facile da seguire a mano. La regola è una sola, ripetuta: <em>«prendi la strada più economica rimasta; aggiungila solo se NON crea un anello»</em>.</p>
+  <ol class="steps">
+    <li>Ordino le strade dal costo più basso: <code>AB(1), BC(2), AC(3), CD(4), BD(5)</code>.</li>
+    <li><code>AB(1)</code>: aggiungo. Per ora <code>A</code> e <code>B</code> sono collegati. ✓</li>
+    <li><code>BC(2)</code>: aggiungo, collega <code>C</code> al gruppo. Ora <code>A,B,C</code> sono insieme. ✓</li>
+    <li><code>AC(3)</code>: <code>A</code> e <code>C</code> sono <em>già</em> nello stesso gruppo → aggiungerla creerebbe un <strong>anello</strong> → la <strong>scarto</strong>. ✗</li>
+    <li><code>CD(4)</code>: aggiungo, collega <code>D</code>. Ora tutte e 4 le città sono connesse. ✓</li>
+    <li>Mi fermo: con 4 città servono esattamente <strong>3 strade</strong> (regola: <code>n−1</code> archi). Le ho.</li>
+  </ol>
+  <p style="margin-bottom:0">MST trovato: <code>AB + BC + CD</code>, costo totale <code>1 + 2 + 4 = <strong>7</strong></code>. Il passo da capire è il <strong>n°4</strong>: <code>AC</code> costava poco (3), ma <code>A</code> e <code>C</code> erano già collegati, quindi quella strada era inutile e l'abbiamo saltata. È tutto qui il «greedy» dell'MST: <em>strada più economica che aggiunge davvero qualcosa</em>. (Prim arriva allo stesso albero, ma fa crescere un unico gruppo da un nodo di partenza invece di ordinare tutte le strade.)</p>
+</div>
+
 <!-- ═══ 1. PROBLEMA MST ═══ -->
 <section id="s1">
 <h2><span class="num">01</span>Problema MST</h2>

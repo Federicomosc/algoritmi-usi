@@ -198,6 +198,29 @@ details .sol-body { padding: 0 16px 16px; border-top: 1px solid var(--border); }
   Dato un grafo <strong>pesato</strong> con pesi <strong>non negativi</strong> e un nodo sorgente <code>u</code>, Dijkstra calcola il <em>costo minimo</em> di un cammino da <code>u</code> a ogni altro vertice. L'idea è <strong>molto simile a Prim</strong>: si espande un insieme <code>N</code> di nodi «visitati definitivamente», scegliendo ogni volta il nodo fuori da <code>N</code> con distanza minima provvisoria <code>D[v]</code>, poi si <strong>rilassano</strong> i vicini. A differenza di Prim, però, si sommano i pesi lungo un <em>cammino</em> (non si cerca un albero di copertura minima).
 </div>
 
+<div class="box box-ex">
+  <div class="box-label">Prima di tutto: capiamolo con un mini-esempio (solo 3 nodi)</div>
+  <p style="margin-top:0">Immagina 3 città <code>A</code>, <code>B</code>, <code>C</code>. I numeri sono i km di ogni strada. Parti da <code>A</code> e vuoi sapere la distanza <strong>più corta</strong> per arrivare in ognuna.</p>
+  <pre style="font-size:12px;padding:14px">strade:   A —1→ B      A —4→ C      B —2→ C</pre>
+  <p>Teniamo una sola cosa in mente: <code>D[x]</code> = «la distanza più corta che ho trovato <em>finora</em> per arrivare a <code>x</code>». All'inizio conosciamo solo <code>D[A] = 0</code> (siamo già lì); per tutti gli altri scriviamo <code>∞</code>, che significa «non ci sono ancora arrivato».</p>
+  <ol class="steps">
+    <li><strong>Parto da A.</strong> Tra i nodi non ancora «sicuri», prendo quello con <code>D</code> più piccola: è <code>A</code> (D=0). Guardo dove posso andare: a <code>B</code> in 1 km e a <code>C</code> in 4 km. Quindi <code>D[B] = 0+1 = 1</code> e <code>D[C] = 0+4 = 4</code>. <code>A</code> è ora definitivo.</li>
+    <li><strong>Prendo il più vicino rimasto: B</strong> (D=1, più piccolo di 4). Lo dichiaro definitivo: <code>D[B]=1</code> non cambierà più. Da <code>B</code> posso andare a <code>C</code> in 2 km: il cammino <code>A→B→C</code> costa <code>1+2 = 3</code>, <strong>meno</strong> dei 4 km della strada diretta! Allora aggiorno <code>D[C] = 3</code>. ← <em>questo aggiornamento si chiama «relax»</em>.</li>
+    <li><strong>Resta solo C</strong> (D=3). Lo dichiaro definitivo. Non ci sono altri nodi da migliorare.</li>
+    <li><strong>Fatto.</strong> Distanze minime da <code>A</code>: <code>A=0</code>, <code>B=1</code>, <code>C=3</code>.</li>
+  </ol>
+  <div class="tbl-wrap" style="margin-top:12px">
+  <table>
+  <tr><th>Dopo aver fissato…</th><th>D[A]</th><th>D[B]</th><th>D[C]</th></tr>
+  <tr><td>inizio</td><td>0</td><td>∞</td><td>∞</td></tr>
+  <tr><td>A</td><td>0</td><td>1</td><td>4</td></tr>
+  <tr><td>B</td><td>0</td><td>1</td><td><mark class="mark">3</mark> ← migliorato!</td></tr>
+  <tr><td>C</td><td>0</td><td>1</td><td>3</td></tr>
+  </table>
+  </div>
+  <p style="margin-bottom:0">Il momento da capire è il <strong>passo 2</strong>: la strada diretta <code>A→C</code> sembrava la migliore (4 km), ma passando da <code>B</code> arriviamo in 3 km. «Rilassare» vuol dire esattamente questo: <em>ho scoperto una scorciatoia, quindi abbasso la distanza</em>. Tutto Dijkstra è ripetere questi due gesti — «prendi il più vicino non ancora fissato» e «prova a migliorare i suoi vicini» — finché non hai sistemato tutti i nodi. L'esempio grande qui sotto (§5) fa la stessa identica cosa, solo con 12 nodi.</p>
+</div>
+
 <!-- ═══ 1. PROBLEMA ═══ -->
 <section id="s1">
 <h2><span class="num">01</span>Problema — cammini minimi da sorgente</h2>

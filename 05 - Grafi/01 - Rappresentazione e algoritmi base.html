@@ -211,6 +211,34 @@ html[data-theme="light"] .nav-link.active { background: rgba(42,108,184,.07); }
   Un <strong>grafo</strong> <code>G = (V, E)</code> modella relazioni tra entità: cantoni confinanti, social network, dipendenze software. In memoria si sceglie tra <strong>lista di adiacenza</strong> (<span class="cx cx-log">Θ(|V|+|E|)</span> spazio, ottima per grafi <em>sparsi</em>) e <strong>matrice di adiacenza</strong> (<span class="cx cx-n">Θ(|V|²)</span>, ottima per accesso casuale agli archi). <strong>BFS</strong> esplora a strati con una coda, calcola distanze e costruisce un albero BFS in <span class="cx cx-log">O(|V|+|E|)</span>. <strong>DFS</strong> segue il ramo più profondo e fa backtrack, producendo una foresta DFS con timestamp <code>d[]</code> e <code>f[]</code>. Su un <strong>DAG</strong>, l'<strong>ordinamento topologico</strong> si ottiene con DFS + output in ordine decrescente di <code>f[]</code>.
 </div>
 
+<div class="box box-ex">
+  <div class="box-label">Prima di tutto: BFS e DFS su un mini-grafo (5 nodi)</div>
+  <p style="margin-top:0">BFS e DFS sono due modi di <strong>visitare tutti i nodi</strong> partendo da uno. La differenza è solo <em>l'ordine</em> in cui li visiti. Usiamo questo grafo, partendo dal nodo <code>1</code>:</p>
+  <pre style="font-size:12px;padding:14px">1 — 2        vicini:
+|   |          1: 2, 3
+3 — 4 — 5      2: 1, 4      3: 1, 4      4: 2, 3, 5      5: 4</pre>
+
+  <p><strong>BFS = «a cerchi concentrici».</strong> Visiti prima tutti i vicini diretti, poi i vicini dei vicini, ecc. Usi una <strong>coda</strong> (chi entra prima esce prima):</p>
+  <ol class="steps">
+    <li>Parto da <code>1</code>, lo metto in coda. Coda: <code>[1]</code>.</li>
+    <li>Tolgo <code>1</code>, guardo i suoi vicini <code>2, 3</code>: mai visti → li metto in coda. Coda: <code>[2, 3]</code>.</li>
+    <li>Tolgo <code>2</code>, vicino nuovo <code>4</code> → in coda. Coda: <code>[3, 4]</code>.</li>
+    <li>Tolgo <code>3</code>: i suoi vicini (1, 4) sono già visti → niente. Coda: <code>[4]</code>.</li>
+    <li>Tolgo <code>4</code>, vicino nuovo <code>5</code> → in coda. Coda: <code>[5]</code>.</li>
+    <li>Tolgo <code>5</code>: niente di nuovo. Coda vuota → finito.</li>
+  </ol>
+  <p>Ordine BFS: <code>1 → 2 → 3 → 4 → 5</code>. In più BFS ti regala la <strong>distanza</strong> (numero di passi) da <code>1</code>: <code>1</code>:0, <code>2</code>:1, <code>3</code>:1, <code>4</code>:2, <code>5</code>:3.</p>
+
+  <p><strong>DFS = «vai più a fondo possibile, poi torna indietro».</strong> Segui un cammino finché puoi; quando sei bloccato, fai un passo indietro (backtrack) e provi un'altra strada:</p>
+  <ol class="steps">
+    <li><code>1</code> → vado al primo vicino <code>2</code>.</li>
+    <li><code>2</code> → vado a <code>4</code>.</li>
+    <li><code>4</code> → vado a <code>3</code>. Da <code>3</code> tutti i vicini sono già visti → <strong>torno indietro</strong> a <code>4</code>.</li>
+    <li>Da <code>4</code> provo l'altro vicino <code>5</code> → lo visito. <code>5</code> non porta a nulla di nuovo → torno indietro fino all'inizio. Finito.</li>
+  </ol>
+  <p style="margin-bottom:0">Ordine DFS: <code>1 → 2 → 4 → 3 → 5</code>. <strong>La differenza in una riga:</strong> BFS usa una <em>coda</em> e si allarga a strati (ottimo per le distanze più corte in numero di passi); DFS usa lo <em>stack</em> delle chiamate ricorsive e si tuffa in profondità (ottimo per esplorare, ordinamento topologico, trovare cicli).</p>
+</div>
+
 <!-- ═══ 1. DEFINIZIONI ═══ -->
 <section id="s1">
 <h2><span class="num">01</span>Definizioni — G = (V, E)</h2>
