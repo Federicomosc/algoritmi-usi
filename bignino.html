@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bignino completo — Algoritmi USI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0e12;--bg2:#14141a;--bg3:#1c1c24;--bg4:#24242e;--border:#2e2e3e;
+  --text:#d4d0c8;--text-dim:#7a7890;--text-bright:#f0ece0;
+  --gold:#e8c547;--teal:#4ec9a8;--red:#e06c75;--blue:#61afef;
+  --purple:#c678dd;--orange:#e5953a;--green:#98c379;--sidebar-w:260px;
+  --accent:#61afef;
+}
+html[data-theme="light"] {
+  --bg:#f4f1ea;--bg2:#ebe6dc;--bg3:#fff;--bg4:#f0ece4;--border:#d4cfc4;
+  --text:#3a3848;--text-dim:#6a6878;--text-bright:#1a1828;
+  --gold:#9a7b10;--teal:#1a7a62;--red:#b8323c;--blue:#2a6cb8;
+  --purple:#7a3a9a;--orange:#a85a18;--green:#3a7a32;--accent:#2a6cb8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6}
+
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding-bottom:48px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-header .title{color:var(--accent);font-family:'Lora',serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-header .sub{color:var(--text-dim);font-size:11px;margin-top:3px}
+.nav-label{padding:4px 20px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:12px}
+.nav-link{display:block;padding:6px 20px 6px 28px;color:var(--text-dim);text-decoration:none;font-size:13px;border-left:2px solid transparent;transition:all .15s}
+.nav-link:hover{color:var(--text-bright);background:var(--bg3);border-left-color:var(--accent)}
+
+#main{margin-left:var(--sidebar-w);max-width:860px;padding:44px 48px 100px}
+.hero{background:linear-gradient(135deg,#10141c,#12121c);border:1px solid var(--border);border-radius:12px;padding:32px 38px;margin-bottom:32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(97,175,239,.14) 0%,transparent 70%);pointer-events:none}
+.hero h1{font-family:'Lora',serif;font-size:27px;font-weight:700;color:var(--text-bright);line-height:1.2}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:14px;margin-top:9px;max-width:600px}
+
+section{margin-bottom:40px;scroll-margin-top:70px}
+section h2{font-family:'Lora',serif;font-size:20px;font-weight:700;color:var(--text-bright);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+section h2 .badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0}
+section h3{font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 8px}
+p{margin-bottom:8px}
+ul,ol{padding-left:18px;margin-bottom:10px}
+li{margin-bottom:3px;font-size:13.5px}
+strong{color:var(--text-bright)}
+a{color:var(--teal);text-decoration:none;font-weight:500}
+a:hover{text-decoration:underline}
+code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--bg4);color:var(--teal);padding:1px 5px;border-radius:4px}
+
+.flash{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:13.5px}
+.flash b{color:var(--text-bright)}
+.flash.gold{border-left-color:var(--gold)} .flash.teal{border-left-color:var(--teal)}
+.flash.blue{border-left-color:var(--blue)} .flash.orange{border-left-color:var(--orange)}
+.flash.green{border-left-color:var(--green)} .flash.purple{border-left-color:var(--purple)}
+.flash.red{border-left-color:var(--red)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+.tbl-wrap{overflow-x:auto;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--bg4);color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--blue)}
+
+pre{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.55;color:var(--text)}
+pre .kw{color:var(--purple)} pre .cm{color:var(--text-dim);font-style:italic} pre .fn{color:var(--blue)}
+
+.box{border-radius:8px;padding:12px 16px;margin:14px 0;border-left:3px solid}
+.box-warn{background:rgba(224,108,117,.07);border-color:var(--red)}
+.box-tip{background:rgba(78,201,168,.07);border-color:var(--teal)}
+.box-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;color:var(--red)}
+.box-tip .box-label{color:var(--teal)}
+
+.checklist{list-style:none;padding:0}
+.checklist li{padding:7px 14px 7px 34px;position:relative;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;font-size:13px}
+.checklist li::before{content:'☐';position:absolute;left:12px;color:var(--accent)}
+
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:200;width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--accent);font-size:18px;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+@media(max-width:768px){#main{margin-left:0;padding:24px 18px 60px}}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg4);color:var(--text-dim);margin-left:6px}
+</style>
+<link rel="stylesheet" href="./mobile.css">
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<header class="mobile-topbar">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Apri menu" aria-expanded="false">☰</button>
+  <span class="mobile-title" id="mobileTitle">Menu</span>
+</header>
+
+<button class="theme-toggle" id="themeToggle" title="Cambia tema">☀</button>
+
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="title">Bignino completo</div>
+    <div class="sub">Tutto il corso, schematizzato · USI</div>
+  </div>
+  <a class="nav-link" href="index.html">← Indice appunti</a>
+  <a class="nav-link" href="ripasso-esame.html">Ripasso (1 pagina)</a>
+  <a class="nav-link" href="final/index.html">Final 2021–2025</a>
+  <div class="nav-label">Capitoli</div>
+  <a class="nav-link" href="#c01">01 · Complessità (RAM, O/Θ/Ω)</a>
+  <a class="nav-link" href="#c01b">01b · P, NP, NP-completo</a>
+  <a class="nav-link" href="#c02">02 · Strutture dati & hash</a>
+  <a class="nav-link" href="#c03">03 · Ordinamento</a>
+  <a class="nav-link" href="#c03b">03b · Divide & Conquer</a>
+  <a class="nav-link" href="#c04">04 · BST</a>
+  <a class="nav-link" href="#c04b">04b · Red-Black & B-tree</a>
+  <a class="nav-link" href="#c05">05 · Grafi (BFS/DFS/topo)</a>
+  <a class="nav-link" href="#c05b">05b · MST & Dijkstra</a>
+  <a class="nav-link" href="#c06">06 · Greedy</a>
+  <a class="nav-link" href="#c06b">06b · Programmazione dinamica</a>
+  <div class="nav-label">Riferimento rapido</div>
+  <a class="nav-link" href="#cheat">Tabella complessità</a>
+  <a class="nav-link" href="#ricorrenze">Ricorrenze chiave</a>
+  <a class="nav-link" href="#pattern">Pattern d'esame</a>
+  <a class="nav-link" href="#errori">Errori da evitare</a>
+  <a class="nav-link" href="#checklist">Checklist ultima ora</a>
+</nav>
+
+<main id="main">
+
+<div class="hero">
+  <h1><span>Bignino</span> completo — Algoritmi</h1>
+  <p>Tutto il corso in forma schematica: definizioni, formule, ricorrenze, pseudocodice e complessità. Una riga = un concetto. Pensato per il ripasso finale: se un punto non ti dice nulla, apri il capitolo completo dall'<a href="index.html">indice</a>.</p>
+</div>
+
+<!-- ══════════ 01 COMPLESSITÀ ══════════ -->
+<section id="c01">
+<h2><span class="badge" style="background:rgba(232,197,71,.15);color:var(--gold)">01</span>Analisi della complessità</h2>
+
+<h3>Modello RAM</h3>
+<ul>
+  <li>Ogni passo elementare (assegnamento, confronto, +, −, ×, accesso array, return) costa <b>O(1)</b>.</li>
+  <li>Si contano i passi in funzione di <b>n</b> = dimensione dell'input.</li>
+  <li>Si ignorano i <b>fattori costanti</b> e i termini di ordine inferiore → conta solo la crescita asintotica.</li>
+</ul>
+
+<h3>Come si misura</h3>
+<div class="flash gold"><b>Worst-case</b> = massimo numero di passi su input di taglia n (è quello standard). Best/average raramente richiesti.</div>
+<div class="flash gold"><b>Ciclo singolo</b> su n → Θ(n) · <b>doppio ciclo annidato</b> → Θ(n²) · <b>dimezzare a ogni passo</b> → Θ(log n) · <b>dividi+ricorsione</b> → spesso Θ(n log n).</div>
+
+<h3>Notazioni asintotiche</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Notazione</th><th>Significato</th><th>Analogia</th></tr>
+<tr><td class="mono">O(g)</td><td>limite superiore: f ≤ c·g definitivamente</td><td>≤</td></tr>
+<tr><td class="mono">Ω(g)</td><td>limite inferiore: f ≥ c·g definitivamente</td><td>≥</td></tr>
+<tr><td class="mono">Θ(g)</td><td>bound stretto: O e Ω insieme</td><td>=</td></tr>
+<tr><td class="mono">o(g)</td><td>strettamente minore (f/g → 0)</td><td>&lt;</td></tr>
+<tr><td class="mono">ω(g)</td><td>strettamente maggiore (f/g → ∞)</td><td>&gt;</td></tr>
+</table></div>
+<div class="flash gold"><b>Regola pratica:</b> tieni solo il termine dominante, butta le costanti. <code>3n²+10n+100 = Θ(n²)</code>.</div>
+
+<h3>Gerarchia di crescita (dal più lento al più veloce a crescere)</h3>
+<div class="flash gold mono">1 &lt; log n &lt; √n &lt; n &lt; n log n &lt; n² &lt; n³ &lt; 2ⁿ &lt; n! &lt; nⁿ</div>
+</section>
+
+<!-- ══════════ 01b TEORIA COMPLESSITÀ ══════════ -->
+<section id="c01b">
+<h2><span class="badge" style="background:rgba(232,197,71,.15);color:var(--gold)">01b</span>P, NP, NP-completezza</h2>
+
+<div class="tbl-wrap"><table>
+<tr><th>Classe</th><th>Definizione (problemi decisionali, risposta SÌ/NO)</th></tr>
+<tr><td><b>P</b></td><td>Risolvibile da un algoritmo in tempo <b>polinomiale</b> O(n^k).</td></tr>
+<tr><td><b>NP</b></td><td>Dato un <b>certificato</b> (soluzione candidata), esiste un <b>verificatore polinomiale</b> che controlla se è valido.</td></tr>
+<tr><td><b>NP-hard</b></td><td>Ogni problema di NP si <b>riduce</b> ad esso in tempo polinomiale (almeno difficile come tutti in NP).</td></tr>
+<tr><td><b>NP-completo</b></td><td>È in <b>NP</b> <u>ed</u> è <b>NP-hard</b> (il "più difficile" di NP).</td></tr>
+</table></div>
+
+<div class="flash gold"><b>P ⊆ NP</b> (se sai risolverlo, sai verificarlo). <b>P = NP?</b> resta aperto.</div>
+<div class="flash gold"><b>Riduzione</b> A ≤ₚ B: trasformo istanze di A in istanze di B in tempo poly preservando la risposta SÌ/NO. Se B è facile, anche A lo è.</div>
+<div class="flash gold"><b>SAT</b> (soddisfacibilità di formula booleana) è stato il <b>primo problema NP-completo</b> (Cook–Levin).</div>
+
+<h3>Esempi del corso</h3>
+<ul>
+  <li><b>SAT / 3-CNF-SAT</b> → NP-completo.</li>
+  <li><b>2-CNF-SAT ∈ P</b>: riducilo a raggiungibilità su un <b>grafo delle implicazioni</b> (ogni clausola a∨b → due implicazioni ¬a→b e ¬b→a). Insoddisfacibile ⟺ esiste x con x e ¬x nella stessa componente fortemente connessa.</li>
+  <li><b>Vertex Cover (VC)</b> → NP-completo (versione decisionale: esiste un cover di taglia ≤ k?).</li>
+</ul>
+
+<div class="box box-warn">
+  <div class="box-label">All'esame</div>
+  <p style="margin:0;font-size:13.5px">«Mostra che X ∈ P» → <b>dai l'algoritmo</b> e analizza la complessità. «Mostra che X ∈ NP» → descrivi il <b>certificato</b> e un <b>verificatore polinomiale</b> <code>Verify(istanza, certificato)</code>. NP non significa "impossibile".</p>
+</div>
+</section>
+
+<!-- ══════════ 02 STRUTTURE DATI ══════════ -->
+<section id="c02">
+<h2><span class="badge" style="background:rgba(198,120,221,.15);color:var(--purple)">02</span>Strutture dati elementari & hash</h2>
+
+<div class="grid2">
+  <div class="flash purple"><b>Stack — LIFO.</b> Push/Pop/Top O(1). Array+top o lista.</div>
+  <div class="flash purple"><b>Queue — FIFO.</b> Enqueue/Dequeue O(1). Array circolare (head/tail) o lista.</div>
+</div>
+<div class="flash purple"><b>Lista doppiamente concatenata con sentinella L.nil:</b> evita i casi limite (lista vuota / primo / ultimo). Insert/Delete O(1) <u>se hai il puntatore al nodo</u>; Search O(n).</div>
+
+<h3>Tabella complessità (worst case)</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Operazione</th><th>Array</th><th>Lista</th><th>Stack</th><th>Queue</th></tr>
+<tr><td>Accesso per indice</td><td class="mono">O(1)</td><td class="mono">O(n)</td><td>—</td><td>—</td></tr>
+<tr><td>Search</td><td class="mono">O(n)</td><td class="mono">O(n)</td><td>—</td><td>—</td></tr>
+<tr><td>Insert/Delete</td><td class="mono">O(n)</td><td class="mono">O(1)*</td><td class="mono">O(1)</td><td class="mono">O(1)</td></tr>
+</table></div>
+<p style="font-size:11.5px;color:var(--text-dim)">* con puntatore al nodo già noto.</p>
+
+<h3>Dizionario & hash</h3>
+<ul>
+  <li><b>Dizionario:</b> Insert / Delete / Search per chiave.</li>
+  <li><b>Direct-address table:</b> array indicizzato dalla chiave. O(1) ma spreca spazio se l'universo è grande.</li>
+  <li><b>Hash table:</b> funzione <code>h(k)</code> mappa chiavi → slot. <b>Collisione</b> = due chiavi nello stesso slot.</li>
+</ul>
+<div class="grid2">
+  <div class="flash purple"><b>Chaining</b> — ogni slot è una lista delle collisioni. Search medio Θ(1+α), worst O(n).</div>
+  <div class="flash purple"><b>Open addressing</b> — niente liste: cerca lo slot libero successivo (linear/quadratic probing, double hashing).</div>
+</div>
+<div class="flash purple"><b>Load factor α = n/m</b> (elementi / slot). Con <b>uniform hashing</b> il numero medio di elementi per slot è E[nᵢ] = α → search media Θ(1+α). Tieni α costante (≈ O(1)).</div>
+</section>
+
+<!-- ══════════ 03 ORDINAMENTO ══════════ -->
+<section id="c03">
+<h2><span class="badge" style="background:rgba(229,149,58,.15);color:var(--orange)">03</span>Ordinamento</h2>
+
+<div class="tbl-wrap"><table>
+<tr><th>Algoritmo</th><th>Worst</th><th>Avg</th><th>In-place</th><th>Stabile</th><th>Idea</th></tr>
+<tr><td>Insertion</td><td class="mono">Θ(n²)</td><td class="mono">Θ(n²)</td><td>sì</td><td>sì</td><td>inserisci ogni elemento al posto giusto nella parte già ordinata</td></tr>
+<tr><td>Selection</td><td class="mono">Θ(n²)</td><td class="mono">Θ(n²)</td><td>sì</td><td>no</td><td>cerca il minimo e portalo in testa</td></tr>
+<tr><td>Bubble</td><td class="mono">Θ(n²)</td><td class="mono">Θ(n²)</td><td>sì</td><td>sì</td><td>scambia adiacenti fuori ordine</td></tr>
+<tr><td>Merge</td><td class="mono">Θ(n log n)</td><td class="mono">Θ(n log n)</td><td>no</td><td>sì</td><td>divide & merge, O(n) extra</td></tr>
+<tr><td>Quick</td><td class="mono">Θ(n²)</td><td class="mono">Θ(n log n)</td><td>sì</td><td>no</td><td>partition attorno a un pivot</td></tr>
+<tr><td>Heap</td><td class="mono">Θ(n log n)</td><td class="mono">Θ(n log n)</td><td>sì</td><td>no</td><td>build-max-heap + extract ripetuti</td></tr>
+</table></div>
+
+<h3>Insertion sort — correttezza con invariante di ciclo</h3>
+<ul>
+  <li><b>Invariante:</b> all'inizio dell'iterazione i, <code>A[1..i−1]</code> è ordinato e contiene gli stessi elementi iniziali.</li>
+  <li><b>Inizializzazione</b> (i=2): A[1..1] è banalmente ordinato. <b>Mantenimento:</b> inserire A[i] al posto giusto mantiene l'ordine. <b>Terminazione</b> (i=n+1): A[1..n] ordinato.</li>
+  <li>Worst case = array decrescente: confronti = (n−1)·n/2 = Θ(n²) (serie aritmetica).</li>
+</ul>
+
+<h3>Quick Sort — Partition</h3>
+<ul>
+  <li><b>Partition(A,p,r):</b> pivot = A[r]; scorri e porta a sinistra ciò che è ≤ pivot; metti il pivot al confine. Restituisce l'indice del pivot. Costo Θ(n).</li>
+  <li><b>Worst Θ(n²)</b> quando il pivot è sempre il min/max (es. array già ordinato): partizioni sbilanciate (0, n−1).</li>
+  <li><b>Avg Θ(n log n)</b> con pivot bilanciato; pivot casuale rende il worst improbabile.</li>
+</ul>
+
+<h3>Heap (binario, max-heap come array)</h3>
+<ul>
+  <li>Array: <code>parent(i)=⌊i/2⌋</code>, <code>left(i)=2i</code>, <code>right(i)=2i+1</code>.</li>
+  <li><b>Proprietà max-heap:</b> A[parent(i)] ≥ A[i]. (radice = massimo)</li>
+  <li><b>Max-Heapify(i):</b> fa "scendere" un nodo che viola la proprietà → O(log n).</li>
+  <li><b>Build-Max-Heap:</b> Heapify dal centro alle radici → <b>O(n)</b> (non n log n!).</li>
+  <li><b>Heap Sort:</b> build (O(n)) + n volte (scambia radice con ultimo, riduci heap, heapify) → Θ(n log n).</li>
+</ul>
+</section>
+
+<!-- ══════════ 03b DIVIDE & CONQUER ══════════ -->
+<section id="c03b">
+<h2><span class="badge" style="background:rgba(229,149,58,.15);color:var(--orange)">03b</span>Divide & Conquer + Master Theorem</h2>
+
+<div class="flash orange"><b>Schema D&C:</b> 1) <b>Divide</b> in sottoproblemi · 2) <b>Conquer</b> ricorsivamente · 3) <b>Combine</b> i risultati.</div>
+
+<h3>Master Theorem — T(n) = a·T(n/b) + f(n)</h3>
+<p>Confronta <code>f(n)</code> con <code>n^(log_b a)</code> (= <var>c</var>):</p>
+<div class="tbl-wrap"><table>
+<tr><th>Caso</th><th>Condizione</th><th>Risultato</th></tr>
+<tr><td>1</td><td>f(n) = O(n^(c−ε)) — domina la ricorsione</td><td class="mono">Θ(n^c)</td></tr>
+<tr><td>2</td><td>f(n) = Θ(n^c · logᵏn)</td><td class="mono">Θ(n^c · log^(k+1) n)</td></tr>
+<tr><td>3</td><td>f(n) = Ω(n^(c+ε)) — domina f (+ regolarità)</td><td class="mono">Θ(f(n))</td></tr>
+</table></div>
+
+<h3>Ricorrenze fondamentali</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Algoritmo</th><th>Ricorrenza</th><th>Soluzione</th></tr>
+<tr><td>Binary Search</td><td class="mono">T(n)=T(n/2)+O(1)</td><td class="mono">Θ(log n)</td></tr>
+<tr><td>MergeSort</td><td class="mono">T(n)=2T(n/2)+Θ(n)</td><td class="mono">Θ(n log n)</td></tr>
+<tr><td>Karatsuba</td><td class="mono">T(ℓ)=3T(ℓ/2)+O(ℓ)</td><td class="mono">Θ(ℓ^log₂3)≈ℓ^1.59</td></tr>
+</table></div>
+
+<h3>Pezzi chiave</h3>
+<ul>
+  <li><b>Binary Search:</b> array <u>ordinato</u>; confronta col centro, scarta metà → Θ(log n).</li>
+  <li><b>Merge di 2 sequenze ordinate:</b> due indici, prendi il minore in testa → Θ(n). Non si può fare meglio di Θ(n): bisogna toccare tutti gli elementi.</li>
+  <li><b>Karatsuba:</b> moltiplicazione scolastica O(ℓ²) → riduce da 4 a 3 moltiplicazioni ricorsive usando <code>ad+bc = (a+b)(c+d) − ac − bd</code>.</li>
+  <li><b>Mediana / k-esimo (Select):</b> con pivot (Quickselect) → O(n) atteso. Naïve (ordina) → O(n log n).</li>
+</ul>
+</section>
+
+<!-- ══════════ 04 BST ══════════ -->
+<section id="c04">
+<h2><span class="badge" style="background:rgba(152,195,121,.15);color:var(--green)">04</span>Binary Search Tree (BST)</h2>
+
+<div class="flash green"><b>Proprietà BST:</b> per ogni nodo x → tutto il sottoalbero <u>sinistro</u> ≤ x.key ≤ tutto il sottoalbero <u>destro</u>.</div>
+
+<h3>Visite (tree-walk)</h3>
+<ul>
+  <li><b>In-order</b> (sx, nodo, dx) → chiavi in <b>ordine crescente</b>. Reverse-order = decrescente.</li>
+  <li><b>Pre-order</b> (nodo, sx, dx) · <b>Post-order</b> (sx, dx, nodo). Tutte Θ(n).</li>
+</ul>
+
+<h3>Operazioni — tutte Θ(h)</h3>
+<ul>
+  <li><b>Search:</b> scendi a sinistra se k &lt; key, a destra se k &gt; key.</li>
+  <li><b>Minimum / Maximum:</b> scendi sempre a sinistra / destra.</li>
+  <li><b>Successor:</b> se ha sottoalbero dx → minimo del dx; altrimenti risali finché non sei figlio sinistro.</li>
+  <li><b>Insert:</b> scendi come in search fino a una foglia, appendi lì.</li>
+</ul>
+
+<h3>Delete — 3 casi</h3>
+<ol>
+  <li><b>0 figli</b> (foglia): rimuovi.</li>
+  <li><b>1 figlio:</b> sostituisci il nodo col figlio.</li>
+  <li><b>2 figli:</b> sostituisci col <b>successore</b> (minimo del sottoalbero destro), poi rimuovi il successore.</li>
+</ol>
+
+<div class="box box-warn">
+  <div class="box-label">Altezza</div>
+  <p style="margin:0;font-size:13.5px">h = Θ(log n) se <b>bilanciato</b>, ma <b>degenera a Θ(n)</b> (catena) se inserisci dati ordinati. Soluzioni: inserimento randomizzato, root-insert con rotazioni, o alberi bilanciati (Red-Black).</p>
+</div>
+<div class="flash green"><b>Range query [a,b]:</b> pota i rami impossibili — se key&lt;a vai solo a destra, se key&gt;b vai solo a sinistra. Con campo <code>size</code> nei nodi conti gli elementi in O(h) senza visitare tutto.</div>
+</section>
+
+<!-- ══════════ 04b RB + B-tree ══════════ -->
+<section id="c04b">
+<h2><span class="badge" style="background:rgba(152,195,121,.15);color:var(--green)">04b</span>Red-Black Tree & B-tree</h2>
+
+<h3>Red-Black — 5 proprietà</h3>
+<ol>
+  <li>Ogni nodo è <b>rosso</b> o <b>nero</b>.</li>
+  <li>La <b>radice</b> è nera.</li>
+  <li>Ogni <b>foglia</b> (T.nil) è nera.</li>
+  <li>Un nodo <b>rosso</b> ha entrambi i figli <b>neri</b> (mai due rossi consecutivi).</li>
+  <li><b>Black-height</b> uguale: ogni cammino da un nodo alle foglie ha lo stesso numero di nodi neri.</li>
+</ol>
+<div class="flash green"><b>Garantisce h ≤ 2·log₂(n+1) = O(log n)</b> → tutte le operazioni O(log n). Si dimostra: size ≥ 2^bh − 1 e bh ≥ h/2.</div>
+<div class="flash green"><b>Rotazioni</b> (LEFT/RIGHT-ROTATE, O(1)) ribilanciano localmente preservando la proprietà BST.</div>
+
+<h3>RB-Insert-Fixup — casi (nodo z rosso)</h3>
+<ul>
+  <li><b>Genitore nero</b> → nessun fixup.</li>
+  <li><b>Zio rosso</b> → ricolora genitore+zio neri, nonno rosso, risali (itera sul nonno).</li>
+  <li><b>Zio nero</b> → rotazione (zig-zag prima si raddrizza, poi rotazione singola) + ricolorazione. Termina.</li>
+</ul>
+
+<h3>B-tree — ricerca su memoria secondaria</h3>
+<ul>
+  <li><b>Motivazione:</b> un accesso a disco (Disk-Read) costa ~10⁴–10⁷ cicli CPU. Si minimizza il <b>numero di accessi</b> = altezza → nodi "grassi" con molte chiavi.</li>
+  <li><b>Grado minimo t ≥ 2:</b> ogni nodo (≠ radice) ha tra <code>t−1</code> e <code>2t−1</code> chiavi, e tra <code>t</code> e <code>2t</code> figli. Nodo <b>pieno</b> = 2t−1 chiavi.</li>
+  <li><b>Altezza:</b> <code>h ≤ log_t((n+1)/2)</code> → O(log_t n) accessi disco.</li>
+  <li><b>Search:</b> in ogni nodo scegli l'intervallo giusto fra le chiavi → O(t·log_t n) CPU, O(log_t n) Disk-Read.</li>
+  <li><b>Insert:</b> scendi e <b>spezza (split)</b> ogni nodo pieno che incontri: la chiave mediana sale al padre. L'albero cresce in altezza solo quando si spezza la radice (raro).</li>
+</ul>
+</section>
+
+<!-- ══════════ 05 GRAFI BASE ══════════ -->
+<section id="c05">
+<h2><span class="badge" style="background:rgba(97,175,239,.15);color:var(--blue)">05</span>Grafi — rappresentazione, BFS, DFS, topo</h2>
+
+<h3>Rappresentazione</h3>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Spazio</th><th>Arco (u,v)?</th><th>Itera vicini</th><th>Quando</th></tr>
+<tr><td><b>Lista adiacenza</b></td><td class="mono">Θ(V+E)</td><td class="mono">O(grado)</td><td class="mono">O(grado)</td><td>grafo <b>sparso</b></td></tr>
+<tr><td><b>Matrice adiacenza</b></td><td class="mono">Θ(V²)</td><td class="mono">O(1)</td><td class="mono">O(V)</td><td>grafo <b>denso</b></td></tr>
+</table></div>
+<p style="font-size:12px;color:var(--text-dim)">Non orientato: ogni arco appare 2 volte / matrice simmetrica. <code>Σ gradi = 2E</code>.</p>
+
+<h3>BFS — ampiezza · O(V+E)</h3>
+<ul>
+  <li>Usa una <b>coda (FIFO)</b>, esplora <b>livello per livello</b>. Colori WHITE→GRAY→BLACK.</li>
+  <li>Calcola <code>d[v]</code> = distanza in <b>numero di archi</b> da s → <b>cammino minimo su grafi non pesati</b>.</li>
+  <li>Albero BFS: <code>π[v]</code> = predecessore.</li>
+</ul>
+
+<h3>DFS — profondità · O(V+E)</h3>
+<ul>
+  <li><b>Ricorsione / stack.</b> Timestamp <code>d[v]</code> (scoperta) e <code>f[v]</code> (fine). Colori WHITE/GRAY/BLACK.</li>
+  <li>Ciclo esterno su tutti i vertici → <b>foresta DFS</b>.</li>
+  <li>Classifica archi: tree / back (→ <b>ciclo</b>) / forward / cross.</li>
+</ul>
+
+<h3>Ordinamento topologico (DAG)</h3>
+<ul>
+  <li>Esegui DFS; inserisci ogni vertice in <b>testa a una lista</b> quando lo finisci (ordine decrescente di <code>f[v]</code>). O(V+E).</li>
+  <li>Valido solo su <b>DAG</b> (grafo orientato aciclico).</li>
+</ul>
+<div class="flash blue"><b>Componenti connesse:</b> ripeti BFS/DFS su ogni vertice ancora WHITE.</div>
+</section>
+
+<!-- ══════════ 05b MST + DIJKSTRA ══════════ -->
+<section id="c05b">
+<h2><span class="badge" style="background:rgba(97,175,239,.15);color:var(--blue)">05b</span>MST (Kruskal, Prim) & Dijkstra</h2>
+
+<div class="flash blue"><b>MST</b> = sottoinsieme di archi che connette tutti i vertici con <b>peso totale minimo</b> (è un albero, V−1 archi). Definito su grafi <b>non orientati pesati e connessi</b>.</div>
+
+<h3>Teorema del taglio (base di entrambi)</h3>
+<div class="flash blue"><b>Cut property:</b> per ogni taglio che non attraversa archi già scelti, l'arco di peso minimo che attraversa il taglio (<b>safe edge</b>) appartiene a qualche MST.</div>
+
+<h3>Kruskal — O(E log E)</h3>
+<ul>
+  <li>Ordina gli archi per peso crescente.</li>
+  <li>Scorri: aggiungi l'arco se <b>non crea ciclo</b> (controllo con <b>Union-Find</b>).</li>
+  <li><b>Union-Find</b> (disjoint-set): <code>Find</code> = radice dell'insieme, <code>Union</code> = unisce due insiemi. Quasi O(1) ammortizzato.</li>
+  <li>Bene su grafi <b>sparsi</b>.</li>
+</ul>
+
+<h3>Prim — O((V+E) log V) con heap</h3>
+<ul>
+  <li>Cresce <b>un solo albero</b> da un vertice radice.</li>
+  <li>Mantieni per ogni vertice fuori dall'albero il <b>peso minimo W[v]</b> di un arco verso l'albero e il predecessore <b>P[v]</b>.</li>
+  <li>Estrai il vertice con W minimo (min-priority queue), aggiungilo, <b>aggiorna (relax)</b> i suoi vicini. Bene su grafi <b>densi</b>.</li>
+</ul>
+
+<h3>Dijkstra — cammini minimi da sorgente · O((V+E) log V)</h3>
+<ul>
+  <li><b>Quasi identico a Prim</b>, ma rilassa sulla <b>distanza dalla sorgente</b>, non sul peso del singolo arco.</li>
+  <li>Variabili: <code>D[v]</code> = distanza stimata da s, <code>P[v]</code> = predecessore, <code>N</code> = insieme dei finalizzati.</li>
+  <li><b>Relax(u,v):</b> <code>if D[u]+w(u,v) &lt; D[v] then D[v]=D[u]+w(u,v); P[v]=u</code>.</li>
+  <li>Estrai il vertice con D minima, finalizzalo, rilassa i vicini. Greedy: una volta estratto, D[v] è definitiva.</li>
+</ul>
+<div class="box box-warn">
+  <div class="box-label">Limite</div>
+  <p style="margin:0;font-size:13.5px">Dijkstra richiede <b>pesi ≥ 0</b>. Con archi negativi usa <b>Bellman-Ford</b> (O(V·E), rileva cicli negativi).</p>
+</div>
+<h3>Confronto</h3>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Prim</th><th>Dijkstra</th></tr>
+<tr><td>Chiave estrazione</td><td>peso arco verso l'albero</td><td>distanza da s</td></tr>
+<tr><td>Relax</td><td class="mono">w(u,v)</td><td class="mono">D[u]+w(u,v)</td></tr>
+<tr><td>Risultato</td><td>MST</td><td>shortest-path tree</td></tr>
+</table></div>
+</section>
+
+<!-- ══════════ 06 GREEDY ══════════ -->
+<section id="c06">
+<h2><span class="badge" style="background:rgba(78,201,168,.15);color:var(--teal)">06</span>Greedy (algoritmi voraci)</h2>
+
+<div class="flash teal"><b>Greedy</b> = a ogni passo la <b>scelta localmente ottima</b>, senza tornare indietro. Funziona se valgono <b>greedy-choice property</b> (la scelta locale fa parte di un'ottima globale) <u>e</u> <b>optimal substructure</b>.</div>
+
+<h3>Quando funziona / quando no</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Greedy ottimo ✓</th><th>Greedy fallisce → serve DP ✗</th></tr>
+<tr><td>Activity selection (non pesata)</td><td>Weighted activity selection</td></tr>
+<tr><td>Huffman coding</td><td>Knapsack 0-1</td></tr>
+<tr><td>Knapsack frazionario</td><td>LIS, edit distance</td></tr>
+<tr><td>MST (Kruskal/Prim), Dijkstra</td><td>Resto monete (sistemi "strani")</td></tr>
+</table></div>
+
+<h3>Esempi chiave</h3>
+<ul>
+  <li><b>Activity selection:</b> ordina per <b>earliest finish time</b>, prendi ogni attività compatibile con l'ultima scelta. Ottimo (exchange argument). O(n log n).</li>
+  <li><b>Knapsack frazionario:</b> ordina per <b>valore/peso</b> (vᵢ/wᵢ) decrescente, riempi; l'ultimo oggetto si può spezzare. Greedy ottimo.</li>
+  <li><b>Knapsack 0-1:</b> greedy <b>fallisce</b> (non puoi spezzare) → serve DP.</li>
+  <li><b>Huffman:</b> codici a lunghezza variabile (prefix-free). Costruisci bottom-up: estrai ripetutamente i <b>2 caratteri meno frequenti</b>, fondili in un nodo (somma frequenze). Min-heap → O(n log n).</li>
+  <li><b>Resto in monete:</b> greedy (prendi sempre la moneta più grande) è ottimo solo per certi sistemi (es. €). Controesempio: monete {1,3,4}, resto 6 → greedy 4+1+1=3 monete, ottimo 3+3=2.</li>
+</ul>
+</section>
+
+<!-- ══════════ 06b DP ══════════ -->
+<section id="c06b">
+<h2><span class="badge" style="background:rgba(78,201,168,.15);color:var(--teal)">06b</span>Programmazione dinamica (DP)</h2>
+
+<div class="flash teal"><b>DP</b> = risolvi ogni <b>sottoproblema una volta sola</b> e memorizza il risultato (tabella). Serve <b>optimal substructure</b> + <b>sottoproblemi sovrapposti</b>.</div>
+
+<h3>Ricetta in 5 passi</h3>
+<ol>
+  <li><b>Definisci il sottoproblema</b> (es. <code>L(j)</code> = LIS che finisce in aⱼ).</li>
+  <li><b>Scrivi la ricorrenza</b> (scelta tra le opzioni dei sottoproblemi).</li>
+  <li><b>Casi base.</b></li>
+  <li><b>Riempi la tabella bottom-up.</b></li>
+  <li><b>Ricostruisci la soluzione</b> ripercorrendo le scelte.</li>
+</ol>
+<p style="font-size:12.5px;color:var(--text-dim)"><b>DP vs Greedy:</b> il greedy decide subito e non torna indietro; la DP considera tutte le scelte e tiene la migliore. <b>DP vs D&C:</b> in D&C i sottoproblemi sono disgiunti, in DP si sovrappongono (→ memorizza).</p>
+
+<h3>Ricorrenze del corso</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Problema</th><th>Ricorrenza</th><th>Tabella</th></tr>
+<tr><td>LIS</td><td class="mono">L(j) = 1 + max{ L(i) | i&lt;j, a[i]&lt;a[j] }</td><td class="mono">O(n²)</td></tr>
+<tr><td>Weighted activity</td><td class="mono">OPT[i] = max( wᵢ + OPT[p(i)], OPT[i−1] )</td><td class="mono">O(n)</td></tr>
+<tr><td>Knapsack 0-1</td><td class="mono">K(w,j) = max( K(w,j−1), vⱼ + K(w−wⱼ, j−1) )</td><td class="mono">O(n·W)</td></tr>
+<tr><td>Edit distance</td><td class="mono">E(i,j) = min( 1+E(i−1,j), 1+E(i,j−1), diff(i,j)+E(i−1,j−1) )</td><td class="mono">O(n·m)</td></tr>
+<tr><td>Bellman-Ford</td><td class="mono">Dᵤ(v) = min_{x∈Adj(u)} [ w(u,x) + Dₓ(v) ]</td><td class="mono">O(V·E)</td></tr>
+</table></div>
+
+<h3>Dettagli utili</h3>
+<ul>
+  <li><b>LIS</b> ⟨5,2,8,6,3,6,9,7⟩ → L = [1,1,2,2,2,3,4,4] → lunghezza <b>4</b> (es. ⟨2,3,6,9⟩). Ricostruisci risalendo dai predecessori.</li>
+  <li><b>Weighted activity:</b> ordina per finish time; <code>p(i)</code> = ultima attività compatibile prima di i. Case 1 = prendo i, Case 2 = la scarto.</li>
+  <li><b>Knapsack 0-1:</b> tabella (W+1)×(n+1); <code>diff</code> = prendo / non prendo l'oggetto j. Ricostruisci confrontando K(w,j) con K(w,j−1).</li>
+  <li><b>Edit distance:</b> <code>diff(i,j)=0</code> se i caratteri coincidono, altrimenti 1 (sostituzione). Operazioni: insert / delete / match-or-substitute. cat→cut = 1.</li>
+  <li><b>Perché non basta la ricorsione naïve:</b> ricalcola gli stessi sottoproblemi (Fibonacci/Pingala esponenziale) → la memoization/tabella lo rende lineare/polinomiale.</li>
+</ul>
+</section>
+
+<!-- ══════════ CHEAT TABLE ══════════ -->
+<section id="cheat">
+<h2><span class="badge" style="background:rgba(97,175,239,.15);color:var(--accent)">★</span>Tabella complessità rapida</h2>
+
+<h3>Strutture dati</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Operazione</th><th>Lista</th><th>BST avg / RB</th><th>Hash avg</th><th>Heap</th><th>B-tree</th></tr>
+<tr><td>Search</td><td class="mono">O(n)</td><td class="mono">O(log n)</td><td class="mono">O(1)</td><td class="mono">O(n)</td><td class="mono">O(log_t n)</td></tr>
+<tr><td>Insert</td><td class="mono">O(1)*</td><td class="mono">O(log n)</td><td class="mono">O(1)</td><td class="mono">O(log n)</td><td class="mono">O(log_t n)</td></tr>
+<tr><td>Delete</td><td class="mono">O(1)*</td><td class="mono">O(log n)</td><td class="mono">O(1)</td><td class="mono">O(log n)</td><td class="mono">O(log_t n)</td></tr>
+<tr><td>Min/Max</td><td class="mono">O(n)</td><td class="mono">O(log n)</td><td class="mono">—</td><td class="mono">O(1)</td><td class="mono">O(log_t n)</td></tr>
+</table></div>
+<p style="font-size:11.5px;color:var(--text-dim)">* lista = O(1) col puntatore al nodo. BST non bilanciato → O(h) con h fino a n.</p>
+
+<h3>Grafi & ordinamento</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Algoritmo</th><th>Complessità</th><th>Vincolo / nota</th></tr>
+<tr><td>BFS / DFS</td><td class="mono">O(V+E)</td><td>topo sort via DFS</td></tr>
+<tr><td>Kruskal</td><td class="mono">O(E log E)</td><td>Union-Find, sparsi</td></tr>
+<tr><td>Prim (heap)</td><td class="mono">O((V+E) log V)</td><td>densi</td></tr>
+<tr><td>Dijkstra (heap)</td><td class="mono">O((V+E) log V)</td><td>pesi ≥ 0</td></tr>
+<tr><td>Bellman-Ford</td><td class="mono">O(V·E)</td><td>pesi negativi ok</td></tr>
+<tr><td>Merge/Heap sort</td><td class="mono">Θ(n log n)</td><td>—</td></tr>
+<tr><td>Quick sort</td><td class="mono">O(n log n) avg</td><td>O(n²) worst</td></tr>
+</table></div>
+</section>
+
+<!-- ══════════ RICORRENZE ══════════ -->
+<section id="ricorrenze">
+<h2><span class="badge" style="background:rgba(97,175,239,.15);color:var(--accent)">★</span>Ricorrenze da sapere a memoria</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ricorrenza</th><th>Soluzione</th><th>Dove</th></tr>
+<tr><td class="mono">T(n)=T(n/2)+Θ(1)</td><td class="mono">Θ(log n)</td><td>binary search</td></tr>
+<tr><td class="mono">T(n)=2T(n/2)+Θ(n)</td><td class="mono">Θ(n log n)</td><td>mergesort</td></tr>
+<tr><td class="mono">T(n)=2T(n/2)+Θ(1)</td><td class="mono">Θ(n)</td><td>tree traversal</td></tr>
+<tr><td class="mono">T(n)=T(n−1)+Θ(n)</td><td class="mono">Θ(n²)</td><td>quicksort worst</td></tr>
+<tr><td class="mono">T(ℓ)=3T(ℓ/2)+O(ℓ)</td><td class="mono">Θ(ℓ^1.59)</td><td>Karatsuba</td></tr>
+</table></div>
+</section>
+
+<!-- ══════════ PATTERN ══════════ -->
+<section id="pattern">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--red)">★</span>Pattern domande d'esame</h2>
+
+<div class="flash red"><b>Algo-X / Better-Algo-X</b><br>1) Cosa calcola (1 frase, non riga-per-riga) · 2) Complessità worst-case · 3) Idea di miglioramento (sort, two-pointers, counting array, hash) · 4) Pseudocodice + nuova complessità.</div>
+<div class="flash red"><b>BST range/size:</b> pota i rami fuori range; con campo <code>size</code> → O(h). Non visitare tutto.</div>
+<div class="flash red"><b>Modella come grafo:</b> stati = vertici, transizioni = archi. Cammino minimo non pesato → BFS; pesato ≥0 → Dijkstra.</div>
+<div class="flash red"><b>Raggio/soglia minima:</b> binary search sul valore + funzione <code>Check(r)</code> monotona.</div>
+<div class="flash red"><b>DP:</b> sottoproblema → ricorsione → casi base → tabella → complessità = O(dim. tabella).</div>
+<div class="flash red"><b>Two pointers:</b> su array ordinato, due indici i,j. Dopo sort O(n log n) → spesso totale O(n log n).</div>
+<div class="flash red"><b>P/NP:</b> in P → dai l'algoritmo; in NP → certificato + verificatore polinomiale.</div>
+<p style="margin-top:10px"><a href="final/index.html">→ Esercizi final 2021–2025 per categoria</a></p>
+</section>
+
+<!-- ══════════ ERRORI ══════════ -->
+<section id="errori">
+<h2><span class="badge" style="background:rgba(224,108,117,.15);color:var(--red)">!</span>Errori classici da evitare</h2>
+<ul>
+  <li><b>Parafrasare il codice</b> invece di dire <i>cosa</i> calcola.</li>
+  <li><b>Greedy su knapsack 0-1</b> — funziona solo nel frazionario.</li>
+  <li><b>Dijkstra con pesi negativi</b> — usa Bellman-Ford.</li>
+  <li><b>Confondere O e Θ</b> (O = limite superiore, Θ = stretto).</li>
+  <li><b>«NP = impossibile»</b> — significa certificato verificabile in poly.</li>
+  <li><b>Visitare tutto il BST</b> quando puoi potare il range.</li>
+  <li><b>Build-Max-Heap = O(n)</b>, non O(n log n).</li>
+  <li><b>Dimenticare l'analisi di complessità</b> alla fine di ogni algoritmo.</li>
+  <li><b>Topological sort su grafo con cicli</b> — vale solo sui DAG.</li>
+  <li><b>BST degenere</b> — su dati ordinati l'altezza è Θ(n), non log n.</li>
+</ul>
+</section>
+
+<!-- ══════════ CHECKLIST ══════════ -->
+<section id="checklist">
+<h2><span class="badge" style="background:rgba(78,201,168,.15);color:var(--teal)">✓</span>Checklist ultima ora</h2>
+<p>Spunta mentalmente; se qualcosa non viene, 15 min sul capitolo.</p>
+<ul class="checklist">
+  <li>So analizzare un doppio ciclo e concludere Θ(n²)</li>
+  <li>So distinguere O, Ω, Θ con la definizione</li>
+  <li>So usare il Master Theorem sui 3 casi</li>
+  <li>So spiegare P vs NP con certificato o algoritmo</li>
+  <li>So tracciare BFS (coda) e DFS (timestamp) su 6+ nodi</li>
+  <li>So fare l'ordinamento topologico via DFS</li>
+  <li>So tracciare Kruskal (Union-Find) e Prim (tabella W/P)</li>
+  <li>So tracciare Dijkstra con la tabella D[]</li>
+  <li>So fare Partition e dire quando Quick sort è O(n²)</li>
+  <li>So Max-Heapify e perché Build-Heap è O(n)</li>
+  <li>So i 3 casi di delete su BST e le 5 proprietà RB</li>
+  <li>So l'altezza del B-tree e perché conta il #accessi disco</li>
+  <li>So riempire le tabelle LIS, Knapsack 0-1, Edit distance</li>
+  <li>So perché greedy fallisce su weighted activity / knapsack 0-1</li>
+  <li>Ho fatto almeno 3 esercizi final da solo</li>
+</ul>
+
+<div class="box box-tip">
+  <div class="box-label">Strategia in aula</div>
+  <ol style="margin:0;font-size:13.5px">
+    <li>Leggi <b>tutti</b> gli esercizi (5 min), parti da quelli che riconosci.</li>
+    <li>Algo-X: prima semantica + complessità, poi la versione "Better".</li>
+    <li>Pseudocodice pulito + <b>complessità finale</b> sempre.</li>
+    <li>Se sei bloccato, scrivi l'idea/approccio: vale punti parziali.</li>
+  </ol>
+</div>
+</section>
+
+</main>
+
+<script>
+const tb = document.getElementById('themeToggle');
+const s = localStorage.getItem('algo-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', s);
+tb.textContent = s === 'light' ? '🌙' : '☀';
+tb.onclick = () => {
+  const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', n);
+  localStorage.setItem('algo-theme', n);
+  tb.textContent = n === 'light' ? '🌙' : '☀';
+};
+</script>
+<script src="./mobile.js"></script>
+</body>
+</html>
